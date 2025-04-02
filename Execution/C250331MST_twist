@@ -1,0 +1,5 @@
+V=UqSLnBorelSmall(0);
+HD=HeisenbergDouble(V);
+v=HD.getGenerator(2)
+[G,W]=HD.getSpecial;
+sweedler('G^-2*W{1,1}*G*W{1,2}')

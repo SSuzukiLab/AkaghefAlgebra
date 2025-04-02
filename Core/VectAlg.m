@@ -1,13 +1,16 @@
-classdef(InferiorClasses=?sym) VectAlg<IAdditive
+classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.RedefinesBrace
     %UNTITLED このクラスの概要をここに記述
     %   詳細説明をここに記述
 
     properties
-        cf (:,:) %coefficient
+        cf  %coefficient 
+        % 1,2,3の階数方向に係数を立体的に並べる．rank=1なら縦ベクトルなので注意
+
+        bs (1,:) Bases %basis
         ZERO (1,:) cell %zero element of each vector space
+        SC TypeParam=TypeParam([])%structure constants
     end
     properties(Dependent)
-        basestr %basis string
         dim %dimension of the vector space
         dims %dimension of each vector space
         rank % Tensor rank
@@ -29,22 +32,23 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
         end
         function ret=casttype(obj,arg)
             % casttype 型を合わせる
-            
+
             % 型を変換するとき以外呼ばれないので，不要な気がする？
             % if ~isequal(class(obj),class(arg))
             %     ret=obj.unit;
             %     ret.cf=arg;
             %     % assert(isa(arg,ret.ctype))
             % end
-            
-            ret=obj.unit;
-                ret.cf=arg;
+            ret=obj.set_c(arg);
+        end
+        function ret=identifier(obj)
+            ret=class(obj);
         end
 
 
         function ret=plus(i1,i2)
             [i1,i2]=alignNum(i1,i2);
-            assert(i1.rank==i2.rank,'different rank addition error')
+            assert(i1.dim==i2.dim,'different dim addition error')
             try
                 sz=size(zeros(size(i1))+zeros(size(i2)));
             catch
@@ -58,9 +62,9 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
             end
             % end
 
-            function ret=plus_(i1,i2)
+            function i1=plus_(i1,i2)
                 % PLUS_ supplementary method for scalar
-                ret=i1.set_cp([i1.cf;i2.cf],[i1.pw;i2.pw],[i1.bs;i2.bs]).calc();
+                i1.cf=i1.cf+i2.cf;
             end
         end
         % function ret=minus(i1,i2)
@@ -74,8 +78,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
         % end
         function ret=eq(i1,i2)
             sub=calc(i1-i2);
-            if sub.ctype=="S"
-                ret=fold(@and,sub.cf==0.',symtrue);
+            if sub.bs.getCtype=="S"
+                ret=fold(@and,all(sub.cf==0),symtrue);
             else
                 ret=all(sub.cf==0);
             end
@@ -83,18 +87,17 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
         %乗算,作用
         function ret=mtimes(i1,i2)
             [i1,i2]=alignNum(i1,i2);
-            assert(isequal(i1.algbase,i2.algbase),'異なる空間での積エラー')
-            R=i1.rank;
-            ret=lfun_(i1|i2,@fun);
-            ret.algbase=i1.algbase;
-            ret.ZERO=i1.ZERO;
-            ret=ret.calc();
-            function [c,p,b]=fun(p,b)
-                c=1;
-                % p=cellfun(@(P)[p{1} P],i2.pw,UniformOutput=false);
-                % b=cellfun(@(B)[b{1} B],i2.bs,UniformOutput=false);
-                p=cellfun(@(p1,p2)[p1 p2],p(1:R),p(R+1:end),UniformOutput=false);
-                b=cellfun(@(b1,b2)[b1 b2],b(1:R),b(R+1:end),UniformOutput=false);
+            assert(isequal(i1.bs,i2.bs),'異なる空間での積エラー')
+            z=i1.ZERO{1};
+            M=z.SC.get([z.identifier '_μ']);
+            ret=i1;
+            ret.cf(:)=0;
+            for k1=1:i1.dim
+                for k2=1:i2.dim
+                    for k3=1:i1.dim
+                        ret.cf(k3)=ret.cf(k3)+M(k1,k2,k3)*i1.cf(k1)*i2.cf(k2);
+                    end
+                end
             end
         end
         function ret=lb(i1,i2)
@@ -130,27 +133,18 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
                 ret=i1.set_cp(i1.cf^i2,pw,bs);
             end
         end
-        function ret=unit(arg,rank)
-            if nargin==1, rank=arg.rank; end
-            N=rank/arg.rank;
-            mustBeInteger(N)
-            ret=arg.set_cp(1,repmat({[]},1,rank),repmat({Bases.empty},1,rank));
-            % ZEROを設定するときにsetZEROメソッドを呼ぶほうがよい？
-            ret.ZERO=repmat(arg.ZERO,1,N);
-            ret.algbase=repmat(arg.algbase,1,N);
+        function ret=unit(arg)
+            eta=arg.SC.get([class(arg) '_η']);
+            ret=arg.set_c(eta); 
         end
         %テンソル積
         function o=or(i1,i2)
             [i1,i2]=alignNum(i1,i2);
-            o=i1.lfun_(@fun);
-            o.algbase=[i1.algbase i2.algbase];
+            o=i1;
+            o.bs=[i1.bs i2.bs];
             o.ZERO=[i1.ZERO i2.ZERO];
-            function [c,p,b]=fun(p,b)
-                c=i2.cf;
-                p=[repmat(p,i2.term,1) i2.pw];
-                b=[repmat(b,i2.term,1) i2.bs];
-            end
-            o.ctype=getType([i1.ctype i2.ctype]);
+            o.bs=[i1.bs i2.bs];
+            o.cf=i1.cf*i2.cf.';
         end
         %副積
         function o=and(i1,i2)
@@ -189,6 +183,37 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
                 o(i,1).cf=i1.cf(i);
             end
         end
+
+        function ret=Delta(obj)
+            ret=obj|obj;
+            ret.cf(:)=0;
+            C=obj.SC.get([obj.identifier '_Δ']);
+            for k1=1:obj.dim
+                for k2=1:obj.dim
+                    for k3=1:obj.dim
+                        ret.cf(k2,k3)=ret.cf(k2,k3)+C(k1,k2,k3)*obj.cf(k1);
+                    end
+                end
+            end
+        end
+        function ret=counit(obj)
+            ep=obj.SC.get([obj.identifier '_ε']);
+            ret=obj.cf.'*ep;
+            
+        end
+        function ret=S(obj)
+            % S: Hopf algebra antipode
+            S=obj.SC.get([obj.identifier '_S']);
+            ret=obj;
+            ret.cf(:)=0;
+            for k1=1:obj.dim
+                for k2=1:obj.dim
+                    ret.cf(k2)=ret.cf(k2)+S(k1,k2)*obj.cf(k1);
+                end
+            end
+        end
+
+        
         %% 作用,表現
         function ret=repMono(obj)
             error('not implemented')
@@ -260,39 +285,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
                     ret3(i)=tmp==0;
                 end
             end
-            
+
             ret=[ret1,ret2,ret3];
         end
 
 
         %% 計算基盤
-
-        % 関係式の取得
-        function [rel,mlist,comm,inv]=get2vRelation(obj)
-            persistent S
-            if isempty(S)
-                S=struct;
-                S.rel=obj.empty;
-                S.comm=[nan;nan];
-                S.inv=[nan;nan];
-                disp("set relations")
-                S=obj.get2vRelation_(S);
-            end
-            rel=S.rel;
-            mlist=S.mlist;
-            comm=S.comm;
-            inv=S.inv;
-        end
-        % 関係式取得の補助メソッド
-        function S=get2vRelation_(obj,S)
-            S.mlist={};
-            for i=1:numel(S.rel)
-                S.rel(i)=combineTerm(S.rel(i));
-                S.mlist(i)=S.rel(i).pw(end);
-            end
-            assert(size(S.comm,1)==2)
-        end
-
 
         % 各項への作用
         function ret=lfun(obj,fun)
@@ -312,8 +310,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
                 % Ci=[mat2cell(obj.pw,ones(1,obj.term),obj.rank), ...
                 %     mat2cell(obj.bs,ones(1,obj.term),obj.rank)];
                 % [C(:,1),C(:,2),C(:,3)]=cellfun(fun,Ci(:,1),Ci(:,2),UniformOutput=false);
-                    % disp(obj.set_cp(C{i,:}))
-                
+                % disp(obj.set_cp(C{i,:}))
+
             end
             C(:,1)=arrayfun(@(x,y)x{1}*y,C(:,1),obj.cf,UniformOutput=false);
             cf=vertcat(C{:,1});
@@ -322,227 +320,39 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
             ret=obj.set_cp(cf,pw,bs);
         end
         function ret=algID(obj)
-            ret=@(p,b)obj.make(1,{p},b);
         end
         function ret=algfun(obj,funs,units)
             % algfun 代数準同型の作用
             % funs,unitsをテンソル階数の分だけ繰り返し入力する
             % funs:具体的にはstrAlg().algIDで返される関数形
             % funs:(power,base)→stralg
-            arguments
-                obj
-            end
-            arguments(Repeating)
-                funs
-                units
-            end
-            % lfun_ 簡約化処理無しの線形作用
-            Rank=obj.rank;
-            assert(length(funs)==Rank,'invalid rank of the algebra morphism domain')
-            ret=obj.lfun_(@linfun);
-            % ret.ZERO=units;
-            [GroupedBase,GroupedUnits]=cellfun(@(x)deal(x.algbase,x.set_cp(0,{[]},{[]})), ...
-                units,UniformOutput=false);
-            ret.algbase=horzcat(GroupedBase{:});
-            GroupedUnits=cellfun(@(x,y)repmat({x},1,length(y)), ...
-                GroupedUnits,GroupedBase,UniformOutput=false);
-            ret.ZERO=[GroupedUnits{:}];
-            for k=1:length(ret.algbase)
-                ret.ZERO{k}.algbase=ret.algbase(k);
-            end
-            % ret=ret_.set_cp(ret_.cf,)
-            function [c,p,b]=linfun(p,b)
-                factors=units;
-                X=VectAlg().scalar;
-                for i=1:Rank
-                    for j=1:length(p{i})
-                        factors{i}=factors{i}*funs{i}(p{i}(j),b{i}(j));
-                    end
-                    X=X|factors{i};
-                end
-                c=X.cf;
-                p=X.pw;
-                b=X.bs;
-            end
         end
 
         %　簡約化=関係式適用＋同次項括り＋零係数項削除
         function arg=calc(arg)
-            arg=replace(arg,30);
-            arg=combineTerm(arg);
-            arg=removeZero(arg);
-        end
-        function obj=replace(obj,Ntimes)
-            obj.sortedFlag=false(obj.term,obj.rank);
-            obj.inverseSimplifiedFlag=false(obj.term,obj.rank);
-            for i=1:Ntimes
-                for j=1:obj.rank
-                    obj=obj.replace2v_(j);
-                end
-                if all(obj.sortedFlag,"all"), break; end
-            end
-            % 逆元による相殺
-            [~,~,~,inv]=obj.get2vRelation;
-
-            Pinv0=[inv(1,:) inv(2,:)];
-            Pinv1=[inv(2,:) inv(1,:)];
-            for k=1:numel(obj.pw)
-                if ~obj.sortedFlag(k)||isempty(obj.pw{k}), continue; end
-                P=obj.pw{k};
-                Ccnt0=sum(Pinv0==P',1);
-                Ccnt1=sum(Pinv1==P',1);
-                Ccnt=min([Ccnt0;Ccnt1]);
-                deleteidx=nan(1,sum(Ccnt));
-                idx=0;
-                for i = 1:numel(Pinv0)
-                    if Ccnt(i)==0,continue; end
-                    deleteidx(idx+(1:Ccnt(i)))=find(P == Pinv0(i),Ccnt(i));
-                    idx=idx+Ccnt(i);
-                end
-                P(deleteidx)=[];
-                obj.pw{k}=P;
-                obj.bs{k}(deleteidx)=[];
-
-            end
-        end
-        function obj=setSortedFlag(obj,flag)
-            obj.sortedFlag=flag;
-        end
-        function [ret]=replace2v_(obj,Fidx)
-            % 2変数の関係式の適用による簡約化をする
-            sortedFlag=obj.sortedFlag;
-            Z=obj.ZERO{Fidx};
-            % 関係式の取得
-            [rel,mlist,comm,inv]=Z.get2vRelation;
-            R=obj.rank;
-            cnt=0;
-            ret=obj.lfun_(@fun);
-            ret.sortedFlag=sortedFlag;
-            if CR.H.replacingDisplay
-                disp(obj)
-            end
-            function [c,p,b]=fun(p,b)
-                % 各項のソートを行う線形関数
-                P=p{1,Fidx};
-                cnt=cnt+1;
-
-                % if isequal(p{1},[3 1])
-                %     disp("stop")
-                % end
-
-                % ソート済みをスキップ
-                if sortedFlag(cnt,Fidx)||length(P)<=1
-                    c=1;
-                    sortedFlag(cnt,Fidx)=true;
-                    return
-                else
-                    % いる？
-                    sortedFlag(cnt,Fidx)=false;
-                end
-
-                % 各因子の反転をおこなう
-                for i=1:length(P)-1
-                    % flipFlag=false(1,length(mlist));
-                    % 交換する組で、かつ順番が入れ替わっているもの
-                    if P(i)>P(i+1)&&~isempty(comm)&&any(all(comm==P([i i+1])'))
-                        P([i i+1])=P([i+1 i]);
-                        c=1;
-                        p{Fidx}=P;
-                        b{Fidx}([i i+1])=b{Fidx}([i+1 i]);
-                        return
-                    end
-                    % 関係式の適用を判定
-                    len0=length(P)-i+1;
-                    lens=cellfun(@length,mlist);
-                    for j=1:length(mlist)
-                        % flipFlag(j)=isequal(mlist{j},P([i i+1]));
-                        if ~(lens(j)<=len0&&isequal(mlist{j},P(i:i+lens(j)-1)))
-                            continue
-                        end
-                        c=-rel(j).cf(1:end-1)/rel(j).cf(end);
-                        N=length(c);
-                        p=repmat(p,N,1);
-                        b=repmat(b,N,1);
-                        p(:,Fidx)=cellfun(@(x)[P(1:i-1) x P(i+lens(j):end)], ...
-                            rel(j).pw(1:end-1),UniformOutput=false);
-                        b(:,Fidx)=cellfun(@(x)[b{1}(1:i-1) x b{1}(i+lens(j):end)], ...
-                            rel(j).bs(1:end-1),UniformOutput=false);
-                        sortedFlag=[sortedFlag([1:cnt-1 cnt*ones(1,length(c)) cnt+1:end],:)];
-                        sortedFlag(cnt+(1:length(c))-1,Fidx)=false;
-                        cnt=cnt+length(c)-1;
-                        return
-                        % 関係式確認用
-                        rel(j)
-                    end
-                end
-                c=1;
-                sortedFlag(cnt)=true;
-            end
-        end
-
-        % 零係数項削除,係数簡約化ステップ
-        function obj=removeZero(obj)
-            if isequal(obj.ctype,NumericType.S)
-                idx=~isAlways(obj.cf==0,Unknown="false");
-                % idx=abs(subs(i1.cf,retq(),0.71))>0.000001;
-                % idx=1:length(i1.cf);
-                % idx=find(i1.cf);
-                % s=@(x)x;
-                % s=@simplify
-                obj=obj.set_cp(simplify(sym(obj.cf(idx))),obj.pw(idx,:),obj.bs(idx,:));
-            else
-                idx=abs(obj.cf)>1000*eps(obj.cf);
-                obj=obj.set_cp(obj.cf(idx),obj.pw(idx,:),obj.bs(idx,:));
-            end
-        end
-        function verify(obj)
-            if isempty(obj)
-                return
-            elseif ~isscalar(obj)
-                arrayfun(@verify,obj)
-                return
-            end
-            N=obj.term;
-            R=size(obj.pw,2);
-            L=cellfun(@(x)size(x,2),obj.pw);
-            assert(isa(obj.cf,obj.ctype.class), ...
-                '係数体エラー\n expected:%s, actual:%s', ...
-                class(obj.cf),obj.ctype.class)
-            assert(isequal(size(obj.pw),[N R]))
-            for i=1:N
-                for j=1:R
-                    assert(length(obj.bs{i,j})==L(i,j),'bsサイズエラー')
-                    for k=1:L(i,j)
-                        obj.verifyBase(obj.pw{i,j}(k),obj.bs{i,j}(k))
-                    end
-                end
-            end
-        end
-        function verifyBase(obj,pw,bs)
-            assert(pw<=bs.dim,'pw範囲外')
+            % arg=replace(arg,30);
+            % arg=combineTerm(arg);
+            % arg=removeZero(arg);
         end
     end
-
     %% objの変更,生成
     methods
-        function obj=make(obj,cf,pw,bs)
+        function obj=make(obj,cf,bs,idx)
             arguments
                 obj
                 cf
-                pw (:,1) cell {verifyPW}
-                bs (1,1) Bases =obj.BASE0
+                bs (1,:) Bases 
+                idx
             end
-            obj.algbase=bs;
-            obj.ZERO={obj.set_cp(0,{[]},{bs.empty})};
-            obj.priority=bs.dim;
-            degs=cellfun(@length,pw);
-            bsCell=arrayfun(@(n)repmat(bs,1,n),degs,UniformOutput=false);
-            obj=obj.set_cp(cf,pw,bsCell);
+            obj.bs=bs;
+            obj.cf(:)=0;
+            obj.cf(idx)=cf;
         end
 
         % function prod()
         % コンストラクタ
         function obj=VectAlg(X)
+
             if nargin==1&&isa(X,"strAlg")
                 obj=obj.set_cp(X.cf,X.pw,X.bs);
                 obj.ZERO=X.ZERO;
@@ -550,22 +360,26 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
                 return
             end
         end
+        function obj=setSC(obj,identifier,mu,eta,Delta,eps,S)
+            % setSC ホップ代数の構造定数を設定する
+            obj.SC.insert([identifier '_μ'],mu);
+            obj.SC.insert([identifier '_η'],eta);
+            obj.SC.insert([identifier '_Δ'],Delta);
+            obj.SC.insert([identifier '_ε'],eps);
+            obj.SC.insert([identifier '_S'],S);
+            Si=S^-1;
+            obj.SC.insert([identifier '_Si'],Si);
 
-        function obj=set_cp(obj,cf,pw,bs)
-            try
-                if isempty(cf)
-                    obj.cf=obj.ctype.zero;
-                    obj.pw=repmat({[]},1,obj.rank);
-                    obj.bs=repmat({Bases.empty},1,obj.rank);
-                    return
-                end
+        end
+
+        function obj=set_c(obj,cf)
+            if obj.rank==1
+                cf=reshape(cf,1,[]);
+            end
+            if isequal(size(obj.cf),size(cf))
                 obj.cf=cf;
-                obj.pw=pw;
-                obj.bs=bs;
-            catch ME
-                mustBeA(pw,"cell")
-                mustBeA(bs,"cell")
-                rethrow(ME)
+            else
+                error("VectAlg:set_c","size mismatch")
             end
         end
 
@@ -607,33 +421,24 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
             builtin("disp",arg)
         end
 
-        function ret=convertBaseString(obj,pw,arg)
-            bsstrArr=string(arg);
-            ret=bsstrArr(pw);
-            if isempty(ret)
-                ret="1";
-            end
-        end
         % テーブル形式表示
         function disp1(arg)
-            % Example string array with duplicates
 
-            bsstr=cellfun(@arg.convertBaseString,arg.pw,arg.bs,UniformOutput=false);
-            if isempty(bsstr)
+            bsnames=fliplr(arrayfun(@string,arg.bs,UniformOutput=false));
+            if isempty(bsnames)
                 disp(table(arg.cf,VariableNames="coeff"))
                 return
             end
-            base=categorical(join(cellfun(@(bsstr)join(bsstr," "),bsstr)," ⊗ ",2));
-            % base(ismissing(base))=categorical("1");
-            coeff=arg.cf;
-
-
-            try
-                disp(table(coeff,base));
-            catch
-                arg.verify
-                arg.disp0
-            end
+            T=combinations(bsnames{:});
+            base=categorical(join(fliplr(T{:,:})," ⊗ ",2));
+            coeff=arg.cf(:);
+            disp(table(coeff,base));
+            % try
+            %
+            % catch
+            %     arg.verify
+            %     arg.disp0
+            % end
         end
         % 数式の形式の表示
         function disp2(arg)
@@ -697,7 +502,29 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
             end
             ret=arrayfun(@(x)F(sum(x.pol)),obj);
         end
+        %% bracing
+    end
 
+    methods (Access=protected)
+        function varargout = braceReference(obj,indexOp)
+            idx=sub2ind(obj.dims,indexOp.Indices{:});
+            cf_=zeros(size(obj.cf),'like',obj.cf);
+            % idx=[idx{:}];
+            cf_(idx)=obj.cf(idx);
+            obj.cf=cf_;
+            varargout={obj};
+            % [varargout{1:nargout}] = obj.cf.(indexOp);
+        end
+
+        function obj = braceAssign(obj,indexOp,varargin)
+            error non_impl
+        end
+
+        function n = braceListLength(obj,indexOp,indexContext)
+            n = 1;
+        end
+    end
+    methods
 
         %% additional function
         function ret=ones(obj)
@@ -727,17 +554,14 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive
             ret.cf=subs(obj.cf,varargin{:});
             ret.pw=subs(obj.pw,varargin{:});
         end
-        function ret=get.term(obj)
-            ret=length(obj.cf);
-        end
-        function ret=get.deg(obj)
-            ret=max(cellfun(@length,obj.pw));
-        end
         function ret=get.dims(obj)
-            ret=[obj.algbase.dim];
+            ret=obj.bs.dims;
+        end
+        function ret=get.dim(obj)
+            ret=obj.bs.dim;
         end
         function ret=get.rank(obj)
-            ret=length(obj.algbase);
+            ret=length(obj.bs);
         end
         function ret=scalar(obj)
             ret=obj.set_cp(1,{},{});

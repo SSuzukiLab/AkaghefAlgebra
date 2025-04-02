@@ -5,7 +5,7 @@ classdef NumericType
     properties
         zero
         priority
-        class
+        type
     end
     
     enumeration
@@ -15,9 +15,10 @@ classdef NumericType
     end
     methods
         function obj=NumericType(zero,priority)
+            % NumericType priorityは優先順位, zeroはゼロの値
             obj.zero=zero;
             obj.priority=priority;
-            obj.class=class(zero);
+            obj.type=class(zero);
         end
         function ret=getType(obj)
             m=max([obj.priority]);

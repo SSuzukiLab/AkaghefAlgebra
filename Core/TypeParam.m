@@ -16,6 +16,9 @@ classdef TypeParam<handle
             try
                 ret=obj.dict(key);
             catch
+                if isempty(obj.createFcn)
+                    error("invalid access:"+string(key))
+                end
                 obj.dict=obj.dict.insert(key,{obj.createFcn(key)});
                 ret=obj.dict(key);
             end

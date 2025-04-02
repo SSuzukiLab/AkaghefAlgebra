@@ -1,10 +1,10 @@
 classdef Bases<matlab.mixin.Heterogeneous&handle
-    properties(Access=private)
+    properties(Access=protected)
         dim_ (1,1) {mustBeInteger} 
         var_ (1,:) string %names of each basis vector
     end
     properties
-        name (1,:) char='basis'%name of basis
+        name (1,:) char='basis' %name of basis
     end
     properties
         ctype NumericType =NumericType.D 
@@ -24,6 +24,9 @@ classdef Bases<matlab.mixin.Heterogeneous&handle
         function ret=dim(obj)
             ret=sum([obj.dim_]);
         end
+        function ret=dims(obj)
+            ret=[obj.dim_];
+        end
         function obj=setVar(obj,dim,var)
             obj.dim_=dim;
             if numel(var)==1&&dim>1
@@ -34,8 +37,8 @@ classdef Bases<matlab.mixin.Heterogeneous&handle
         function ret=getCtype(obj)
             ret=getType([obj.ctype]);
         end
-        function ret=isa(obj,arg)
-            ret=isa(getCtype(obj.ctype),arg)||isequal(class(arg),'double');
+        function ret=validate(obj,arg)
+            ret=isa(arg,getCtype(obj).type)||isequal(class(arg),'double');
         end
         function ret=string(obj)
             ret=horzcat(obj.var_);
