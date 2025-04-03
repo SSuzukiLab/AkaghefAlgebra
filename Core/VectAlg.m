@@ -17,6 +17,13 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
     end
     %% binomial operation
     methods
+        function obj=setBase(obj,base)
+            % setBase 基底の設定
+            obj.bs=base;
+            obj.cf=zeros([obj.bs.dim_]);
+            obj.ZERO={obj};
+        end
+        
         function [i1,i2]=alignNum(i1,i2)
             % 型をstrAlgにする
             if ~isequal(class(i1),class(i2))
@@ -42,7 +49,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             ret=obj.set_c(arg);
         end
         function ret=identifier(obj)
-            ret=class(obj);
+            ret=obj.bs.name;
         end
 
 
@@ -74,8 +81,6 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             i1.cf=-i1.cf;
         end
 
-        % function i1=uplus(i1)
-        % end
         function ret=eq(i1,i2)
             sub=calc(i1-i2);
             if sub.bs.getCtype=="S"
@@ -155,35 +160,6 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             error('not implemented')
         end
 
-        function o=prodeval(arg)
-            r=arg.rank/2;
-            mustBeInteger(r)
-            o=arg.set_cp(arg.cf, ...
-                cellfun(@horzcat,arg.pw(:,1:r),arg.pw(:,r+1:end),UniformOutput=false), ...
-                cellfun(@horzcat,arg.bs(:,1:r),arg.bs(:,r+1:end),UniformOutput=false));
-            o.algbase=arg.algbase(1:r);
-        end
-        function o=commeval(arg)
-            arg=arg.prodeval;
-            [pw,idx]=cellfun(@sort,arg.pw,UniformOutput=false);
-            bs=cellfun(@(bs,i)bs(i),arg.bs,idx,UniformOutput=false);
-            o=arg.set_cp(arg.cf,pw,bs);
-        end
-        function o=commtimes(i1,i2)
-            o=commeval(i1|i2);
-        end
-        function o=split(i1)
-            o=repmat(i1.unit,i1.term,i1.rank);
-            for i=1:i1.term
-                for j=1:i1.rank
-                    o(i,j)=i1.set_cp(1,i1.pw(i,j),i1.bs(i,j));
-                    o(i,j).algbase=i1.algbase(j);
-                    o(i,j).ZERO=i1.ZERO(j);
-                end
-                o(i,1).cf=i1.cf(i);
-            end
-        end
-
         function ret=Delta(obj)
             ret=obj|obj;
             ret.cf(:)=0;
@@ -212,84 +188,6 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 end
             end
         end
-
-        
-        %% 作用,表現
-        function ret=repMono(obj)
-            error('not implemented')
-        end
-        function ret=act(obj,vec)
-            arguments
-                obj VectAlg
-                vec symp
-            end
-            dimA=rep(obj).dimV;
-            dimV=vec.dim;
-            Nfactor=dimV/dimA;
-            mustBeInteger(Nfactor)
-            if Nfactor==1
-                ret=act(repMono(obj),vec);
-            else
-                ret=act(rep(DeltaN(obj,Nfactor)),vec);
-            end
-        end
-        function result = rep(obj)
-            % Split the object into parts
-            splitParts = obj.split;
-
-            % Replace each part using the repMono function
-            replacedParts = arrayfun(@repMono, splitParts);
-
-            % Combine the results using a logical OR operation
-            combinedResult = replacedParts(:, 1);
-            for colIndex = 2:size(replacedParts, 2)
-                combinedResult = arrayfun(@or, combinedResult, replacedParts(:, colIndex));
-            end
-
-            % Sum up the final results
-            result = sum(combinedResult);
-        end
-        function ret=checkRepresentation(obj)
-            % 表現(準同型)の検証
-            [rel,~,comm,inv]=obj.get2vRelation;
-            % rel検証
-            reps=arrayfun(@rep,rel);
-            ret1=arrayfun(@(x)x==0,reps);
-            % comm検証
-            ret2=false(1,size(comm,2));
-            if isnan(comm(1))
-                ret2=true;
-            else
-                base=obj.algbase;
-                for i=1:size(comm,2)
-                    tmp1=obj.set_cp(1,{comm(1,i)},{base});
-                    tmp2=obj.set_cp(1,{comm(2,i)},{base});
-                    tmp1=rep(tmp1);
-                    tmp2=rep(tmp2);
-                    tmp=tmp1*tmp2-tmp2*tmp1;
-                    ret2(i)=tmp==0;
-                end
-            end
-            % inv検証
-            ret3=false(1,size(inv,2));
-            if isnan(inv(1))
-                ret3=true;
-            else
-                base=obj.algbase;
-                for i=1:size(inv,2)
-                    tmp1=obj.set_cp(1,{inv(1,i)},{base});
-                    tmp2=obj.set_cp(1,{inv(2,i)},{base});
-                    tmp1=rep(tmp1);
-                    tmp2=rep(tmp2);
-                    tmp=tmp1*tmp2-1;
-                    ret3(i)=tmp==0;
-                end
-            end
-
-            ret=[ret1,ret2,ret3];
-        end
-
-
         %% 計算基盤
 
         % 各項への作用
@@ -337,14 +235,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
     end
     %% objの変更,生成
     methods
-        function obj=make(obj,cf,bs,idx)
+        function obj=make(obj,cf,idx)
             arguments
                 obj
                 cf
-                bs (1,:) Bases 
                 idx
             end
-            obj.bs=bs;
             obj.cf(:)=0;
             obj.cf(idx)=cf;
         end
@@ -352,12 +248,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         % function prod()
         % コンストラクタ
         function obj=VectAlg(X)
-
-            if nargin==1&&isa(X,"strAlg")
-                obj=obj.set_cp(X.cf,X.pw,X.bs);
-                obj.ZERO=X.ZERO;
-                obj.algbase=X.algbase;
-                return
+            if nargin==1
+                error("vect:cast","implicit casting not allowed:%s",string(X))
             end
         end
         function obj=setSC(obj,identifier,mu,eta,Delta,eps,S)
@@ -370,6 +262,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             Si=S^-1;
             obj.SC.insert([identifier '_Si'],Si);
 
+        end
+        function ret=verify(obj)
+
+        end
+        function ret=verifyHopf(obj)
+            
         end
 
         function obj=set_c(obj,cf)
@@ -432,13 +330,19 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             T=combinations(bsnames{:});
             base=categorical(join(fliplr(T{:,:})," ⊗ ",2));
             coeff=arg.cf(:);
+            if CR.H.vectD1removeZero
+                idx=arg.removeZero;
+                coeff=coeff(idx);
+                base=base(idx);
+                if ~any(idx)
+                    coeff=0;
+                    base=categorical("-");
+                end
+            end
             disp(table(coeff,base));
-            % try
-            %
-            % catch
-            %     arg.verify
-            %     arg.disp0
-            % end
+        end
+        function ret=removeZero(arg)
+            ret=abs(arg.cf)>1e-10;
         end
         % 数式の形式の表示
         function disp2(arg)
@@ -542,182 +446,44 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
 
         %複製
-        function ret=matrix(obj,i1)
-            ret=repmat(obj,i1);
-        end
-        function obj=setBase(obj,algB,Zero)
-            obj.algbase=algB;
-            obj.ZERO=Zero;
-        end
-        function ret=subs(obj,varargin)
-            ret=obj;
-            ret.cf=subs(obj.cf,varargin{:});
-            ret.pw=subs(obj.pw,varargin{:});
-        end
-        function ret=get.dims(obj)
-            ret=obj.bs.dims;
-        end
-        function ret=get.dim(obj)
-            ret=obj.bs.dim;
-        end
-        function ret=get.rank(obj)
-            ret=length(obj.bs);
-        end
-        function ret=scalar(obj)
-            ret=obj.set_cp(1,{},{});
-            ret.ZERO={};
-            ret.algbase=Bases.empty;
-        end
+        % function ret=matrix(obj,i1)
+        %     ret=repmat(obj,i1);
+        % end
+        % function obj=setBase(obj,algB,Zero)
+        %     obj.algbase=algB;
+        %     obj.ZERO=Zero;
+        % end
+        % function ret=subs(obj,varargin)
+        %     ret=obj;
+        %     ret.cf=subs(obj.cf,varargin{:});
+        %     ret.pw=subs(obj.pw,varargin{:});
+        % end
+        % function ret=get.dims(obj)
+        %     ret=obj.bs.dims;
+        % end
+        % function ret=get.dim(obj)
+        %     ret=obj.bs.dim;
+        % end
+        % function ret=get.rank(obj)
+        %     ret=length(obj.bs);
+        % end
+        % function ret=scalar(obj)
+        %     ret=obj.set_cp(1,{},{});
+        %     ret.ZERO={};
+        %     ret.algbase=Bases.empty;
+        % end
     end
     methods(Hidden)
-        function ret=dimP(obj)
-            ret=size(obj.pw,2);
-        end
+
     end
     %zeros
     methods (Static)
-
         function F=tensorMor(func,dim)
-            arguments(Repeating)
-                func
-                dim
-            end
-            N=numel(func);
-            F=@fun;
-            dims=cell2mat(dim);
-            idx=arrayfun(@(x,y){x-(0:y-1)},cumsum(dims),dims);
-            function [c,p]=fun(p)
-                C=cell(1,N);
-                P=cell(1,N);
-                for i=1:N
-                    [C{i},P{i}]=func{i}(p(idx{i}));
-                end
-                terms=cellfun(@numel,C);
-                idx0=terms==0;
-                C{idx0}=0;
-                P{idx0}=zeros(1,0);
-                terms(idx0)=1;
-                combi=arrayfun(@(x){1:x},terms);
-                T=combinations(combi{:});
-                h=height(T);
-                w=width(T);
-                % cの初期化？
-                TC=cell(h,w);
-                TP=cell(h,w);
-                for i=1:w
-                    TC{:,i}=C{i}(T{:,i});
-                    TP{:,i}=P{i}(T{:,i},:);
-                end
-                c=zeros(h,1,CR.H.cft);
-                p=zeros(h,1,CR.H.pft);
-                for i=1:h
-                    for j=1:w
-                        c(i)=c(i)+TC{i,j};
-                    end
-                    p(i,:)=hotzcat(TP{i,:});
-                end
-            end
         end
     end
 
 end
 
-
-%% Local method
-% 同類項括り
-function ret=combineTerm(arg)
-    if isa(arg,'strEndV')&&false
-        % strEndVが同類項を間違えてくくってしまうため，追加
-        ret=arg;
-        return
-    end
-
-    cf=arg.cf;
-    pw=arg.pw;
-    bs=arg.bs;
-    t=size(arg.pw,1);
-    Rank=size(arg.pw,2);
-    if isempty(pw)
-        ret=arg.set_cp(sum(cf),pw,cell(size(pw)));
-        return
-    end
-    maxDegs = nan(1,Rank); % Maximum array length
-    % Prepare padded power arrays for sorting
-    paddedArrays=cell(size(arg.pw));
-    for i=1:Rank
-        maxDegs(i)=max([0;cellfun(@length,pw(:,i))]);
-        paddedArrays(:,i) = cellfun(@(x) [-Inf(1, maxDegs(i) - length(x)),x], pw(:,i), 'UniformOutput', false);
-    end
-    sortingMatrix = cell2mat(paddedArrays);
-
-    % Sort terms by their padded power arrays (length first, then dictionary order)
-    [sortedPw,sortIdx]=sortrows(sortingMatrix);
-    groupedTerms=cell(t,3);
-    cf=cf(sortIdx);
-    bs=bs(sortIdx,:);
-    % Group terms with identical power arrays
-    groupIdx=1;
-    currentPw=sortedPw(1,:);
-    for ii=1:numel(sortIdx)
-        if ~isequal(currentPw,sortedPw(ii,:))
-            groupIdx=groupIdx+1;
-            currentPw=sortedPw(ii,:);
-        end
-        groupedTerms{groupIdx,1}(end+1)=cf(ii);
-        groupedTerms{groupIdx,2}=currentPw;
-        groupedTerms{groupIdx,3}(end+1,:)=bs(ii,:);
-    end
-    Nterm=groupIdx;
-    groupedTerms=groupedTerms(1:Nterm,:);
-    % Reduce grouped terms (combine coefficients and pick one base)
-    reducedTerms=cell(Nterm,1);
-    for i=1:Nterm
-        reducedTerms{i}=reduceGroup(groupedTerms(i,:));
-    end
-    groupedTerms=vertcat(reducedTerms{:});
-    % Extract reduced powers, remove padding, and combine all terms
-    pw=cellfun(@(factors)mat2cell(factors,1,maxDegs),groupedTerms(:,2),UniformOutput=false);
-    pw=vertcat(pw{:});
-    bs=cell(size(pw));
-    for i=1:Nterm
-        for j=1:Rank
-            pw{i,j}(pw{i,j}==-Inf)=[];
-        end
-    end
-    bs=vertcat(groupedTerms{:,3});
-    cf=vertcat(groupedTerms{:,1});
-    ret=arg.set_cp(cf,pw,bs);
-
-    function termGroup=reduceGroup(termGroup)
-        %  Helper function to combine terms in a group
-        termGroup{1}=sum(termGroup{1});
-        termGroup{3}=termGroup{3}(1,:);
-    end
-
-
-end
-function [q,r,flag]=helpdiv(q,r,d)
-    arguments
-        q symp
-        r symp
-        d symp
-    end
-    flag=false;
-    if length(r.cf)<length(d.cf)
-        return
-    elseif length(r.cf)==length(d.cf)
-        flag=true;
-    end
-    Q=d;
-    Q=d.set_cp(r.cf(1)/d.cf(1),r.pw(1,:)-d.pw(1,:));
-    q=q+Q;
-    r=r-Q*d;
-    if flag&&(length(r.cf)==length(d.cf))
-        disp("infinite loop")
-        return
-    end
-    [q,r]=helpdiv(q,r,d);
-end
 
 
 function cp=set_cptype(cp,typ)

@@ -10,7 +10,10 @@ classdef TensorBases<Bases
         function obj = TensorBases(bases,name)
             % Constructor for TensorBases
             obj.bases = bases;
-            obj.var_ = string(bases);
+            vars=fliplr({bases.var_});
+            Tvar=combinations(vars{:});
+            obj.dim_=prod([bases.dim_]);
+            obj.var_ =join(fliplr(Tvar{:,:})," ⊗ ",2);
             if nargin > 1
                 obj.name = name;
             else

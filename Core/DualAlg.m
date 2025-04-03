@@ -4,14 +4,20 @@ classdef DualAlg<VectAlg
         % Store coefficients as a map from basis elements to values
         dualobj
     end
-    
+    methods(Static)
+        function obj=getGenerator(dualobj)
+            % getGenerator Create a dual algebra generator
+            obj=DualAlg();
+            obj=setDualObj(obj,dualobj);
+        end
+    end
     methods
         % function obj = DualAlg(basis, coeffs)
         %     obj.basis = basis;
         %     obj.coeffs = coeffs;
         % end
         function obj = setDualObj(obj,dualobj)
-            % setDualObj Set the dual object    
+            % setDualObj Set the dual object
             obj.dualobj = dualobj;
             obj=DualAlg;
             bs=dualobj.bs;
@@ -19,7 +25,7 @@ classdef DualAlg<VectAlg
             obj.cf=dualobj.cf;
             Z=obj;
             Z.cf(:)=0;
-            obj.ZERO={Z};        
+            obj.ZERO={Z};
         end
 
 
@@ -40,7 +46,7 @@ classdef DualAlg<VectAlg
                 end
             end
         end
-        
+
         % Comultiplication
         function mapOut = Delta(obj)
             mapOut = containers.Map('KeyType','char','ValueType','double');
@@ -52,7 +58,7 @@ classdef DualAlg<VectAlg
                 mapOut(key) = val;
             end
         end
-        
+
         % Counit
         function val = epsilon(obj)
             val = 0;
@@ -60,7 +66,7 @@ classdef DualAlg<VectAlg
                 val = val + obj.coeffs(obj.basis{i});
             end
         end
-        
+
         % Antipode (simple involution-like example)
         function sObj = S(obj)
             sCoeffs = containers.Map('KeyType','char','ValueType','double');
@@ -76,10 +82,7 @@ classdef DualAlg<VectAlg
             % This is a placeholder; actual implementation will depend on the specific algebra
             hp=eye(obj.dim);
             obj.SC.insert([obj.identifier '_HP'],hp);
-            end
         end
-
-
         function ret=HP(i1,i2)
             % Hopf algebra pairing
             % i1: strAlg
@@ -90,7 +93,7 @@ classdef DualAlg<VectAlg
                 z=i1.ZERO{1};
             else
                 z=i2.ZERO{1};
-            end            
+            end
             M=z.SC.get([z.identifier '_HP']);
             ret=i1;
             ret.cf(:)=0;
