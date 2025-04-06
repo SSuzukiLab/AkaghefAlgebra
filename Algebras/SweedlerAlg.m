@@ -1,22 +1,20 @@
 classdef(InferiorClasses=?sym) SweedlerAlg<VectAlg
     % SWEEDLERALG 4-dimensional Sweedler Hopf algebra
     properties(Constant)
-        bs0=Bases(4,["1" "g" "x" "x*g"])
+        bs0=Bases(4,["1" "K" "E" "E*K"],'Sweedler')
     end
     methods(Static)
-        function [g,x]=getGenerator()
+        function [Z,K,E]=getGenerator()
             Z=SweedlerAlg();
-            Z.ZERO={Z};
+            Z=Z.setBase(Z.bs0);
             Z.setConst;
-            g=Z.make(1,2);
-            x=Z.make(1,3);
+            K=Z.make(1,2);
+            E=Z.make(1,3);
         end
     end
     methods
-        function obj=SweedlerAlg()
-            obj.cf=zeros(4,1);
-            obj.bs=obj.bs0;
-        end
+        % function obj=SweedlerAlg()
+        % end
         function obj=casttype(obj,arg)
             if isa(arg,'double')&&isscalar(arg)
                 obj=obj.set_c([arg;0;0;0]);
@@ -27,7 +25,7 @@ classdef(InferiorClasses=?sym) SweedlerAlg<VectAlg
         function setConst(obj)
             % Sweedler Hopf algebra H4 structure constants
 
-            % Basis: e1 = 1, e2 = g, e3 = x, e4 = gx
+            % Basis: e1 = 1, e2 = K, e3 = E, e4 = EK
 
             % Multiplication tensor M(i,j,k): e_i * e_j = sum_k M(i,j,k) * e_k
             M = zeros(4,4,4);
@@ -43,10 +41,10 @@ classdef(InferiorClasses=?sym) SweedlerAlg<VectAlg
             C = zeros(4,4,4);
             C(1,1,1) = 1;
             C(2,2,2) = 1;
-            C(3,3,1) = 1; C(3,2,3) = 1;
-            C(4,4,2) = 1; C(4,1,4) = 1;
+            C(3,1,3) = 1; C(3,3,2) = 1;
+            C(4,2,4) = 1; C(4,4,1) = 1;
 
-            % Counit vector: epsilon(i) = ε(e_i)
+            % Counit vector: epsilon_i = ε(e_i)
             epsilon = [1; 1; 0; 0];
 
             % Counit vector: η(1) = η^i(e_i)
@@ -56,12 +54,13 @@ classdef(InferiorClasses=?sym) SweedlerAlg<VectAlg
             S = zeros(4,4);
             S(1,1) = 1;
             S(2,2) = 1;
-            S(3,4) = -1;
+            S(3,4) = 1;
             S(4,3) = -1;
             
-         
             
-            obj.setSC(class(obj),M,eta,C,epsilon,S);
+            
+            obj.setSC(obj.identifier,M,eta,C,epsilon,S);
+            obj.setIntegrals([0;0;0;1],[0;0;1;1],[0;0;-1;0],[0;0;-1;1]);
         end
     end
 end

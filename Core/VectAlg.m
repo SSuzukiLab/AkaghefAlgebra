@@ -3,7 +3,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
     %   詳細説明をここに記述
 
     properties
-        cf  %coefficient 
+        cf  %coefficient
         % 1,2,3の階数方向に係数を立体的に並べる．rank=1なら縦ベクトルなので注意
 
         bs (1,:) Bases %basis
@@ -20,33 +20,48 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function obj=setBase(obj,base)
             % setBase 基底の設定
             obj.bs=base;
-            obj.cf=zeros([obj.bs.dim_]);
+            obj.cf=Czeros(obj,base.dim,1);
             obj.ZERO={obj};
         end
-        
+        function ret=getSC(obj,arg)
+            ret=obj.SC.get([obj.bs.name arg]);
+        end
+
         function [i1,i2]=alignNum(i1,i2)
             % 型をstrAlgにする
-            if ~isequal(class(i1),class(i2))
+            if ~isequal(class(i1),class(i2))||~isequal(i1.bs,i2.bs)
                 tf=[isa(i1,"VectAlg") isa(i2,"VectAlg")];
                 if isequal(tf,[1 0])
-                    i2=casttype(i1,i2);
+                    i2=castCtype(i1,i2);
                 elseif isequal(tf,[0 1])
-                    i1=casttype(i2,i1);
+                    i1=castCtype(i2,i1);
                 elseif isequal(tf,[1 1])
-                    error("symp:alignNum","invalid input")
+                    try
+                        i2=i1.casttype(i2);
+                    catch
+                        try
+                            i1=i2.casttype(i1);
+                        catch
+                            error("symp:alignNum","invalid input")
+                        end
+                    end
+
                 end
             end
         end
         function ret=casttype(obj,arg)
             % casttype 型を合わせる
-
-            % 型を変換するとき以外呼ばれないので，不要な気がする？
-            % if ~isequal(class(obj),class(arg))
-            %     ret=obj.unit;
-            %     ret.cf=arg;
-            %     % assert(isa(arg,ret.ctype))
-            % end
-            ret=obj.set_c(arg);
+            if arg.rank==0
+                ret=obj.unit;
+                ret.cf=arg*ret.cf;
+            else
+                error not_impl
+            end
+        end
+        function ret=castCtype(obj,arg)
+            % casttype 型を合わせる
+            ret=obj.unit;
+            ret.cf=arg*ret.cf;
         end
         function ret=identifier(obj)
             ret=obj.bs.name;
@@ -93,17 +108,17 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=mtimes(i1,i2)
             [i1,i2]=alignNum(i1,i2);
             assert(isequal(i1.bs,i2.bs),'異なる空間での積エラー')
-            z=i1.ZERO{1};
-            M=z.SC.get([z.identifier '_μ']);
             ret=i1;
-            ret.cf(:)=0;
-            for k1=1:i1.dim
-                for k2=1:i2.dim
-                    for k3=1:i1.dim
-                        ret.cf(k3)=ret.cf(k3)+M(k1,k2,k3)*i1.cf(k1)*i2.cf(k2);
-                    end
-                end
+            R=i1.rank;
+            cf=tensorprod(i1.cf,i2.cf,Num=R);
+            for k=1:R
+                M=i1.ZERO{k}.getSC('_μ');
+                cf=tensorprod(cf,M,[1 R+2-k],[1 2]);
             end
+            ret.cf=cf;
+        end
+        function ret=times(i1,i2)
+
         end
         function ret=lb(i1,i2)
             ret=i1*i2-i2*i1;
@@ -115,41 +130,34 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         %べき
         function ret=mpower(i1,i2)
-            %i2がsymの場合の実装をする
-            if i1.term>1
-                ret=i1.unit;
-                for ii=1:i2
-                    ret=i1*ret;
-                end
-            elseif i1.term==1
-                % 実装効率に振ってよくない
-                if isa(i2,'sym')
-                    if ~isempty(symvar(i2))
-                        i1.pw=i1.pw*i2;
-                        i1.cf=i1.cf^i2;
-                        ret=i1;
-                        return
-                    else
-                        i2=double(i2);
-                    end
-                end
-                pw=cellfun(@(pw)repmat(pw,1,i2),i1.pw,UniformOutput=false);
-                bs=cellfun(@(bs)repmat(bs,1,i2),i1.bs,UniformOutput=false);
-                ret=i1.set_cp(i1.cf^i2,pw,bs);
+            ret=i1.unit;
+            for ii=1:i2
+                ret=i1*ret;
             end
         end
         function ret=unit(arg)
-            eta=arg.SC.get([class(arg) '_η']);
-            ret=arg.set_c(eta); 
+            eta=1;
+            for k=1:arg.rank
+                eta_=arg.ZERO{k}.getSC('_η');
+                eta=tensorprod(eta,eta_,Num=k);
+            end
+            ret=arg.set_c(shiftdim(eta,1));
         end
         %テンソル積
         function o=or(i1,i2)
-            [i1,i2]=alignNum(i1,i2);
+            try
+                [i1,i2]=alignNum(i1,i2);
+            catch ME
+                if ~(isa(i1,"VectAlg")&&isa(i2,"VectAlg"))
+                    % (g|g)|gのような元に対処する
+                    rethrow(ME)
+                end
+            end
             o=i1;
             o.bs=[i1.bs i2.bs];
             o.ZERO=[i1.ZERO i2.ZERO];
             o.bs=[i1.bs i2.bs];
-            o.cf=i1.cf*i2.cf.';
+            o.cf=tensorprod(i1.cf,i2.cf,Num=i1.rank);
         end
         %副積
         function o=and(i1,i2)
@@ -164,18 +172,25 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             ret=obj|obj;
             ret.cf(:)=0;
             C=obj.SC.get([obj.identifier '_Δ']);
-            for k1=1:obj.dim
-                for k2=1:obj.dim
-                    for k3=1:obj.dim
-                        ret.cf(k2,k3)=ret.cf(k2,k3)+C(k1,k2,k3)*obj.cf(k1);
-                    end
-                end
-            end
+            ret.cf=tensorprod(C,obj.cf,1,1);
+            % for k1=1:obj.dim
+            %     for k2=1:obj.dim
+            %         for k3=1:obj.dim
+            %             ret.cf(k2,k3)=ret.cf(k2,k3)+C(k1,k2,k3)*obj.cf(k1);
+            %         end
+            %     end
+            % end
         end
         function ret=counit(obj)
             ep=obj.SC.get([obj.identifier '_ε']);
             ret=obj.cf.'*ep;
-            
+            ep=1;
+            for k=1:arg.rank
+                eta_=arg.ZERO{k}.getSC('_ε');
+                eta=tensorprod(eta,eta_,Num=k);
+            end
+            ret=arg.set_c(shiftdim(eta,1));
+
         end
         function ret=S(obj)
             % S: Hopf algebra antipode
@@ -239,9 +254,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             arguments
                 obj
                 cf
+            end
+            arguments(Repeating)
                 idx
             end
             obj.cf(:)=0;
+            idx=sub2ind([obj.dims 1],idx{:});
             obj.cf(idx)=cf;
         end
 
@@ -252,27 +270,127 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 error("vect:cast","implicit casting not allowed:%s",string(X))
             end
         end
-        function obj=setSC(obj,identifier,mu,eta,Delta,eps,S)
+        function obj=setSC(obj,identifier,mu,eta,Delta,ep,S)
             % setSC ホップ代数の構造定数を設定する
             obj.SC.insert([identifier '_μ'],mu);
             obj.SC.insert([identifier '_η'],eta);
             obj.SC.insert([identifier '_Δ'],Delta);
-            obj.SC.insert([identifier '_ε'],eps);
+            obj.SC.insert([identifier '_ε'],ep);
             obj.SC.insert([identifier '_S'],S);
             Si=S^-1;
             obj.SC.insert([identifier '_Si'],Si);
-
+            P=tensorprod(tensorprod(tensorprod(mu,S,3,1),Delta,3,1),S,[3 1],[1 2]);
+            [U,K,V] = svd(P);
+            Ir=U(:,1);
+            Cr=K(1,1)*V(:,1);
+            Cr=Cr/(Ir.'*Cr);
+            Cl=Si*Cr;
+            Il=S.'*Ir;
+            obj.setIntegrals(Ir,Cr,Il,Cl);
+        end
+        function setIntegrals(obj,Ir,Cr,Il,Cl)
+            % Ir,Cr,Il,Cl (D,1) size
+            obj.SC.insert([obj.identifier '_intr'],Ir);
+            obj.SC.insert([obj.identifier '_cointr'],Cr);
+            obj.SC.insert([obj.identifier '_intl'],Il);
+            obj.SC.insert([obj.identifier '_cointl'],Cl);
+            obj.SC.insert([obj.identifier '_CrIl'],dot(Cr,Il));         
         end
         function ret=verify(obj)
-
+            try
+                assert(isequal(size(obj.cf),obj.dims)||(obj.rank==1&&numel(obj.cf)==obj.dim))
+            catch ME
+                obj.disp0
+                rethrow(ME)
+            end
         end
-        function ret=verifyHopf(obj)
+        function ret=verifyHopf(obj,isequal_)
+            % verifyHopf ホップ代数の構造定数を確認する
+            D=obj.dim;
+            I=eye(D);
+            mu=obj.getSC(['_μ']);
+            eta=obj.getSC(['_η']);
+            Delta=obj.getSC(['_Δ']);
+            ep=obj.getSC(['_ε']);
+            S=obj.getSC(['_S']);
+            Si=obj.getSC(['_Si']);
+
+            % size
+            assert(isequal(size(mu),[D D D]),"invalid size:μ")
+            assert(isequal(size(eta),[D 1]),"invalid size:η")
+            assert(isequal(size(Delta),[D D D]),"invalid size:Δ")
+            assert(isequal(size(ep),[D 1]),"invalid size:ε")
+            assert(isequal(size(S),[D D]),"invalid size:S")
+            assert(isequal(size(Si),[D D]),"invalid size:Si")
+
+            % unitality
+            tmp=tensorprod(eta,mu,1,1,Num=1);
+            assert(isequal_(tmp,I),"unitality error")
+            tmp=tensorprod(eta,mu,1,2,Num=1);
+            assert(isequal_(tmp,I),"unitality error")
+            % counitality
+            tmp=tensorprod(ep,Delta,1,2,Num=1);
+            assert(isequal_(tmp,I),"counitality error")
+            tmp=tensorprod(ep,Delta,1,3,Num=1);
+            assert(isequal_(tmp,I),"counitality error")
+
+            % associativity
+            tmp=tensorprod(mu,mu,3,1);
+            tmp2=permute(tensorprod(mu,mu,2,3),[1 3 4 2]);
+            assert(isequal_(tmp,tmp2),"associativity error")
+            % coassociativity
+            tmp=permute(tensorprod(Delta,Delta,2,1),[1 3 4 2]);
+            tmp2=tensorprod(Delta,Delta,3,1);
+            assert(isequal_(tmp,tmp2),"coassociativity error")
+
+            % bialgebra property
+            %  Δ∘μ = (μ⊗μ)∘τ23∘(Δ⊗Δ)
+            tmp = tensorprod(Delta,Delta,Num=3);
+            tmp2 = tensorprod(mu,mu,Num=3);
+            tmp = tensorprod(tmp,tmp2,[2 5 3 6],[1 2 4 5]);
+            tmp2= tensorprod(mu,Delta,3,1);
+            assert(isequal_(tmp,tmp2),"bialgebra property error")
+
+
+            % antipode property
+            % μ ∘ (S ⊗ id) ∘ Δ = η ∘ ε  and  μ ∘ (id ⊗ S) ∘ Δ = η ∘ ε
+            tmp2=tensorprod(ep,eta,2,2,Num=2);
+
+            tmp=tensorprod(S,mu,1,1);
+            tmp=tensorprod(Delta,tmp,[2 3],[1 2]);
+            assert(isequal_(tmp,tmp2),"antipode left inverse error")
+
+            tmp=tensorprod(S,mu,2,2);
+            tmp=tensorprod(Delta,tmp,[2 3],[1 2]);
+            assert(isequal_(tmp,tmp2),"antipode right inverse error")
+
+            % integral property
+            %  δ_r*u=ε(u)δ_r, u*δ_l=ε(u)δ_l,
+            % ∫_r(u_1)u_2=∫_r(u), u_1∫_l(u_2)=∫_l(u)
+
+            intr=obj.getSC(['_intr']);
+            cointr=obj.getSC(['_cointr']);
+            intl=obj.getSC(['_intl']);
+            cointl=obj.getSC(['_cointl']);
+            tmp=tensorprod(cointr,mu,1,1,Num=1);
+            tmp2=tensorprod(ep,cointr,Num=1);
+            assert(isequal_(tmp,tmp2),"right cointegral property error")
+            tmp=tensorprod(intr,Delta,1,2,Num=1);
+            tmp2=tensorprod(intr,eta,Num=1);
+            assert(isequal_(tmp,tmp2),"right integral property error")
+            % tmp=tensorprod(intl,cointr,1,2,Num=1);
+            % tmp2=tensorprod(intl,cointr,Num=1);
+            % leftはまだ未実装
+            tmp=[dot(intr,cointr), dot(intl,cointr); ...
+                 dot(intr,cointl), dot(intl,cointl)];
+            assert(isequal_(tmp([1 2 4]),[1 1 1]),"integral normalization error")
             
+
         end
 
         function obj=set_c(obj,cf)
             if obj.rank==1
-                cf=reshape(cf,1,[]);
+                cf=reshape(cf,[],1);
             end
             if isequal(size(obj.cf),size(cf))
                 obj.cf=cf;
@@ -370,7 +488,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function ret=convertTermToSym(arg)
             % 数式表示の
-            bsstr=cellfun(@arg.convertBaseString,arg.pw,arg.bs,UniformOutput=false);
+            bsstr=string(arg.bs);
             if isempty(bsstr)
                 disp(table(arg.cf,VariableNames="coeff"))
                 return
@@ -384,7 +502,6 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % end
             % ret=formatstr;
             % return
-            % formatの変数zzzzを置き換える処理がうまくいかないので下記を実行する
             % if isnumeric(arg.cf)
             %     coeff=arrayfun(@(x)sprintf("%+g",x),arg.cf);
             % else
@@ -411,12 +528,13 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
     methods (Access=protected)
         function varargout = braceReference(obj,indexOp)
-            idx=sub2ind(obj.dims,indexOp.Indices{:});
-            cf_=zeros(size(obj.cf),'like',obj.cf);
-            % idx=[idx{:}];
-            cf_(idx)=obj.cf(idx);
-            obj.cf=cf_;
-            varargout={obj};
+            idx=[0,0];
+            [idx(1),idx(2)]=ind2sub(obj.dims,indexOp.Indices{1});
+
+            Z=obj.ZERO{indexOp.Indices{2}};
+            Z.ZERO={Z};
+            Z.cf(idx(indexOp.Indices{2}))=obj.cf(indexOp.Indices{1});
+            varargout={Z};
             % [varargout{1:nargout}] = obj.cf.(indexOp);
         end
 
@@ -443,6 +561,9 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 z = repmat(symp,varargin{:});
             end
         end
+        function ret=Czeros(obj,varargin)
+            ret=zeros(varargin{:},obj.bs.getCtype.type);
+        end
 
 
         %複製
@@ -458,15 +579,15 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         %     ret.cf=subs(obj.cf,varargin{:});
         %     ret.pw=subs(obj.pw,varargin{:});
         % end
-        % function ret=get.dims(obj)
-        %     ret=obj.bs.dims;
-        % end
-        % function ret=get.dim(obj)
-        %     ret=obj.bs.dim;
-        % end
-        % function ret=get.rank(obj)
-        %     ret=length(obj.bs);
-        % end
+        function ret=get.dims(obj)
+            ret=obj.bs.dims;
+        end
+        function ret=get.dim(obj)
+            ret=obj.bs.dim;
+        end
+        function ret=get.rank(obj)
+            ret=length(obj.bs);
+        end
         % function ret=scalar(obj)
         %     ret=obj.set_cp(1,{},{});
         %     ret.ZERO={};

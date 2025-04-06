@@ -20,6 +20,9 @@ classdef TensorBases<Bases
                 obj.name = join({bases.name}, "⊗");
             end
         end
+        function helperHD(obj)
+            obj.var_=replace(obj.var_,"⊗","#");
+        end
         
         % Define other methods here
     end
