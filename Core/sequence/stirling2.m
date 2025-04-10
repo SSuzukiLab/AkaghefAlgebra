@@ -29,7 +29,7 @@ function S = stirling2(m, n, c)
 arguments
     m 
     n = 0:m
-    c {mustBeMember(c,{'uint64','double'})}= 'uint64'
+    c {mustBeMember(c,{'uint64','double'})}= 'double'
 end
 mMax=max(m);
 S = diag(ones(mMax+1,1,c) );       % table of solutions S(m,n)

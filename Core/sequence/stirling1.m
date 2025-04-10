@@ -30,7 +30,7 @@ function S = stirling1(m, n, c)
 arguments
     m 
     n = 0:m
-    c {mustBeMember(c,{'uint64','double'})}= 'uint64'
+    c {mustBeMember(c,{'uint64','double'})}= 'double'
 end
 mMax=max(m);
 S = diag(ones(mMax+1,1,c) );       % table of solutions S(m,n)
@@ -40,6 +40,8 @@ for r = 2:mMax+1
         S(r,k) = S(r-1, k-1) + (r-2)*S(r-1,k);% 1-indexed
     end
 end
+
+S = S(m+1,n+1);
 
 if isa(S,'double') && any(S > realmax('double'),"all")
     error('overflow');
