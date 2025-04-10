@@ -27,6 +27,12 @@ function validateParsedTable(T)
     % Validate the parsed table where each label is an expression
     % (not just a variable name), which must be evaluable in the caller workspace,
     % and its rank (i.e., ndims) must equal rank(i)
+    idx=horzcat(T.indexList{:});
+    [vals, ~, grp] = unique(idx);           % Get unique values and group indices
+    counts = accumarray(grp, 1)>2;          % Count occurrences
+    if any(counts)
+        error("contraction indices:%s must appear just 2 times",mat2str(vals(counts)))
+    end
     for i = 1:height(T)
         expr = T.labels(i);
         indices = T.indexList{i};
@@ -35,7 +41,7 @@ function validateParsedTable(T)
         try
             value = evalin('base', expr);
         catch
-            error('Expression "%s" cannot be evaluated in the caller workspace.', expr);
+            warning('Expression "%s" cannot be evaluated in the base workspace.', expr);
         end
 
         % Check that the number of dimensions matches the index list length
@@ -45,7 +51,7 @@ function validateParsedTable(T)
         end
         expectedRank = numel(indices);
         if actualRank ~= expectedRank
-            error('Expression "%s" has rank %d, expected %d.', expr, actualRank, expectedRank);
+            warning('Expression "%s" has rank %d, expected %d.', expr, actualRank, expectedRank);
         end
     end
 end
@@ -105,7 +111,7 @@ function expr = makeExpressionString(T)
     end
 end
 function expr=permDim(expr,acc,ord)
-    if length(acc)~=length(ord)
+    if ~(length(acc)==length(ord)&&all(ismember(acc,ord)))
         error("Second arguments(order) must be a permutation of remaining tensor indices:%s",mat2str(acc))
     end
     [~, perm] = ismember(ord,acc);

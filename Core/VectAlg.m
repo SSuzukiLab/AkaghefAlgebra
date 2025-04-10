@@ -356,12 +356,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % μ ∘ (S ⊗ id) ∘ Δ = η ∘ ε  and  μ ∘ (id ⊗ S) ∘ Δ = η ∘ ε
             tmp2=tensorprod(ep,eta,2,2,Num=2);
 
-            tmp=tensorprod(S,mu,1,1);
+            tmp=tensorprod(S,mu,2,1);
             tmp=tensorprod(Delta,tmp,[2 3],[1 2]);
             assert(isequal_(tmp,tmp2),"antipode left inverse error")
 
-            tmp=tensorprod(S,mu,2,2);
-            tmp=tensorprod(Delta,tmp,[2 3],[1 2]);
+            tmp=tensorprod(Delta,S,3,1);
+            tmp=tensorprod(tmp,mu,[2 3],[1 2]);
             assert(isequal_(tmp,tmp2),"antipode right inverse error")
 
             % integral property
@@ -381,11 +381,48 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % tmp=tensorprod(intl,cointr,1,2,Num=1);
             % tmp2=tensorprod(intl,cointr,Num=1);
             % leftはまだ未実装
-            tmp=[dot(intr,cointr), dot(intl,cointr); ...
-                 dot(intr,cointl), dot(intl,cointl)];
+            tmp=[intr.'*cointr, intl.'*cointr; ...
+                 intr.'*cointl, intl.'*cointl];
+            assert(isequal_(tmp([1 2 4]),[1 1 1]),"integral normalization error")
+
+            disp("Confirmed to be a Hopf algebra")
+        end
+        function verifyInt(obj)
+            isequal_=@(x,y)all(eqD(x,y,1e-5),"all");
+            D=obj.dim;
+            I=eye(D);
+            mu=obj.getSC(['_μ']);
+            eta=obj.getSC(['_η']);
+            Delta=obj.getSC(['_Δ']);
+            ep=obj.getSC(['_ε']);
+            S=obj.getSC(['_S']);
+            Si=obj.getSC(['_Si']);
+
+            intr=obj.getSC(['_intr']);
+            cointr=obj.getSC(['_cointr']);
+            intl=obj.getSC(['_intl']);
+            cointl=obj.getSC(['_cointl']);
+            tmp=tensorprod(cointr,mu,1,1,Num=1);
+            tmp2=tensorprod(ep,cointr,Num=1);
+            assert(isequal_(tmp,tmp2),"right cointegral property error")
+            tmp=tensorprod(intr,Delta,1,2,Num=1);
+            tmp2=tensorprod(intr,eta,Num=1);
+            assert(isequal_(tmp,tmp2),"right integral property error")
+            % tmp=tensorprod(intl,cointr,1,2,Num=1);
+            % tmp2=tensorprod(intl,cointr,Num=1);
+            % leftはまだ未実装
+            tmp=[intr.'*cointr, intl.'*cointr; ...
+                 intr.'*cointl, intl.'*cointl];
             assert(isequal_(tmp([1 2 4]),[1 1 1]),"integral normalization error")
             
-
+        end
+        function dispInt(obj)
+            intr=obj.getSC(['_intr']);
+            cointr=obj.getSC(['_cointr']);
+            intl=obj.getSC(['_intl']);
+            cointl=obj.getSC(['_cointl']);
+            T=table([intr cointr intl cointl].',VariableNames="coordinates",RowNames=["intr" "cointr" "intl" "cointl"]);
+            disp(T)
         end
 
         function obj=set_c(obj,cf)
