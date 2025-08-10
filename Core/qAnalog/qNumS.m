@@ -57,8 +57,17 @@ classdef qNumS
             %     out=X*(q^(n-k)/qN.n(n+1-k))*out+1;
             % end
         end
-        function out=binomial(qN,n,m)
-            out=simplify(qN.fac(n)/(qN.fac(n-m)*qN.fac(m)));
+        function ret=binomial(qN,n,m)
+            % out=simplify(qN.fac(n)/(qN.fac(n-m)*qN.fac(m)));
+            if ~isa(n,'sym')&&n<m
+                ret=0;
+                return
+            else
+                ret=1;
+            end
+            for ii=0:m-1
+                ret=qN.n(n-ii)/qN.n(m-ii)*ret;
+            end
         end
         function ret=factor(qN,arg)
             F=factor(sym(arg));

@@ -32,5 +32,5 @@ codegen/
 # Cloud based storage dotfile
 .MATLABDriveTag
 
-#Mac OS
+# Mac OS
 .DS_Store

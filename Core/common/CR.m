@@ -12,6 +12,7 @@ classdef CR<handle& matlab.mixin.CustomCompactDisplayProvider ...
         pft='double'
         iszero 
         vectD1removeZero=true
+        Fp_default=5
     end
     properties(Hidden)
         replacingDisplay=false
