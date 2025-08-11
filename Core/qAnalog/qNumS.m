@@ -1,47 +1,31 @@
 classdef qNumS
-    properties
-        q=sym('q')
-    end
-    methods
-        function qN=qNumS(q)
-            if nargin==0, q=sym('q'); end
-            qN.q=q;
-        end
-        function out=n(qN,x)
-            q=qN.q;
+    methods(Static)
+        function out=n(q,x)
             out=(q^x-q^(-x))/(q-q^(-1));
         end
-        function out=T(qN)
-            q=qN.q;
+        function out=tau(q)
             out=q-q^-1;
         end
-        function ret=pch(qN,x,n,Q)
+        function ret=pch(q,x,n)
             if n==0
                 ret=1;
             else
-                if nargin==3, Q=qN.q; end
-                ret=(1-x*Q^(n-1))*qN.pch(x,n-1,Q);
+                ret=(1-x*q^(n-1))*qNumS.pch(x,n-1,q);
             end
         end
-        % function out=q(obj)
-        %     syms q
-        %     out=q;
-        % end
-        function out=fac(obj,n)
+        function out=fac(q,n)
             out=sym(1);
             for kk=2:n
-                out=out*obj.n(kk);
+                out=out*qNumS.n(q,kk);
             end
-            % out=simplify(out);
         end
-        function out=exp(qN,X,n,inv)
+        function out=exp(q,X,n,inv)
             arguments
-                qN
+                q
                 X
                 n
                 inv (1,1) logical=false
             end
-            q=qN.q;
             if inv
                 q=q^-1;
             end
@@ -50,15 +34,10 @@ classdef qNumS
             end
             out=0;
             for k=0:n
-                out=out+(q^(k*(k-1)/2)/qN.fac(k))*X^k;
+                out=out+(q^(k*(k-1)/2)/qNumS.fac(q,k))*X^k;
             end
-            % out=1;
-            % for k=1:n
-            %     out=X*(q^(n-k)/qN.n(n+1-k))*out+1;
-            % end
         end
-        function ret=binomial(qN,n,m)
-            % out=simplify(qN.fac(n)/(qN.fac(n-m)*qN.fac(m)));
+        function ret=binomial(q,n,m)
             if ~isa(n,'sym')&&n<m
                 ret=0;
                 return
@@ -66,15 +45,14 @@ classdef qNumS
                 ret=1;
             end
             for ii=0:m-1
-                ret=qN.n(n-ii)/qN.n(m-ii)*ret;
+                ret=qNumS.n(q,n-ii)/qNumS.n(q,m-ii)*ret;
             end
         end
-        function ret=factor(qN,arg)
+        function ret=factor(q,arg)
             F=factor(sym(arg));
             N=numel(F);
             T=table(nan(N,1),F.',VariableNames={'type','value'});
             ret=T;
-            q=qN.q;
             % for i=1:height(T)
             %     x=T{i,'value'};
             %     if isAlways(isfinite(x))
@@ -86,8 +64,8 @@ classdef qNumS
             %     end
             % end
         end
-
-
+        function ret=test(arg)
+            ret=sym('q');
+        end
     end
-
 end

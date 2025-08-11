@@ -14,15 +14,14 @@ classdef TypeParam<handle
         function ret = get(obj,key)
             % get キャッシュにアクセス　なければ生成
             try
-                ret=obj.dict(key);
+                ret=obj.dict{key};
             catch
                 if isempty(obj.createFcn)
                     error("invalid access:"+string(key))
                 end
                 obj.dict=obj.dict.insert(key,{obj.createFcn(key)});
-                ret=obj.dict(key);
+                ret=obj.dict{key};
             end
-            ret=ret{1};
         end
         function insert(obj,key,val)
             obj.dict=obj.dict.insert(key,{val});

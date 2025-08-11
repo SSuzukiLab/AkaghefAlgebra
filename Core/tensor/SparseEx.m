@@ -1,31 +1,57 @@
-classdef SparseEx
+classdef(InferiorClasses=?sym) SparseEx
     % SparseEx: A lightweight sparse array class using key-value representation
     %   Stores non-zero elements and their indices explicitly.
 
     properties
-        key double       % NxD array: indices of non-zero elements
+        zero (1,1) =0; % Default value for zero elements
+        key double       % NxR array: indices of non-zero elements
         val (:,1)        % Nx1 array: corresponding non-zero values
         size 
     end
 
     properties(Dependent)
         Nelem            % Number of non-zero elements
+        rank             % rank of tensor
     end
 
     methods
         function obj = SparseEx(arg)
             % Constructor: Converts numeric array into SparseEx format
-            sz = size(arg);
-            if isnumeric(arg)
-                obj.val = arg(:);
-                tmp = arrayfun(@(x){1:x}, sz);
-                obj.key = fliplr(table2array(combinations(tmp{:}))); % Generate linear indices
+            if ~isa(arg, 'SparseEx')
+                obj.zero = zeros(1,1,'like',arg);
+                obj.size = size(arg);
+                if AlgebraConfig.H.SpElimZero
+                    idx= find(arg ~= obj.zero);
+                else
+                    idx = 1:numel(arg);
+                end
+                if isempty(arg)
+                    obj.key = [];
+                    obj.val = [];
+                elseif length(obj.size) ==2&& obj.size(2) == 1
+                    if obj.size(1) == 1
+                        obj.size = []; % scalar case
+                    else
+                        obj.size = obj.size(1); % vector case
+                    end
+                    obj.key = idx(:); 
+                    obj.val = arg(idx(:));
+                else
+                    subs=cell(1,length(obj.size));
+                    [subs{:}] = ind2sub(obj.size, idx); 
+                    obj.key = vertcat(subs{:}).';
+                    obj.val = arg(idx); 
+                end
             end
         end
 
         function ret = get.Nelem(obj)
             % Return the number of stored non-zero elements
             ret = numel(obj.val);
+        end
+        function ret = get.rank(obj)
+            % Return the rank of the tensor (number of dimensions)
+            ret = size(obj.key, 2);
         end
         function obj=simplify(obj)
             idx=find(obj.val==0);
