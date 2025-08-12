@@ -28,7 +28,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
 
         function [i1,i2]=alignNum(i1,i2)
-            % 型をstrAlgにする
+            % 型をStrAlgにする
             if ~isequal(class(i1),class(i2))||~isequal(i1.bs,i2.bs)
                 tf=[isa(i1,"VectAlg") isa(i2,"VectAlg")];
                 if isequal(tf,[1 0])
@@ -42,7 +42,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                         try
                             i1=i2.casttype(i1);
                         catch
-                            error("symp:alignNum","invalid input")
+                            error("PolAlg:alignNum","invalid input")
                         end
                     end
 
@@ -74,7 +74,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             try
                 sz=size(zeros(size(i1))+zeros(size(i2)));
             catch
-                error("symp:plus","size dimensions must match")
+                error("PolAlg:plus","size dimensions must match")
             end
             if any(sz==0)
                 ret=repmat(i1,sz);
@@ -237,7 +237,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=algfun(obj,funs,units)
             % algfun 代数準同型の作用
             % funs,unitsをテンソル階数の分だけ繰り返し入力する
-            % funs:具体的にはstrAlg().algIDで返される関数形
+            % funs:具体的にはStrAlg().algIDで返される関数形
             % funs:(power,base)→stralg
         end
 
@@ -460,7 +460,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
         function disp(i1)
             if isempty(i1)
-                disp("Empty strAlg: ("+join(string(size(i1)),",")+")")
+                disp("Empty StrAlg: ("+join(string(size(i1)),",")+")")
             else
                 for ii=1:numel(i1)
                     disp_(i1(ii))
@@ -593,9 +593,9 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             if nargin==1
                 z=obj.set_cp([]);
             elseif any([varargin{:}] <= 0)
-                z = symp.empty(varargin{:});
+                z = PolAlg.empty(varargin{:});
             else
-                z = repmat(symp,varargin{:});
+                z = repmat(PolAlg,varargin{:});
             end
         end
         function ret=Czeros(obj,varargin)

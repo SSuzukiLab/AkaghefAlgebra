@@ -1,4 +1,4 @@
-classdef Usl3Borel<strAlg&UEAlg
+classdef Usl3Borel<StrAlg&UEAlg
     properties(Constant)
         PairClass='FSL3Borel'
         B=Bases(2,["E1", "E12", "E2", "H1", "H2"],"sl3Borel")
@@ -20,7 +20,7 @@ classdef Usl3Borel<strAlg&UEAlg
     methods
 
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,Usl3Borel.B);
+            obj=obj.make@StrAlg(cf,pw,Usl3Borel.B);
             
         end
         function obj=getP(obj,p)

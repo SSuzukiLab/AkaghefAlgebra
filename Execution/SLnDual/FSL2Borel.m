@@ -1,4 +1,4 @@
-classdef FSL2Borel<strAlg&HopfAlg
+classdef FSL2Borel<StrAlg&HopfAlg
     %UFSL2BOREL このクラスの概要をここに記述
     %   詳細説明をここに記述
     properties(Constant,Hidden)
@@ -23,7 +23,7 @@ classdef FSL2Borel<strAlg&HopfAlg
     methods
 
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,FSL2Borel.B);
+            obj=obj.make@StrAlg(cf,pw,FSL2Borel.B);
             
         end
         function ret=getGen(O,n)

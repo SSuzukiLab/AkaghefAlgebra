@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) Usl2Full<strAlg&UEAlg
+classdef(InferiorClasses=?sym) Usl2Full<StrAlg&UEAlg
     properties(Constant)
         PairClass='FSL2Full'
         B=Bases(3,["E" "F" "H"],"sl2")
@@ -17,7 +17,7 @@ classdef(InferiorClasses=?sym) Usl2Full<strAlg&UEAlg
     methods
 
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,Usl2Full.B);
+            obj=obj.make@StrAlg(cf,pw,Usl2Full.B);
             
         end
         function ret=getP(obj,p)

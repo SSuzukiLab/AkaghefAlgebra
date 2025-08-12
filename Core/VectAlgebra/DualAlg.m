@@ -85,8 +85,8 @@ classdef DualAlg<VectAlg
         end
         function ret=HP(i1,i2)
             % Hopf algebra pairing
-            % i1: strAlg
-            % i2: strAlg
+            % i1: StrAlg
+            % i2: StrAlg
             % [i1,i2]=alignNum(i1,i2);
             assert(isequal(i1.bs,i2.bs),'異なる空間での積エラー')
             if isa(i1,'DualAlg')

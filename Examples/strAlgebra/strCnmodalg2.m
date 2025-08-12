@@ -1,6 +1,6 @@
-classdef(InferiorClasses=?sym) strCnmodalg2<strAlg
+classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
     properties(Constant,Hidden)
-        B=TypeParam(@(l)Bases(2*l,["x_m"+(l:-1:1) "x_"+(1:l)],"strC"+l+"alg"))
+        B=TypeParam(@(l)Bases(2*l,["x_m"+(l:-1:1) "x_"+(1:l)],"StrC"+l+"alg"))
     end
     properties
         l
@@ -12,7 +12,7 @@ classdef(InferiorClasses=?sym) strCnmodalg2<strAlg
         function o=times(i1,i2)
             o=commeval(i1|i2);
         end
-        function obj=strCnmodalg2(l)
+        function obj=StrCnmodalg2(l)
             % コンストラクタ　C_l型の代数を生成する
             obj.priority=1:2*l;
             obj.l=l;
@@ -37,9 +37,9 @@ classdef(InferiorClasses=?sym) strCnmodalg2<strAlg
                 ll=obj.l;
                 D=obj.dict;
                 q=sym('q');
-                S(ll)={struct};
+                S(ll)={Struct};
                 S{ll}.rel=obj.empty;
-                O=strCnmodalg2.getGenerator(ll);
+                O=StrCnmodalg2.getGenerator(ll);
                 % x_i,x_j q-commutative
                 for i=-ll:ll
                     for j=-ll:ll
@@ -75,16 +75,16 @@ classdef(InferiorClasses=?sym) strCnmodalg2<strAlg
         end
         
         function obj=make(obj,cf,pw)
-            obj=obj.make@strAlg(cf,pw,strCnmodalg2.B.get(obj.l));
+            obj=obj.make@StrAlg(cf,pw,StrCnmodalg2.B.get(obj.l));
         end
     end
     methods(Static)
         function [O,varargout]=getGenerator(l,opt)
             arguments
                 l {mustBeInteger}
-                opt string {mustBeMember(opt,["all","dict"])}="dict"
+                opt String {mustBeMember(opt,["all","dict"])}="dict"
             end
-            O=strCnmodalg2(l).make(0,{[]});
+            O=StrCnmodalg2(l).make(0,{[]});
             X=cell(0);
             for i=1:2*l
                 X{end+1}=O.make(1,{i});

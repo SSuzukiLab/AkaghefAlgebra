@@ -1,5 +1,5 @@
-classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
-    properties(Constant,Hidden,Abstract)
+classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
+    properties(Constant,Hidden,AbStract)
         % B
         B            %=TypeParam(@(N)Bases(5*N,reshape(["E","F","K","Ki" "H"]+(1:N)',1,5*N),"Uqsl_"+(N+1)))
         CM           %=TypeParam(@createDelta)
@@ -9,7 +9,7 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
         RelStorage   %=TypeParam(@createRel)
         Vtype        %='symAnmodlg'
     end
-    properties(Abstract,Dependent)
+    properties(AbStract,Dependent)
         dimV
     end
     properties
@@ -20,15 +20,15 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
 
     %% generation
     methods
-        % function obj=strAnalg(Nvar)
+        % function obj=StrAnalg(Nvar)
         %     obj.Nvar=Nvar;
         %     obj.algbase=obj.B.get(Nvar);
         % end
         % function obj=unit(obj)
-        %     obj=unit@strAlg(obj);
+        %     obj=unit@StrAlg(obj);
         % end
         function obj=make(obj,cf,pw)
-            obj=obj.make@strAlg(sym(cf),pw,obj.algbase);
+            obj=obj.make@StrAlg(sym(cf),pw,obj.algbase);
         end
     end
     methods(Static)
@@ -36,7 +36,7 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
             arguments
                 Nvar {mustBeInteger}
             end
-            O=strQUEAlg();
+            O=StrQUEAlg();
             O.ctype="S";
             O.Nvar=Nvar;
             O.algbase=O.B.get(Nvar);
@@ -52,7 +52,7 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
     end
     methods
         function ret=convertBaseString(obj,pw,bs)
-            ret=convertBaseString@strAlg(obj,pw,bs);
+            ret=convertBaseString@StrAlg(obj,pw,bs);
         end
         %% relation
         % function [rel,mlist,comm,inv]=get2vRelation(arg)
@@ -69,10 +69,10 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
         % inv=S.inv;
         % function S_=createRel(Nvar)
         %     mustBeInteger(Nvar)
-        %     O=strQUEAlg.getGenerator(Nvar);
-        %     % S=struct;
+        %     O=StrQUEAlg.getGenerator(Nvar);
+        %     % S=Struct;
         %     q=sym('q');
-        %     S_=struct;
+        %     S_=Struct;
         %     % q^θ X=qXq^θ
         %     % [K,E], [Ki,E] KKi [E,F]=[H],[Ei,Fj]=0 [K,Ki]
         %     CM=diag(2*ones(1,Nvar))-diag(ones(1,Nvar-1),1)-diag(ones(1,Nvar-1),1);
@@ -188,7 +188,7 @@ classdef(InferiorClasses=?sym) strQUEAlg<strAlg&HopfAlg
 end
 
 function ret = createDelta(Ntype)
-    % createDelta: Returns a delta structure for Nvar variables
+    % createDelta: Returns a delta Structure for Nvar variables
     obj=eval(mfilename);
     [O,E,F,K,Ki,H]=obj.getGenerator(Ntype);
     I_=O.unit;
@@ -214,7 +214,7 @@ end
 function ret = createRep(Ntype)
     % createRep: Returns a weyl algebra representation based on Nvar
     q=obj.q;
-    [O,x,qth]=strWeylXQ.getGenerator(Ntype+1);
+    [O,x,qth]=StrWeylXQ.getGenerator(Ntype+1);
     I_=O.unit;
     NanVal=I_;
     NanVal.cf=nan;

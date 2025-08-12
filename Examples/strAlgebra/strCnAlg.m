@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
+classdef(InferiorClasses=?sym) StrCnAlg<StrQUEAlg
     properties(Constant,Hidden)
         % B
         B            =TypeParam(@(N)Bases(5*N,reshape(["E","F","K","Ki" "H"]+(1:N)',1,5*N),"Uqsl_"+(N+1)))
@@ -16,15 +16,15 @@ classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
 
     %% generation
     methods
-        % function obj=strAnalg(Nvar)
+        % function obj=StrAnalg(Nvar)
         %     obj.Nvar=Nvar;
         %     obj.algbase=obj.B.get(Nvar);
         % end
         % function obj=unit(obj)
-        %     obj=unit@strAlg(obj);
+        %     obj=unit@StrAlg(obj);
         % end
         function obj=make(obj,cf,pw)
-            obj=obj.make@strAlg(sym(cf),pw,obj.algbase);
+            obj=obj.make@StrAlg(sym(cf),pw,obj.algbase);
         end
         function ret=get.dimV(obj)
             ret=obj.Nvar+1;
@@ -35,7 +35,7 @@ classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
             arguments
                 Nvar {mustBeInteger}
             end
-            O=strCnAlg();
+            O=StrCnAlg();
             O.ctype="S";
             O.Nvar=Nvar;
             O.algbase=O.B.get(Nvar);
@@ -52,7 +52,7 @@ classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
     end
     methods
         function ret=convertBaseString(obj,pw,bs)
-            ret=convertBaseString@strAlg(obj,pw,bs);
+            ret=convertBaseString@StrAlg(obj,pw,bs);
         end
         %% relation
 
@@ -77,7 +77,7 @@ classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
             function ret=createRep(N)
                 q=obj.q;
                 d=dictionary([-N:-1 1:N],1:2*N);
-                [O,x,qth]=strWeylXQ.getGenerator(N*2);
+                [O,x,qth]=StrWeylXQ.getGenerator(N*2);
                 I_=O.unit;
                 x=dictionary(d.keys,x(d.values));
                 qth=dictionary(d.keys,qth(d.values));
@@ -117,7 +117,7 @@ classdef(InferiorClasses=?sym) strCnAlg<strQUEAlg
 
             function v=getModGenerator(obj)
                 N=obj(1).Nvar;
-                v0=symp(1,zeros(1,N));
+                v0=PolAlg(1,zeros(1,N));
                 v0.base.ctype="S";
                 v0.ctype="S";
                 v=cellfun(@(p)v0.set_cp(1,p),mat2cell(eye(N),ones(1,N),N));

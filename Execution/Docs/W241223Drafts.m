@@ -43,7 +43,7 @@ PBWの定理により、任意のの元はの形の項の線形結合で書け�
 StrWeylAlgを親クラス(スーパークラス)とし、ワイル代数やリー代数などはその子クラス(サブクラス)としました。これによりHopfAlgは抽象クラスで、双代数の演算の実装を子クラスに強制できます。(インターフェースとほぼ同義です。)
 他に、計算ルールを定義するCRクラス(Calculation Ruleの略)、数学的意味の基底を定義するBasesクラス、q類似の計算をするクラスqNum等があります。
 Uの実装例(フルのコード)
-% classdef(InferiorClasses=?sym) Usl2<strAlg&UEAlg
+% classdef(InferiorClasses=?sym) Usl2<StrAlg&UEAlg
 %     properties(Constant,Hidden)
 %         B=Bases(3,["E" "F" "H"],"sl2")
 %     end
@@ -51,7 +51,7 @@ Uの実装例(フルのコード)
 %     %% generation
 %     methods(Static)
 %         function obj=make(cf,pw,~)
-%             obj=Usl2().make@strAlg(cf,pw,Usl2.B);
+%             obj=Usl2().make@StrAlg(cf,pw,Usl2.B);
 %         end
 %         function [O,E,F,H]=getGenerator(obj)
 %             O=Usl2();
@@ -83,9 +83,9 @@ Uの実装例(フルのコード)
 %     end
 % end
 
-strAlgのコード(要約)
+StrAlgのコード(要約)
 (chat GPT4oによる自動生成ですが、正確です。)
-% classdef(InferiorClasses=?sym) strAlg
+% classdef(InferiorClasses=?sym) StrAlg
 %    % Instance Properties
 %     properties
 %         cf (:,1) = 0               % Coefficients of the algebra elements
@@ -320,20 +320,20 @@ MATLABでは、プロパティの型制約を指定することができます�
 % function ret=algfun(obj,funs,units)
 %     % algfun 代数準同型の作用
 %     % funs,unitsをテンソル階数の分だけ繰り返し入力する
-%     % funs:具体的にはstrAlg().algIDで返される関数形
+%     % funs:具体的にはStrAlg().algIDで返される関数形
 %     % funs:(power,base)→stralg
 %     % units
 %     arguments
-%         obj (1,1) strAlg
+%         obj (1,1) StrAlg
 %     end
 %     arguments(Repeating)
 %         funs (1,1) function_handle
-%         units (1,1) strAlg
+%         units (1,1) StrAlg
 %     end
 %     実装略
 % end    
 
-このとき、funsは関数ハンドル、unitsは単位元(strAlgクラスのオブジェクト)である必要があります。
+このとき、funsは関数ハンドル、unitsは単位元(StrAlgクラスのオブジェクト)である必要があります。
 このように型制約を指定することで、関数の引数の型を間違えて代入するミスを防ぐことができます。
 また、サイズもスカラー、という制約を指定することができます。
 これにより、ベクトルオブジェクトを代入するミスを防ぐことができます。
@@ -347,8 +347,8 @@ MATLABでは、演算子オーバーロードを使うことで、自作クラ�
 他にも、+,-,*,/などの演算子を定義することができます。
 テンソル積は残念ながらなかったので、|演算子(tensorのorの部分)として定義しました。
 
-また、1+Eのように1はdouble型であるため、普通はstrAlgクラスのオブジェクトとの演算ができません。これを可能にするために、double型をstrAlgクラスのオブジェクトに変換するメソッドcasttypeを定義しました。クラスが異なる場合、自動的に変換することができます。
-また、メソッドが呼ばれる優先順位の関係で、symbolic数との演算を行うとエラーが出る問題があります。たとえばsymbolic変数qとstrAlgクラスのオブジェクトAに対して、q*Aという演算を行うと、symクラスのメソッドmtimesが先に呼ばれてしまいます。これを防ぐために、InferiorClasses=?symというオプションを指定しました。
+また、1+Eのように1はdouble型であるため、普通はStrAlgクラスのオブジェクトとの演算ができません。これを可能にするために、double型をStrAlgクラスのオブジェクトに変換するメソッドcasttypeを定義しました。クラスが異なる場合、自動的に変換することができます。
+また、メソッドが呼ばれる優先順位の関係で、symbolic数との演算を行うとエラーが出る問題があります。たとえばsymbolic変数qとStrAlgクラスのオブジェクトAに対して、q*Aという演算を行うと、symクラスのメソッドmtimesが先に呼ばれてしまいます。これを防ぐために、InferiorClasses=?symというオプションを指定しました。
 
 
 それが、です。

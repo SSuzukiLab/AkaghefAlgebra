@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
+classdef(InferiorClasses=?sym) StrAnAlg_<StrAlg&HopfAlg
     properties(Constant,Hidden)
         B=TypeParam(@(N)Bases(4*N,reshape(["E","F","K","Ki"]+(1:N)',1,4*N),"Uqsl_"+(N+1)))
     end
@@ -9,15 +9,15 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
 
     %% generation
     methods
-        % function obj=strAnalg(Nvar)
+        % function obj=StrAnalg(Nvar)
         %     obj.Nvar=Nvar;
         %     obj.algbase=obj.B.get(Nvar);
         % end
         % function obj=unit(obj)
-        %     obj=unit@strAlg(obj);
+        %     obj=unit@StrAlg(obj);
         % end
         function obj=make(obj,cf,pw)
-            obj=obj.make@strAlg(sym(cf),pw,obj.algbase);
+            obj=obj.make@StrAlg(sym(cf),pw,obj.algbase);
         end
     end
     methods(Static)
@@ -25,7 +25,7 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
             arguments
                 Nvar {mustBeInteger}
             end
-            O=strAnAlg_();
+            O=StrAnAlg_();
             O.ctype="S";
             O.Nvar=Nvar;
             O.algbase=O.B.get(Nvar);
@@ -42,7 +42,7 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
     end
     methods
         function ret=convertBaseString(obj,pw,bs)
-            ret=convertBaseString@strAlg(obj,pw,bs);
+            ret=convertBaseString@StrAlg(obj,pw,bs);
         end
         %% relation
         function [rel,mlist,comm,inv]=get2vRelation(arg)
@@ -57,10 +57,10 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
             inv=S.inv;
             function S_=createRel(Nvar)
                 mustBeInteger(Nvar)
-                O=strAnAlg_.getGenerator(Nvar);
-                % S=struct;
+                O=StrAnAlg_.getGenerator(Nvar);
+                % S=Struct;
                 q=sym('q');
-                S_=struct;
+                S_=Struct;
                 % q^θ X=qXq^θ
                 % [K,E], [Ki,E] KKi [E,F]=[H],[Ei,Fj]=0 [K,Ki]
                 CM=diag(2*ones(1,Nvar))-diag(ones(1,Nvar-1),1)-diag(ones(1,Nvar-1),1);
@@ -137,7 +137,7 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
             end
             function ret=createRep(N)
                 q=obj.q;
-                [O,x,qth]=strWeylXQ.getGenerator(N+1);
+                [O,x,qth]=StrWeylXQ.getGenerator(N+1);
                 I_=O.unit;
                 arr_=[arrayfun(@(k)(x(k)/x(k+1))*(qth(k+1)-1/qth(k+1))*(q-q^-1)^-1,1:N), ...
                     arrayfun(@(k)(x(k+1)/x(k))*(qth(k)-1/qth(k))*(q-q^-1)^-1,1:N), ...
@@ -149,7 +149,7 @@ classdef(InferiorClasses=?sym) strAnAlg_<strAlg&HopfAlg
         end
         function v=getModGenerator(obj)
             N=obj(1).Nvar+1;
-            v0=symp(1,zeros(1,N));
+            v0=PolAlg(1,zeros(1,N));
             v0.base.ctype="S";
             v0.ctype="S";
             v=cellfun(@(p)v0.set_cp(1,p),mat2cell(eye(N),ones(1,N),N));

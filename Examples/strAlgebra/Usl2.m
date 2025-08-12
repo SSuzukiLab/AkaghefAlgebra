@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) Usl2<strAlg&UEAlg
+classdef(InferiorClasses=?sym) Usl2<StrAlg&UEAlg
     properties(Constant,Hidden)
         B=Bases(3,["E" "F" "H"],"sl2")
     end
@@ -15,13 +15,13 @@ classdef(InferiorClasses=?sym) Usl2<strAlg&UEAlg
     end
     methods
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,Usl2.B);
+            obj=obj.make@StrAlg(cf,pw,Usl2.B);
         end
         %% relation
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S
             if isempty(S)
-                S=struct;
+                S=Struct;
                 S.rel(1)=Usl2.make([1 -1 -1],{[1 2] [2 1] 3});
                 S.rel(2)=Usl2.make([1 -1 -2],{[3 1] [1 3] 1});
                 S.rel(3)=Usl2.make([1 -1 2],{[3 2] [2 3] 2});

@@ -1,4 +1,4 @@
-classdef QWeylAlg<symp&IAlg
+classdef QWeylAlg<PolAlg&IAlg
     %WEYLALG このクラスの概要をここに記述
     %   詳細説明をここに記述
 
@@ -9,7 +9,7 @@ classdef QWeylAlg<symp&IAlg
 
     methods
         function obj=QWeylAlg(varargin)
-            obj@symp(varargin{:})
+            obj@PolAlg(varargin{:})
             obj.ctype="S";
         end
         function arg=prodevalQW1(arg)
@@ -25,13 +25,13 @@ classdef QWeylAlg<symp&IAlg
                 pw_=p([n+i 2*n+i]);
                 pws=sum(pw_);
                 k=min(pw_);
-                qN=qNumS(q);
+                qN=qNumS();
                 nt=(k:-1:0)';
                 pw2=pw_+0*nt;
                 pw_=pw_-nt;
-                c=prod(arrayfun(@qN.fac,pw2) ...
-                    ./arrayfun(@qN.fac,pw_),2)...
-                    ./arrayfun(@qN.fac,nt)...
+                c=prod(arrayfun(@(n)qN.fac(q,n),pw2) ...
+                    ./arrayfun(@(n)qN.fac(q,n),pw_),2)...
+                    ./arrayfun(@(n)qN.fac(q,n),nt)...
                     .*q.^(-nt.*(nt-1)/2)...
                     .*q.^(2*prod(pw2,2))...
                     .*q.^(-pws*nt+nt.*(nt-1)/2*2);
@@ -60,7 +60,7 @@ classdef QWeylAlg<symp&IAlg
                     dif1([n+i 3*n+i])=[-1 +1];
                     dif2([n+i,2*n+i])=[-1 -1];
                     px=p(2*n+i);
-                    x=x.set_cp([x.q^(2*px);x.q^(px-1)*qNumS(x.q).n(px)],[p+dif1;p+dif2]);
+                    x=x.set_cp([x.q^(2*px);x.q^(px-1)*qNumS.n(x.q,px)],[p+dif1;p+dif2]);
                     x=x.prodevalQW2;
                     c=x.cf;
                     p=x.pw;

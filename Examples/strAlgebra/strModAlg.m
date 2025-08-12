@@ -1,4 +1,4 @@
-classdef strModAlg<strAlg
+classdef StrModAlg<StrAlg
     % properties
     %     type
     % end

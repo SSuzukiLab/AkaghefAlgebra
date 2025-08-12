@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) FSL2Full<strAlg&HopfAlg
+classdef(InferiorClasses=?sym) FSL2Full<StrAlg&HopfAlg
     %UFSL2FULL このクラスの概要をここに記述
     %   詳細説明をここに記述
     properties(Constant,Hidden)
@@ -25,7 +25,7 @@ classdef(InferiorClasses=?sym) FSL2Full<strAlg&HopfAlg
     methods
 
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,FSL2Full.B);
+            obj=obj.make@StrAlg(cf,pw,FSL2Full.B);
             
         end
         function ret=getGen(O,n)

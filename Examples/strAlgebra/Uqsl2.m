@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) Uqsl2<strAlg&HopfAlg
+classdef(InferiorClasses=?sym) Uqsl2<StrAlg&HopfAlg
     properties(Constant,Hidden)
         B=Bases(4,["E" "F" "K" "Ki"],"Uqsl2")
     end
@@ -6,7 +6,7 @@ classdef(InferiorClasses=?sym) Uqsl2<strAlg&HopfAlg
     %% generation
     methods(Static)
         function obj=make(cf,pw,~)
-            obj=Uqsl2().make@strAlg(cf,pw,Uqsl2.B);
+            obj=Uqsl2().make@StrAlg(cf,pw,Uqsl2.B);
             obj.ctype="S";
         end
         function [O,E,F,K,Ki]=getGenerator(obj)
@@ -24,7 +24,7 @@ classdef(InferiorClasses=?sym) Uqsl2<strAlg&HopfAlg
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S
             if isempty(S)
-                S=struct;
+                S=Struct;
                 q=sym('q');
                 % KE=q^2EK
                 S.rel(1)=Uqsl2.make([1 -q^2],{[3 1] [1 3]});
@@ -49,7 +49,7 @@ classdef(InferiorClasses=?sym) Uqsl2<strAlg&HopfAlg
         function ret = repMono(obj)
             persistent arr I
             if isempty(arr)
-                [O,x,qth]=strWeylXQ.getGenerator(2);
+                [O,x,qth]=StrWeylXQ.getGenerator(2);
                 I=O.unit;
                 q=sym('q');
                 arr=[(x(1)/x(2))*(qth(2)-1/qth(2))*(q-q^-1)^-1, ...

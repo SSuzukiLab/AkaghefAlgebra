@@ -53,7 +53,7 @@ function [c,p,b]=fun1(p,b)
     b=b(2);
 end
 %% act
-v=cellfun(@symp,{1 1},{[1 0] [0 1]});
+v=cellfun(@PolAlg,{1 1},{[1 0] [0 1]});
 [v.ctype]=deal("S");
 x=v(1);
 y=v(2);

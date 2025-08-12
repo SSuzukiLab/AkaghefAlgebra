@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) strWeylXQ<strEndV
+classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
     properties(Constant,Hidden)
         B=TypeParam(@(N)Bases(4*N,reshape(["X","Xi","qt","qti"]+(1:N)',1,4*N),"weyl_"+N))
     end
@@ -9,7 +9,7 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
 
     %% generation
     methods
-        function obj=strWeylXQ(Nvar)
+        function obj=StrWeylXQ(Nvar)
             obj.Nvar=Nvar;
             obj.algbase=obj.B.get(Nvar);
         end
@@ -25,16 +25,16 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
             elseif any(1:N==pw-3*N)
                 obj=obj.make("qth",pw-3*N,-1,obj.q);
             end
-            ret=obj.getActMono@strEndV(1,1);
+            ret=obj.getActMono@StrEndV(1,1);
         end
         function obj=unit(obj)
-            obj=unit@strAlg(obj);
+            obj=unit@StrAlg(obj);
         end
         function obj=make(obj,arg,varargin)
-            if isstring(arg)
-                obj=obj.make@strEndV(arg,varargin{:});
+            if isString(arg)
+                obj=obj.make@StrEndV(arg,varargin{:});
             else
-                obj=obj.make@strAlg(arg,varargin{1},obj.algbase);
+                obj=obj.make@StrAlg(arg,varargin{1},obj.algbase);
             end
         end
         function ret=mpower(i1,i2)
@@ -43,10 +43,10 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
                 i2=-i2;
                 i1=1/i1;
             end
-            ret=mpower@strAlg(i1,i2);
+            ret=mpower@StrAlg(i1,i2);
         end
         function ret=mrdivide(i1,i2)
-            assert(isa(i2,"strWeylXQ"))
+            assert(isa(i2,"StrWeylXQ"))
             assert(i2.term==1,'除算が定義されません')
             Nvar=i2.Nvar;
             arr=(1:Nvar)'+[1 0 3 2]*Nvar;
@@ -60,7 +60,7 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
             arguments
                 Nvar
             end
-            O=strWeylXQ(Nvar);
+            O=StrWeylXQ(Nvar);
             O=O.make(0,{[]});
             C=num2cell(1:Nvar);
             C(2,:)=cellfun(@(i){O.make(1,{i})},C(1,:));
@@ -72,11 +72,11 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
     end
     methods
         function ret=convertBaseString(obj,pw,bs)
-            ret=convertBaseString@strAlg(obj,pw,bs);
+            ret=convertBaseString@StrAlg(obj,pw,bs);
         end
         %% relation
         function ret=replace(obj,Ntimes)
-            ret=replace@strAlg(obj,Ntimes);
+            ret=replace@StrAlg(obj,Ntimes);
         end
         function [rel,mlist,comm,inv]=get2vRelation(arg)
             persistent RS
@@ -89,8 +89,8 @@ classdef(InferiorClasses=?sym) strWeylXQ<strEndV
             comm=S.comm;
             inv=S.inv;
             function S_=createRel(Nvar)
-                O=strWeylXQ.getGenerator(Nvar);
-                S_=struct;
+                O=StrWeylXQ.getGenerator(Nvar);
+                S_=Struct;
                 % q^θ X=qXq^θ
                 S_.rel=[expr1(0,2),expr1(2,1),expr1(3,0),expr1(1,3)];
                         % expr2(0,1),expr2(1,0),expr2(2,3),expr2(3,2)];

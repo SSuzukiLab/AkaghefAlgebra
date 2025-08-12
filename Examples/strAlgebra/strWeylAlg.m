@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) strWeylAlg<strAlg&UEAlg
+classdef(InferiorClasses=?sym) StrWeylAlg<StrAlg&UEAlg
     properties(Constant,Hidden)
         B=TypeParam(@(N)Bases(2*N,["X"+(1:N) "D"+(1:N)],"weyl_"+N))
     end
@@ -9,12 +9,12 @@ classdef(InferiorClasses=?sym) strWeylAlg<strAlg&UEAlg
     
     %% generation
     methods
-        function obj=strWeylAlg(Nvar)
+        function obj=StrWeylAlg(Nvar)
             obj.Nvar=Nvar;
             obj.algbase=obj.B.get(Nvar);
         end
         function obj=make(obj,cf,pw)
-            obj=obj.make@strAlg(cf,pw,obj.algbase);
+            obj=obj.make@StrAlg(cf,pw,obj.algbase);
         end
     end
     methods(Static)
@@ -23,7 +23,7 @@ classdef(InferiorClasses=?sym) strWeylAlg<strAlg&UEAlg
                 Nvar 
                 isNumberedVarName =false;
             end
-            O=strWeylAlg(Nvar);
+            O=StrWeylAlg(Nvar);
             O=O.make(0,{[]});
             C=num2cell(1:Nvar);
             C(2,:)=cellfun(@(i){O.make(1,{i})},C(1,:));
@@ -56,8 +56,8 @@ classdef(InferiorClasses=?sym) strWeylAlg<strAlg&UEAlg
             comm=S.comm;
             inv=S.inv;
             function S_=createRel(Nvar)
-                O=strWeylAlg.getGenerator(Nvar);
-                S_=struct;
+                O=StrWeylAlg.getGenerator(Nvar);
+                S_=Struct;
                 % DX-XD=1
                 S_.rel=arrayfun(@(i)O.make([1 -1 -1],{[Nvar+i i] [i Nvar+i] []}),1:Nvar);
                 S_.comm=[nan;nan];

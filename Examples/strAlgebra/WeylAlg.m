@@ -1,4 +1,4 @@
-classdef WeylAlg<symp&IAlg
+classdef WeylAlg<PolAlg&IAlg
     %WEYLALG このクラスの概要をここに記述
     %   詳細説明をここに記述
 

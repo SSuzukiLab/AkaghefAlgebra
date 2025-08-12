@@ -1,4 +1,4 @@
-classdef Usl2Borel<strAlg&UEAlg
+classdef Usl2Borel<StrAlg&UEAlg
     properties(Constant)
         PairClass='FSL2Borel'
         B=Bases(2,["E" "H"],"sl2Borel")
@@ -13,7 +13,7 @@ classdef Usl2Borel<strAlg&UEAlg
     end
     methods
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,Usl2Borel.B);           
+            obj=obj.make@StrAlg(cf,pw,Usl2Borel.B);           
         end
         function ret=getP(obj,p)
             
