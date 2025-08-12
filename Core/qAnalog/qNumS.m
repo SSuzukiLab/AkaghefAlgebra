@@ -1,4 +1,5 @@
 classdef qNumS
+    % 250811時点で最新
     methods(Static)
         function out=n(q,x)
             out=(q^x-q^(-x))/(q-q^(-1));

@@ -5,6 +5,7 @@ classdef Bases<matlab.mixin.Heterogeneous&handle
     end
     properties
         name (1,:) char='basis' %name of basis
+        ZERO strAlg
     end
     properties
         ctype NumericType =NumericType.D 

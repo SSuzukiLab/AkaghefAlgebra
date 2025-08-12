@@ -11,12 +11,9 @@ classdef Usl2Borel<strAlg&UEAlg
             H=O.make(1,{2});
         end
     end
-
     methods
-
         function obj=make(obj,cf,pw,~)
-            obj=obj.make@strAlg(cf,pw,Usl2Borel.B);
-            
+            obj=obj.make@strAlg(cf,pw,Usl2Borel.B);           
         end
         function ret=getP(obj,p)
             

@@ -1,12 +1,12 @@
-classdef CR<handle& matlab.mixin.CustomCompactDisplayProvider ...
-            &dynamicprops& matlab.mixin.SetGet
+classdef CR<handle&dynamicprops& matlab.mixin.SetGet
     %CR このクラスの概要をここに記述
     %   詳細説明をここに記述
     properties(Constant)
         H CR=CR
+        ProjectPath = fileparts(mfilename('fullpath'));
     end
     properties
-        name char='empty'
+        name char='default'
         displayRule=0
         cft='double'
         pft='double'
@@ -23,14 +23,6 @@ classdef CR<handle& matlab.mixin.CustomCompactDisplayProvider ...
             if nargin==1
                 obj.name=name;
             end
-        end
-
-        function  ret=string(obj)
-            ret=reshape(string({obj.name}),size(obj));
-        end
-
-        function rep = compactRepresentationForColumn(obj,displayConfiguration,~)
-            rep = fullDataRepresentation(obj,displayConfiguration);
         end
     end
 end

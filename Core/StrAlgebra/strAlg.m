@@ -8,8 +8,9 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
         % bs (:,:) cell ={Bases.empty}
 
         ctype NumericType ="D"
-        % ZEROにalgbaseが依存する形式のほうがよくないか？
-        algbase (1,:) Bases
+        % ZEROにbaseが依存する形式のほうがよくないか？
+        base (1,:) Bases
+        spec (1,1) SpaceSpec
         ZERO (1,:) strAlg
         sortedFlag
         inverseSimplifiedFlag
@@ -88,10 +89,10 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
         %乗算,作用
         function ret=mtimes(i1,i2)
             [i1,i2]=alignNum(i1,i2);
-            assert(isequal(i1.algbase,i2.algbase),'異なる空間での積エラー')
+            assert(isequal(i1.base,i2.base),'異なる空間での積エラー')
             R=i1.rank;
             ret=lfun_(i1|i2,@fun);
-            ret.algbase=i1.algbase;
+            ret.base=i1.base;
             ret.ZERO=i1.ZERO;
             ret=ret.calc();
             function [c,p,b]=fun(p,b)
@@ -138,22 +139,25 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             if nargin==1, rank=arg.rank; end
             N=rank/arg.rank;
             mustBeInteger(N)
-            ret=arg.set_cp(1,repmat({[]},1,rank));
+            ret=arg.set_cp(1,cell(1,rank));
+            
             % ZEROを設定するときにsetZEROメソッドを呼ぶほうがよい？
-            ret.ZERO=repmat(arg.ZERO,1,N);
-            ret.algbase=repmat(arg.algbase,1,N);
+            % ret.ZERO=repmat(arg.ZERO,1,N);
+            ret.base=repmat(arg.base,1,N);
         end
         %テンソル積
         function o=or(i1,i2)
             [i1,i2]=alignNum(i1,i2);
             o=i1.lfun_(@fun);
-            o.algbase=[i1.algbase i2.algbase];
-            o.ZERO=[i1.ZERO i2.ZERO];
+            o.base=[i1.base i2.base];
+            o.spec=or(i1.spec,i2.spec);
+            % o.ZERO=o.ZERO.set_cp(0,cell(1,o.rank));
+            % o.ZERO.ZERO=[i1.ZERO i2.ZERO];
+            o.ctype=getType([i1.ctype i2.ctype]);
             function [c,p]=fun(p)
                 c=i2.cf;
                 p=[repmat(p,i2.term,1) i2.pw];
             end
-            o.ctype=getType([i1.ctype i2.ctype]);
         end
         %副積
         function o=and(i1,i2)
@@ -169,7 +173,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             mustBeInteger(r)
             o=arg.set_cp(arg.cf, ...
                 cellfun(@horzcat,arg.pw(:,1:r),arg.pw(:,r+1:end),UniformOutput=false));
-            o.algbase=arg.algbase(1:r);
+            o.base=arg.base(1:r);
         end
         function o=commeval(arg)
             arg=arg.prodeval;
@@ -184,8 +188,8 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             for i=1:i1.term
                 for j=1:i1.rank
                     o(i,j)=i1.set_cp(1,i1.pw(i,j));
-                    o(i,j).algbase=i1.algbase(j);
-                    o(i,j).ZERO=i1.ZERO(j);
+                    o(i,j).base=i1.base(j);
+                    % o(i,j).ZERO=i1.ZERO(j);
                 end
                 o(i,1).cf=i1.cf(i);
             end
@@ -236,7 +240,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             if isnan(comm(1))
                 ret2=true;
             else
-                base=obj.algbase;
+                base=obj.base;
                 for i=1:size(comm,2)
                     tmp1=obj.set_cp(1,{comm(1,i)});
                     tmp2=obj.set_cp(1,{comm(2,i)});
@@ -251,7 +255,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             if isnan(inv(1))
                 ret3=true;
             else
-                base=obj.algbase;
+                base=obj.base;
                 for i=1:size(inv,2)
                     tmp1=obj.set_cp(1,{inv(1,i)});
                     tmp2=obj.set_cp(1,{inv(2,i)});
@@ -341,7 +345,9 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             Rank=obj.rank;
             assert(length(funs)==Rank,'invalid rank of the algebra morphism domain')
             ret=obj.lfun_(@linfun);
-            ret.ZERO=cellfun(@(x)x.set_cp(0,repmat({[]},1,x.rank)),units);
+            unit=horzcat(units{:});
+            ret.base=[unit.base];
+            % ret.ZERO=cellfun(@(x)x.set_cp(0,cell(1,x.rank)),units);
             function [c,p]=linfun(p)
                 factors=units;
                 X=strAlg().scalar;
@@ -523,8 +529,8 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
                 pw (:,1) cell {verifyPW}
                 bs (1,1) Bases 
             end
-            obj.ZERO=[obj.set_cp(0,{[]})];
-            obj.ZERO.algbase=bs;
+            bs.ZERO=[obj.set_cp(0,{[]})];
+            obj.base=bs;
             % degs=cellfun(@length,pw);
             % bsCell=arrayfun(@(n)repmat(bs,1,n),degs,UniformOutput=false);
             obj=obj.set_cp(cf,pw);
@@ -536,7 +542,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             if nargin==1&&isa(X,"strAlg")
                 obj=obj.set_cp(X.cf,X.pw);
                 obj.ZERO=X.ZERO;
-                obj.algbase=X.algbase;
+                obj.base=X.base;
                 return
             end
         end
@@ -545,7 +551,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             try
                 if isempty(cf)
                     obj.cf=obj.ctype.zero;
-                    obj.pw=repmat({[]},1,obj.rank);
+                    obj.pw=cell(1,obj.rank);
                     return
                 end
                 obj.cf=cf;
@@ -610,7 +616,7 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             % Example string array with duplicates
             bsstr=strings(arg.term,arg.rank);
             for i=1:arg.rank
-                bc=arg.algbase(i);
+                bc=arg.base(i);
                 for j=1:arg.term
                     bsstr(j,i)=join(arg.convertBaseString(arg.pw{j,i},bc)," ");
                 end
@@ -658,10 +664,11 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
         end
         function ret=convertTermToSym(arg)
             % 数式表示の
-            bs=num2cell(repmat(arg.algbase,size(arg.pw,1),1));
+            bs=num2cell(repmat(arg.base,size(arg.pw,1),1));
             bsstr=cellfun(@arg.convertBaseString,arg.pw,bs,UniformOutput=false);
             if isempty(bsstr)
                 disp(table(arg.cf,VariableNames="coeff"))
+                ret=string(arg.cf);
                 return
             end
             base=join(cellfun(@(bsstr)join(bsstr,"*"),bsstr),"|",2);
@@ -698,6 +705,9 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
 
 
         %% additional function
+        function validate(obj)
+            assert(all(size(obj.pw)==[length(obj.cf),obj.rank]))
+        end
         function ret=ones(obj)
 
         end
@@ -716,16 +726,19 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
         function ret=matrix(obj,i1)
             ret=repmat(obj,i1);
         end
-        function obj=setBase(obj,algB,Zero)
-            obj.algbase=algB;
-            obj.ZERO=Zero;
-        end
-        function ret=get.algbase(obj)
-            if isempty(obj.ZERO)
-                ret=obj.algbase;
-            else
-                ret=[obj.ZERO.algbase];
-            end
+        % function obj=setBase(obj,algB,Zero)
+        %     obj.base=algB;
+        %     obj.ZERO=Zero;
+        % end
+        % function ret=get.base(obj)
+        %     if isempty(obj.ZERO)
+        %         ret=obj.base;
+        %     else
+        %         ret=[obj.ZERO.base];
+        %     end
+        % end
+        function ret=get.ZERO(obj)
+            ret=[obj.base.ZERO];
         end
         function ret=subs(obj,varargin)
             ret=obj;
@@ -739,15 +752,15 @@ classdef(InferiorClasses=?sym) strAlg<IAdditive&matlab.mixin.Heterogeneous
             ret=max(cellfun(@length,obj.pw));
         end
         function ret=get.dims(obj)
-            ret=[obj.algbase.dim];
+            ret=[obj.base.dim];
         end
         function ret=get.rank(obj)
-            ret=length(obj.algbase);
+            ret=length(obj.base);
         end
         function ret=scalar(obj)
             ret=obj.set_cp(1,{});
-            ret.ZERO=strAlg.empty;
-            ret.algbase=Bases.empty;
+            % ret.ZERO=strAlg.empty;
+            ret.base=Bases.empty;
         end
     end
     methods(Hidden)

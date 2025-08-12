@@ -5,9 +5,6 @@ classdef(InferiorClasses=?sym) Usl2<strAlg&UEAlg
     
     %% generation
     methods(Static)
-        function obj=make(cf,pw,~)
-            obj=Usl2().make@strAlg(cf,pw);
-        end
         function [O,E,F,H]=getGenerator(obj)
             O=Usl2();
             O=O.make(0,{[]});
@@ -17,7 +14,9 @@ classdef(InferiorClasses=?sym) Usl2<strAlg&UEAlg
         end
     end
     methods
-        
+        function obj=make(obj,cf,pw,~)
+            obj=obj.make@strAlg(cf,pw,Usl2.B);
+        end
         %% relation
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S

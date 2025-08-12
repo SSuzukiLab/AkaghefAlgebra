@@ -59,7 +59,7 @@ classdef FSL2Borel<strAlg&HopfAlg
         function ret = counit(obj)
             arr=[1,0,1,0,0];
             I=obj.unit;
-            X=obj.algfun(@(p,~)I.set_cp(arr(p),I.pw,I.bs),I);
+            X=obj.algfun(@(p,~)I.set_cp(arr(p),I.pw),I);
             ret=X.cf;
         end
 
