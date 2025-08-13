@@ -71,7 +71,7 @@ classdef(InferiorClasses=?sym) StrCnAlg<StrQUEAlg
 
 
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr{1}(p);
             end
             function ret=createRep(N)
@@ -134,7 +134,7 @@ classdef(InferiorClasses=?sym) StrCnAlg<StrQUEAlg
             I=arr{1}(end);
             ret=obj.algfun(@fun,I|I);
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr{1}(p);
             end
             function ret=createDelta(N)

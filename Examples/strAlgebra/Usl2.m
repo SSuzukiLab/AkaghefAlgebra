@@ -21,7 +21,7 @@ classdef(InferiorClasses=?sym) Usl2<StrAlg&UEAlg
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S
             if isempty(S)
-                S=Struct;
+                S=struct;
                 S.rel(1)=Usl2.make([1 -1 -1],{[1 2] [2 1] 3});
                 S.rel(2)=Usl2.make([1 -1 -2],{[3 1] [1 3] 1});
                 S.rel(3)=Usl2.make([1 -1 2],{[3 2] [2 3] 2});

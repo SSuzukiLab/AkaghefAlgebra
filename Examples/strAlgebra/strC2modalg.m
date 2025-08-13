@@ -13,7 +13,7 @@ classdef(InferiorClasses=?sym) StrC2modalg<StrAlg
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S
             if isempty(S)
-                S=Struct;
+                S=struct;
                 J=dictionary([-2 -1 1 2],1:4);
                 q=sym('q');
                 % KE=q^2EK

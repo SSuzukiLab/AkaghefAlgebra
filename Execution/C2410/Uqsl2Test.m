@@ -1,9 +1,10 @@
 % Define
-[O,E,F,K,Ki]=Uqsl2.getGenerator;
+syms q
+[O,E,F,K,Ki]=StrUqsl2.getGenerator(q);
 A=O.make([3 2],{[] [1]});
 B=O.make(3:4,{[] [2 3]});
 I=O+1;
-syms q
+
 %% addition
 A+B
 C=A-B
@@ -42,15 +43,16 @@ assert(Delta(A*B)-Delta(A)*Delta(B)==0)
 assert(counit(E*F+E)==0)
 C=B*A;
 C2=Delta(C);
-C1=C2.lfun_(@fun1).setBase(C.algbase,C.ZERO).calc();
+C2=C2.lfun_(@fun1);
+C2.base=C.base;
+C1=C2.calc();
 assert(C==C1)
 
 % assert(C1-B*A==0)
 
-function [c,p,b]=fun1(p,b)
+function [c,p]=fun1(p)
     c=isempty(find(p{1}<3));
     p=p(2);
-    b=b(2);
 end
 %% act
 v=cellfun(@PolAlg,{1 1},{[1 0] [0 1]});

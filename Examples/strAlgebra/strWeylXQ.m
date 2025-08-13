@@ -90,7 +90,7 @@ classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
             inv=S.inv;
             function S_=createRel(Nvar)
                 O=StrWeylXQ.getGenerator(Nvar);
-                S_=Struct;
+                S_=struct;
                 % q^θ X=qXq^θ
                 S_.rel=[expr1(0,2),expr1(2,1),expr1(3,0),expr1(1,3)];
                         % expr2(0,1),expr2(1,0),expr2(2,3),expr2(3,2)];

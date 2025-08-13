@@ -1,16 +1,17 @@
-classdef(InferiorClasses=?sym) Uqsl2<StrAlg&HopfAlg
+classdef(InferiorClasses=?sym) StrUqsl2<StrAlg&HopfAlg
     properties(Constant,Hidden)
         B=Bases(4,["E" "F" "K" "Ki"],"Uqsl2")
+        q
     end
     
     %% generation
     methods(Static)
         function obj=make(cf,pw,~)
-            obj=Uqsl2().make@StrAlg(cf,pw,Uqsl2.B);
+            obj=StrUqsl2().make@StrAlg(cf,pw,StrUqsl2.B);
             obj.ctype="S";
         end
-        function [O,E,F,K,Ki]=getGenerator(obj)
-            O=Uqsl2();
+        function [O,E,F,K,Ki]=getGenerator(q)
+            O=StrUqsl2();
             O=O.make(0,{[]});
             E=O.make(1,{1});
             F=O.make(1,{2});
@@ -24,18 +25,18 @@ classdef(InferiorClasses=?sym) Uqsl2<StrAlg&HopfAlg
         function [rel,mlist,comm,inv]=get2vRelation(obj)
             persistent S
             if isempty(S)
-                S=Struct;
+                S=struct;
                 q=sym('q');
                 % KE=q^2EK
-                S.rel(1)=Uqsl2.make([1 -q^2],{[3 1] [1 3]});
-                S.rel(2)=Uqsl2.make([1 -q^-2],{[4 1] [1 4]});
+                S.rel(1)=StrUqsl2.make([1 -q^2],{[3 1] [1 3]});
+                S.rel(2)=StrUqsl2.make([1 -q^-2],{[4 1] [1 4]});
                 % KF=q^-2FK
-                S.rel(3)=Uqsl2.make([1 -q^-2],{[3 2] [2 3]});
-                S.rel(4)=Uqsl2.make([1 -q^2],{[4 2] [2 4]});
+                S.rel(3)=StrUqsl2.make([1 -q^-2],{[3 2] [2 3]});
+                S.rel(4)=StrUqsl2.make([1 -q^2],{[4 2] [2 4]});
                 % KK^-1=1
-                S.rel(5)=Uqsl2.make([1 -1],{[4 3] []});
-                S.rel(6)=Uqsl2.make([1 -1],{[3 4] []});
-                S.rel(7)=Uqsl2.make([1 -1 -[1 -1]/(q-q^-1)],{[1 2] [2 1] 3 4});
+                S.rel(5)=StrUqsl2.make([1 -1],{[4 3] []});
+                S.rel(6)=StrUqsl2.make([1 -1],{[3 4] []});
+                S.rel(7)=StrUqsl2.make([1 -1 -[1 -1]/(q-q^-1)],{[1 2] [2 1] 3 4});
                 S.comm=[nan;nan];
                 S.inv=[nan;nan];
                 S=obj.get2vRelation_(S);
@@ -62,7 +63,7 @@ classdef(InferiorClasses=?sym) Uqsl2<StrAlg&HopfAlg
             ret=I.set_cp(converted.cf,converted.pw,converted.bs);
             ret.dimV=2;
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrUqsl2.B)
                 ret=arr(p);
             end
         end
@@ -83,7 +84,7 @@ classdef(InferiorClasses=?sym) Uqsl2<StrAlg&HopfAlg
             end
             ret=obj.algfun(@fun,I|I);
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrUqsl2.B)
                 ret=dict(p);
             end
         end

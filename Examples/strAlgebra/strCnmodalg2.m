@@ -37,7 +37,7 @@ classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
                 ll=obj.l;
                 D=obj.dict;
                 q=sym('q');
-                S(ll)={Struct};
+                S(ll)={struct};
                 S{ll}.rel=obj.empty;
                 O=StrCnmodalg2.getGenerator(ll);
                 % x_i,x_j q-commutative

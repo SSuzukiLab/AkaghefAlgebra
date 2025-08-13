@@ -117,8 +117,8 @@ classdef (InferiorClasses={?sym})PolAlg
             N=i1.term;
             M=i2.term;
             D=i1.dim;
-            C=zeros(N*M,1,i1.ctype.class);
-            P=zeros(N*M,D,i1.ptype.class);
+            C=repmat(i1.ctype.zero,N*M,1);
+            P=repmat(i1.ptype.zero,N*M,D);
             for ii=1:N
                 for jj=1:M
                     C((ii-1)*M+jj)=i1.cf(ii)*i2.cf(jj);
@@ -512,10 +512,10 @@ function [i1,i2]=alignNum(i1,i2)
         assert(isequal(i1.base,i2.base))
     elseif tf(2)
         i1.base=i2.base;
-        i1.pw=zeros(i1.term,i1.base.dim,i1.ptype.class);
+        i1.pw=repmat(i1.ptype.zero,i1.term,i1.base.dim);
     elseif tf(1)
         i2.base=i1.base;
-        i2.pw=zeros(i2.term,i2.base.dim,i2.ptype.class);
+        i2.pw=repmat(i2.ptype.zero,i2.term,i2.base.dim);
 
     end
 end

@@ -58,9 +58,9 @@ classdef(InferiorClasses=?sym) StrAnAlg_<StrAlg&HopfAlg
             function S_=createRel(Nvar)
                 mustBeInteger(Nvar)
                 O=StrAnAlg_.getGenerator(Nvar);
-                % S=Struct;
+                % S=struct;
                 q=sym('q');
-                S_=Struct;
+                S_=struct;
                 % q^θ X=qXq^θ
                 % [K,E], [Ki,E] KKi [E,F]=[H],[Ei,Fj]=0 [K,Ki]
                 CM=diag(2*ones(1,Nvar))-diag(ones(1,Nvar-1),1)-diag(ones(1,Nvar-1),1);
@@ -132,7 +132,7 @@ classdef(InferiorClasses=?sym) StrAnAlg_<StrAlg&HopfAlg
             ret=I.set_cp(converted.cf,converted.pw,converted.bs);
             ret.dimV=obj.Nvar+1;
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr{1}(p);
             end
             function ret=createRep(N)
@@ -164,7 +164,7 @@ classdef(InferiorClasses=?sym) StrAnAlg_<StrAlg&HopfAlg
             I=arr{1}(end);
             ret=obj.algfun(@fun,I|I);
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr{1}(p);
             end
             function ret=createDelta(N)

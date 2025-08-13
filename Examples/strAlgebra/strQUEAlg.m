@@ -70,9 +70,9 @@ classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
         % function S_=createRel(Nvar)
         %     mustBeInteger(Nvar)
         %     O=StrQUEAlg.getGenerator(Nvar);
-        %     % S=Struct;
+        %     % S=struct;
         %     q=sym('q');
-        %     S_=Struct;
+        %     S_=struct;
         %     % q^θ X=qXq^θ
         %     % [K,E], [Ki,E] KKi [E,F]=[H],[Ei,Fj]=0 [K,Ki]
         %     CM=diag(2*ones(1,Nvar))-diag(ones(1,Nvar-1),1)-diag(ones(1,Nvar-1),1);
@@ -139,7 +139,7 @@ classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
             ret=I.set_cp(converted.cf,converted.pw,converted.bs);
             ret.dimV=obj.Nvar+1;
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr(p);
             end
         end
@@ -155,7 +155,7 @@ classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
             I=arr(end);
             ret=obj.algfun(@fun,I|I);
             function ret=fun(p,b)
-                % assert(b==Uqsl2.B)
+                % assert(b==StrStrUqsl2.B)
                 ret=arr(p);
             end
         end
@@ -188,7 +188,7 @@ classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
 end
 
 function ret = createDelta(Ntype)
-    % createDelta: Returns a delta Structure for Nvar variables
+    % createDelta: Returns a delta structure for Nvar variables
     obj=eval(mfilename);
     [O,E,F,K,Ki,H]=obj.getGenerator(Ntype);
     I_=O.unit;

@@ -249,15 +249,15 @@ ans =
 ```
 
 ```matlab
-[O,E,F,K,Ki]=Uqsl2.getGenerator;
+[O,E,F,K,Ki]=StrUqsl2.getGenerator;
 ```
 
 ```matlabTextOutput
-クラス 'Uqsl2' のメソッド、プロパティまたはフィールド 'make_' が認識されません。
-エラー: Uqsl2.make (行 38)
-            obj=Uqsl2().make_(cf,pw,Uqsl2.B);
-エラー: Uqsl2.getGenerator (行 41)
-            O=Uqsl2.make(0,{});
+クラス 'StrUqsl2' のメソッド、プロパティまたはフィールド 'make_' が認識されません。
+エラー: StrUqsl2.make (行 38)
+            obj=StrUqsl2().make_(cf,pw,StrUqsl2.B);
+エラー: StrUqsl2.getGenerator (行 41)
+            O=StrUqsl2.make(0,{});
 ```
 
 ```matlab

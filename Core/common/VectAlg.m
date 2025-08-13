@@ -468,7 +468,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             end
         end
         function disp_(i1)
-            feval("disp"+CR.H.displayRule,i1);
+            try
+            feval("disp"+AlgebraConfig.H.disp_VectAlg,i1);
+            catch ME
+                warning(ME.identifier,'cannot display properly:\n %s',ME.message)
+                i1.disp0
+            end
         end
         function disp0(arg)
             builtin("disp",arg)
