@@ -4,7 +4,7 @@ function [expression,acc]=makeTensorExpression(str,ord)
         ord (1,:) double=[]
     end
     T=parseFormulaArgument(str);
-    validateParsedTable(T)
+    T=validateParsedTable(T)
     [T,acc]=calcContractIndex(T);
     expression=makeExpressionString(T);
     expression=permDim(expression,acc,ord);
@@ -23,7 +23,7 @@ function T = parseFormulaArgument(arg)
     T = table(labels, indexList);
     T.rank=cellfun(@length,T.indexList);
 end
-function validateParsedTable(T)
+function T=validateParsedTable(T)
     % Validate the parsed table where each label is an expression
     % (not just a variable name), which must be evaluable in the caller workspace,
     % and its rank (i.e., ndims) must equal rank(i)
@@ -33,6 +33,8 @@ function validateParsedTable(T)
     if any(counts)
         error("contraction indices:%s must appear just 2 times",mat2str(vals(counts)))
     end
+    T.value=cell(height(T),1);
+    T.size=cell(height(T),1);
     for i = 1:height(T)
         expr = T.labels(i);
         indices = T.indexList{i};
@@ -43,11 +45,13 @@ function validateParsedTable(T)
         catch
             warning('Expression "%s" cannot be evaluated in the base workspace.', expr);
         end
-
+        T.value{i}=value;
+        T.size{i}=size(value);
         % Check that the number of dimensions matches the index list length
         actualRank = ndims(value);
         if isvector(value)
             actualRank=1;
+            T.size{i}=T.size{i}(1);
         end
         expectedRank = numel(indices);
         if actualRank ~= expectedRank

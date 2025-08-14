@@ -10,7 +10,8 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
         ctype NumericType ="D"
         % ZEROにbaseが依存する形式のほうがよくないか？
         base (1,:) Bases
-        spec (1,1) SpaceSpec
+        spec (1,1) SpaceSpec % specify principle of space
+        % also, store structure constant 
         ZERO (1,:) StrAlg
         sortedFlag
         inverseSimplifiedFlag
@@ -551,9 +552,8 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
                 obj.ZERO=X.ZERO;
                 obj.base=X.base;
                 return
-            else
-                disp(class(obj))
             end
+                % disp(class(obj))
         end
         
 

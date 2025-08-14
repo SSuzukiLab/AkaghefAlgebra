@@ -1,6 +1,6 @@
 % Define
 syms q
-[O,E,F,K,Ki]=StrUqsl2.getGenerator(q);
+[O,E,F,K,Ki]=StrUqsl2().getGenerator(q);
 A=O.make([3 2],{[] [1]});
 B=O.make(3:4,{[] [2 3]});
 I=O+1;
@@ -66,3 +66,4 @@ assert(act(E,q*(y|x)-(x|y))==0)
 assert(act(F,q*(y|x)-(x|y))==0)
 assert(act(F,x|y)==q*(y|y))
 
+%%

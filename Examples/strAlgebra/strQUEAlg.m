@@ -1,5 +1,5 @@
 classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
-    properties(Constant,Hidden,AbStract)
+    properties(Constant,Hidden,Abstract)
         % B
         B            %=TypeParam(@(N)Bases(5*N,reshape(["E","F","K","Ki" "H"]+(1:N)',1,5*N),"Uqsl_"+(N+1)))
         CM           %=TypeParam(@createDelta)
@@ -9,7 +9,7 @@ classdef(InferiorClasses=?sym) StrQUEAlg<StrAlg&HopfAlg
         RelStorage   %=TypeParam(@createRel)
         Vtype        %='symAnmodlg'
     end
-    properties(AbStract,Dependent)
+    properties(Abstract,Dependent)
         dimV
     end
     properties

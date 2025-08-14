@@ -9,6 +9,8 @@ classdef (InferiorClasses={?sym})PolAlg
         cf (:,1)
         pw
         base (1,:) Bases
+        spec (1,1) SpaceSpec % specify principle of space
+        % also, store structure constant 
         ctype NumericType ="D"
         ptype NumericType ="D"
     end

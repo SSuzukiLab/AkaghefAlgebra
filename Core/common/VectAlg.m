@@ -8,7 +8,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
         bs (1,:) Bases %basis
         ZERO (1,:) cell %zero element of each vector space
-        SC TypeParam=TypeParam([])%structure constants
+        spec (1,1) SpaceSpec % specify principle of space
+        % also, store structure constant 
     end
     properties(Dependent)
         dim %dimension of the vector space
@@ -24,7 +25,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             obj.ZERO={obj};
         end
         function ret=getSC(obj,arg)
-            ret=obj.SC.get([obj.bs.name arg]);
+            ret=obj.spec.SC{arg};
         end
 
         function [i1,i2]=alignNum(i1,i2)
@@ -272,13 +273,19 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function obj=setSC(obj,identifier,mu,eta,Delta,ep,S)
             % setSC ホップ代数の構造定数を設定する
-            obj.SC.insert([identifier '_μ'],mu);
-            obj.SC.insert([identifier '_η'],eta);
-            obj.SC.insert([identifier '_Δ'],Delta);
-            obj.SC.insert([identifier '_ε'],ep);
-            obj.SC.insert([identifier '_S'],S);
+            % obj.SC.insert([identifier '_μ'],mu);
+            % obj.SC.insert([identifier '_η'],eta);
+            % obj.SC.insert([identifier '_Δ'],Delta);
+            % obj.SC.insert([identifier '_ε'],ep);
+            % obj.SC.insert([identifier '_S'],S);
+            obj.spec.SC{'_μ'}=mu;
+            obj.spec.SC{'_η'}=eta;
+            obj.spec.SC{'_Δ'}=Delta;
+            obj.spec.SC{'_ε'}=ep;
+            obj.spec.SC{'_S'}=S;
             Si=S^-1;
-            obj.SC.insert([identifier '_Si'],Si);
+            % obj.SC.insert([identifier '_Si'],Si);
+            obj.spec.SC{'_Si'}=Si;
             P=tensorprod(tensorprod(tensorprod(mu,S,3,1),Delta,3,1),S,[3 1],[1 2]);
             [U,K,V] = svd(P);
             Ir=U(:,1);
@@ -290,11 +297,16 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function setIntegrals(obj,Ir,Cr,Il,Cl)
             % Ir,Cr,Il,Cl (D,1) size
-            obj.SC.insert([obj.identifier '_intr'],Ir);
-            obj.SC.insert([obj.identifier '_cointr'],Cr);
-            obj.SC.insert([obj.identifier '_intl'],Il);
-            obj.SC.insert([obj.identifier '_cointl'],Cl);
-            obj.SC.insert([obj.identifier '_CrIl'],dot(Cr,Il));         
+            % obj.SC.insert([obj.identifier '_intr'],Ir);
+            % obj.SC.insert([obj.identifier '_cointr'],Cr);
+            % obj.SC.insert([obj.identifier '_intl'],Il);
+            % obj.SC.insert([obj.identifier '_cointl'],Cl);
+            % obj.SC.insert([obj.identifier '_CrIl'],dot(Cr,Il));      
+            obj.spec.SC{'_intr'}=Ir;
+            obj.spec.SC{'_cointr'}=Cr;
+            obj.spec.SC{'_intl'}=Il;
+            obj.spec.SC{'_cointl'}=Cl;
+            obj.spec.SC{'_CrIl'}=dot(Cr,Il);
         end
         function ret=verify(obj)
             try
