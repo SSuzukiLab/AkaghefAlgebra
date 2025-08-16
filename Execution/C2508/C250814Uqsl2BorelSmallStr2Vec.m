@@ -4,7 +4,7 @@ syms q
 [O,E,F,K,Ki]=StrUqsl2().getGenerator(q);
 assume(q>0)
 %%
-N=5;
+N=3;
 Mu0=zeros(N*ones(1,6),'sym');
 Mu1=zeros(N*ones(1,7));
 T=combinations(1:N,1:N,1:N,1:N);
@@ -25,6 +25,8 @@ for i=1:height(T)
 end
 Mu1=double(reshape(Mu1,[N^2,N^2,N^2,N]));
 Mu0=reshape(Mu0,[N^2,N^2,N^2]);
+%%
+save("D250814Uqsl2BorelSmallStr2Vec.mat","Mu0")
 %%
 Mu3=double(subs(Mu0,q,exp(2*pi*1i/N)));
 sum(~eqD(Mu3,0,1e-100),"all") %[output:1771ebf2]
@@ -48,6 +50,21 @@ A2=permute(TP(TP(Mu1,Mu1,2,3),Mu2,[3,6],[1,2]),[1,3,4,2,5]);
 size(A2) %[output:0f1363d0]
 %%
 all(A1==A2,"all") %[output:604dbb99]
+%%
+%[text] #### `計算量比較`
+%[text] $q=\\zeta\_5\n$ `small quantumで計算した結果，乗算`
+%[text] 
+%[text] `経過時間は 16.142055 秒です。`
+tic
+A=0;
+for i=1
+    A=A+kron(Mu0(:,:,i),squeeze(Mu0(i,:,:)));
+end
+toc %[output:5186943c]
+%%
+tic
+A=calcTensorExpression('Mu0{0,1,2}Mu0{2,3,4}',[0,4]); %[output:7808e69f]
+toc %[output:9bdff084]
 
 %[appendix]{"version":"1.0"}
 %---
@@ -77,4 +94,13 @@ all(A1==A2,"all") %[output:604dbb99]
 %---
 %[output:604dbb99]
 %   data: {"dataType":"textualVariable","outputData":{"header":"logical","name":"ans","value":"   1"}}
+%---
+%[output:5186943c]
+%   data: {"dataType":"text","outputData":{"text":"経過時間は 16.142055 秒です。\n","truncated":false}}
+%---
+%[output:7808e69f]
+%   data: {"dataType":"text","outputData":{"text":"times\n","truncated":false}}
+%---
+%[output:9bdff084]
+%   data: {"dataType":"text","outputData":{"text":"経過時間は 1.021923 秒です。\n","truncated":false}}
 %---

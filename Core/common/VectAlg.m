@@ -172,7 +172,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=Delta(obj)
             ret=obj|obj;
             ret.cf(:)=0;
-            C=obj.SC.get([obj.identifier '_Δ']);
+            C=obj.getSC(['_Δ']);
             ret.cf=tensorprod(C,obj.cf,1,1);
             % for k1=1:obj.dim
             %     for k2=1:obj.dim
@@ -195,14 +195,15 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function ret=S(obj)
             % S: Hopf algebra antipode
-            S=obj.SC.get([obj.identifier '_S']);
+            S=obj.spec.SC{'_S'};
             ret=obj;
             ret.cf(:)=0;
-            for k1=1:obj.dim
-                for k2=1:obj.dim
-                    ret.cf(k2)=ret.cf(k2)+S(k1,k2)*obj.cf(k1);
-                end
-            end
+            % for k1=1:obj.dim
+            %     for k2=1:obj.dim
+            %         ret.cf(k2)=ret.cf(k2)+S(k1,k2)*obj.cf(k1);
+            %     end
+            % end
+            ret.cf=S*obj.cf; %250816 Sの定義のテンソルを転置した
         end
         %% 計算基盤
 
@@ -286,6 +287,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             Si=S^-1;
             % obj.SC.insert([identifier '_Si'],Si);
             obj.spec.SC{'_Si'}=Si;
+            if isa(mu,'sym'), return; end
             P=tensorprod(tensorprod(tensorprod(mu,S,3,1),Delta,3,1),S,[3 1],[1 2]);
             [U,K,V] = svd(P);
             Ir=U(:,1);
@@ -306,7 +308,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             obj.spec.SC{'_cointr'}=Cr;
             obj.spec.SC{'_intl'}=Il;
             obj.spec.SC{'_cointl'}=Cl;
-            obj.spec.SC{'_CrIl'}=dot(Cr,Il);
+            obj.spec.SC{'_CrIl'}=Cr.'*Il;
         end
         function ret=verify(obj)
             try
@@ -368,11 +370,11 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % μ ∘ (S ⊗ id) ∘ Δ = η ∘ ε  and  μ ∘ (id ⊗ S) ∘ Δ = η ∘ ε
             tmp2=tensorprod(ep,eta,2,2,Num=2);
 
-            tmp=tensorprod(S,mu,2,1);
-            tmp=tensorprod(Delta,tmp,[2 3],[1 2]);
+            tmp=tensorprod(S,Delta,2,2);
+            tmp=tensorprod(tmp,mu,[1,3],[1,2]);
             assert(isequal_(tmp,tmp2),"antipode left inverse error")
 
-            tmp=tensorprod(Delta,S,3,1);
+            tmp=tensorprod(Delta,S,3,2);
             tmp=tensorprod(tmp,mu,[2 3],[1 2]);
             assert(isequal_(tmp,tmp2),"antipode right inverse error")
 

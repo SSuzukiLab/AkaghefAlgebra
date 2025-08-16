@@ -20,7 +20,7 @@ classdef(InferiorClasses=?sym) SparseEx
             if ~isa(arg, 'SparseEx')
                 obj.zero = zeros(1,1,'like',arg);
                 obj.size = size(arg);
-                if AlgebraConfig.H.SpElimZero
+                if AlgebraConfig.H.SP_elim_zero 
                     idx= find(arg ~= obj.zero);
                 else
                     idx = 1:numel(arg);
@@ -39,7 +39,7 @@ classdef(InferiorClasses=?sym) SparseEx
                 else
                     subs=cell(1,length(obj.size));
                     [subs{:}] = ind2sub(obj.size, idx); 
-                    obj.key = vertcat(subs{:}).';
+                    obj.key = horzcat(subs{:});
                     obj.val = arg(idx); 
                 end
             end
@@ -85,8 +85,8 @@ classdef(InferiorClasses=?sym) SparseEx
             for i = 1:n
                 k = obj.key(i, :);
                 kstr = join(string(k), ',');
-                v = obj.val(i);
-                fprintf('  (%s)  %g\n', kstr, v);
+                v = string(obj.val(i));
+                fprintf('  (%s)  %s\n', kstr, v);
             end
         end
     end

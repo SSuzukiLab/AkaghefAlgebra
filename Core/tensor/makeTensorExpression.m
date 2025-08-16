@@ -4,7 +4,7 @@ function [expression,acc]=makeTensorExpression(str,ord)
         ord (1,:) double=[]
     end
     T=parseFormulaArgument(str);
-    T=validateParsedTable(T)
+    T=validateParsedTable(T);
     [T,acc]=calcContractIndex(T);
     expression=makeExpressionString(T);
     expression=permDim(expression,acc,ord);
