@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) SparseEx
+classdef(InferiorClasses=?sym) SparseEx<IAdditive
     % SparseEx: A lightweight sparse array class using key-value representation
     %   Stores non-zero elements and their indices explicitly.
 
@@ -13,35 +13,48 @@ classdef(InferiorClasses=?sym) SparseEx
         Nelem            % Number of non-zero elements
         rank             % rank of tensor
     end
-
+    methods(Static)
+        function obj=convert(arg,Elem2NonzeroIndices)
+            if isa(arg, 'SparseEx')
+                obj = arg; % Already a SparseEx object
+                return;
+            end
+            obj=SparseEx;
+            if nargin<2
+                Elem2NonzeroIndices = @find;
+            elseif isa(Elem2NonzeroIndices,'double')
+                Elem2NonzeroIndices = @(x) find(~eqD(x,0,Elem2NonzeroIndices));
+            elseif isequal(Elem2NonzeroIndices,"full")
+                Elem2NonzeroIndices =@(x) 1:numel(x);
+            end
+            % obj.zero = zeros(1,1,'like',arg);
+            obj.size = size(arg);
+            idx= Elem2NonzeroIndices(arg);
+            if isempty(arg)
+                obj.key = [];
+                obj.val = [];
+            elseif length(obj.size) ==2&& obj.size(2) == 1
+                if obj.size(1) == 1
+                    obj.size = []; % scalar case
+                else
+                    obj.size = obj.size(1); % vector case
+                end
+                obj.key = idx(:); 
+                obj.val = arg(idx(:));
+            else
+                subs=cell(1,length(obj.size));
+                [subs{:}] = ind2sub(obj.size, idx); 
+                obj.key = horzcat(subs{:});
+                obj.val = arg(idx); 
+            end
+        end
+    end
     methods
         function obj = SparseEx(arg)
             % Constructor: Converts numeric array into SparseEx format
-            if ~isa(arg, 'SparseEx')
-                obj.zero = zeros(1,1,'like',arg);
-                obj.size = size(arg);
-                if AlgebraConfig.H.SP_elim_zero 
-                    idx= find(arg ~= obj.zero);
-                else
-                    idx = 1:numel(arg);
-                end
-                if isempty(arg)
-                    obj.key = [];
-                    obj.val = [];
-                elseif length(obj.size) ==2&& obj.size(2) == 1
-                    if obj.size(1) == 1
-                        obj.size = []; % scalar case
-                    else
-                        obj.size = obj.size(1); % vector case
-                    end
-                    obj.key = idx(:); 
-                    obj.val = arg(idx(:));
-                else
-                    subs=cell(1,length(obj.size));
-                    [subs{:}] = ind2sub(obj.size, idx); 
-                    obj.key = horzcat(subs{:});
-                    obj.val = arg(idx); 
-                end
+            if nargin>0&&~isa(arg, 'SparseEx')
+                % issue:sparseExへの変換メソッドを持っていた場合はどうする？
+                obj=SparseEx.convert(arg);
             end
         end
 
