@@ -359,11 +359,17 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
             % bialgebra property
             %  Δ∘μ = (μ⊗μ)∘τ23∘(Δ⊗Δ)
-            tmp = tensorprod(Delta,Delta,Num=3);
-            tmp2 = tensorprod(mu,mu,Num=3);
-            tmp = tensorprod(tmp,tmp2,[2 5 3 6],[1 2 4 5]);
-            tmp2= tensorprod(mu,Delta,3,1);
-            assert(isequal_(tmp,tmp2),"bialgebra property error")
+            % tmp = tensorprod(Delta,Delta,Num=3);
+            % tmp2 = tensorprod(mu,mu,Num=3);
+            % tmp = tensorprod(tmp,tmp2,[2 5 3 6],[1 2 4 5]);
+            % tmp2= tensorprod(mu,Delta,3,1);
+            % assert(isequal_(tmp,tmp2),"bialgebra property error")
+            tmp=calcTensorExpression( ...
+                'Delta{1,3,4}Delta{2,5,6}mu{3,5,7}mu{4,6,8}',[1,2,7,8]);
+            tmp2=calcTensorExpression( ...
+                'mu{1,2,3}Delta{3,7,8}',[1,2,7,8]);
+            dif=tmp-tmp2;
+            assert(isequal_(dif.val,0),"bialgebra property error")
 
 
             % antipode property
@@ -394,12 +400,22 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             assert(isequal_(tmp,tmp2),"right integral property error")
             % tmp=tensorprod(intl,cointr,1,2,Num=1);
             % tmp2=tensorprod(intl,cointr,Num=1);
-            % leftはまだ未実装
+            % issue:leftはまだ未実装
             tmp=[intr.'*cointr, intl.'*cointr; ...
                  intr.'*cointl, intl.'*cointl];
             assert(isequal_(tmp([1 2 4]),[1 1 1]),"integral normalization error")
 
             disp("Confirmed to be a Hopf algebra")
+            function assertT(expr1,ord1,expr2,ord2,msg)
+                % assertT: assert with tensor order
+                val1=calcTensorExpression(expr1,ord1);
+                val2=calcTensorExpression(expr2,ord2);
+                diff=val1-val2;
+                
+                if ~isequal(size(expr1),ord1) || ~isequal(size(expr2),ord2)
+                    error("VectAlg:verifyHopf",msg)
+                end
+            end
         end
         function verifyInt(obj)
             isequal_=@(x,y)all(eqD(x,y,1e-5),"all");

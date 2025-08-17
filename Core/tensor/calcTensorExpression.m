@@ -138,7 +138,8 @@ function T=calcContractOrder(T)
     end
     T=T(order,:);
     if any(Ncontract(2:end)==0)
-        disp("no contraction product included")
+        % disp("no contraction product included")
+        % issue: evaluate using kronecker product after multiplying
     end
 end
 function val=multiplyCoeff(tbl,T,ord)
@@ -177,8 +178,9 @@ function val=multiplyCoeff(tbl,T,ord)
     end
     val=SparseEx;
     val.val=V;
+    val.key=tbl{:,"v"+ord};
     val.size=dims;
-    
+    val=val.simplify;
     % 
     % % Initialize the result array with the appropriate class
     % val = zeros([dims, 1], class(V));

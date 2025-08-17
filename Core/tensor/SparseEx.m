@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) SparseEx<IAdditive
+classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
     % SparseEx: A lightweight sparse array class using key-value representation
     %   Stores non-zero elements and their indices explicitly.
 
@@ -6,7 +6,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive
         zero (1,1) =0; % Default value for zero elements
         key double       % NxR array: indices of non-zero elements
         val (:,1)        % Nx1 array: corresponding non-zero values
-        size 
+        size
     end
 
     properties(Dependent)
@@ -36,16 +36,18 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive
             elseif length(obj.size) ==2&& obj.size(2) == 1
                 if obj.size(1) == 1
                     obj.size = []; % scalar case
+                    obj.key=[];
+                    obj.val=arg;
                 else
                     obj.size = obj.size(1); % vector case
+                    obj.key = idx(:);
+                    obj.val = arg(idx(:));
                 end
-                obj.key = idx(:); 
-                obj.val = arg(idx(:));
             else
                 subs=cell(1,length(obj.size));
-                [subs{:}] = ind2sub(obj.size, idx); 
+                [subs{:}] = ind2sub(obj.size, idx(:));
                 obj.key = horzcat(subs{:});
-                obj.val = arg(idx); 
+                obj.val = arg(idx);
             end
         end
     end
@@ -64,19 +66,68 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive
         end
         function ret = get.rank(obj)
             % Return the rank of the tensor (number of dimensions)
-            ret = size(obj.key, 2);
+            ret = length(obj.size);
         end
-        function obj=simplify(obj)
-            idx=find(obj.val==0);
-            obj.val(idx)=[];
-            obj.key(idx,:)=[];
+        function obj=simplify(obj,arg)
+            arguments
+                obj SparseEx
+                arg.Elem2ZeroIndices function_handle = @(x)find(x~=0)
+                arg.simplify_func = AlgebraConfig.H.simplify_func_Sparse;
+            end
+            idx=arg.Elem2ZeroIndices(obj.val);
+            if obj.rank~=0
+                obj.val(idx)=[];
+                obj.key(idx,:)=[];
+            else
+                obj.val=sum(obj.val,"all");
+            end
+            if isempty(obj.val)
+                obj.val=0;
+                obj.key=ones(1,obj.rank);
+            end
+            obj.val=arg.simplify_func(obj.val);
         end
 
         function outputArg = method1(obj, inputArg)
             % Placeholder method (not used)
             outputArg = obj.Property1 + inputArg;
         end
+        function ret= ge(arg1,arg2)
+            % Greater than or equal comparison
+            arguments
+                arg1 SparseEx
+                arg2 SparseEx
+            end
+            ret=arg1-arg2;
+            ret.val=ret.val>=0;
+        end
+        function arg= not(arg)
+            % Greater than or equal comparison
+            arguments
+                arg SparseEx
+            end
+            arg.val = ~arg.val; % Negate the values for inequality
+        end
 
+        function ret= eq(arg1,arg2)
+            % Greater than or equal comparison
+            arguments
+                arg1 SparseEx
+                arg2 SparseEx
+            end
+            ret=arg1-arg2;
+            ret.val=ret.val==0;
+        end
+        function ret= isapprox(arg1,arg2,tol)
+            % Greater than or equal comparison
+            arguments
+                arg1 SparseEx
+                arg2 SparseEx
+                tol double
+            end
+            ret=arg1-arg2;
+            ret.val=abs(ret.val)<=tol;
+        end
         function ret = plus(arg1, arg2)
             % Addition of two SparseEx objects
             arguments
@@ -86,20 +137,35 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive
             N = arg1.Nelem;
             ret = arg1;
             [ret.key, ~, iC] = unique([arg1.key; arg2.key], 'rows');
+            if isempty(ret.key)
+                ret.val=arg1.val+arg2.val;
+            else
             ret.val(iC(N+1:end)) = arg2.val;
             ret.val(iC(1:N)) = ret.val(iC(1:N)) + arg1.val;
+            end
             ret=ret.simplify;
         end
 
+        function arg=uminus(arg)
+            % Negation of SparseEx object
+            arg.val = -arg.val;
+        end
+        function disp0(obj)
+            builtin('disp', obj)
+        end
         function disp(obj)
             % disp method: Display non-zero entries in sparse-like format
             n = obj.Nelem;
-            fprintf('SparseEx with %d non-zero entries:\n', n);
-            for i = 1:n
-                k = obj.key(i, :);
-                kstr = join(string(k), ',');
-                v = string(obj.val(i));
-                fprintf('  (%s)  %s\n', kstr, v);
+            if isempty(obj.size)
+                fprintf('SparseEx scalar: %s\n', string(obj.val));
+            else
+                fprintf('SparseEx with %d non-zero entries:\n', n);
+                for i = 1:n
+                    k = obj.key(i, :);
+                    kstr = join(string(k), ',');
+                    v = string(obj.val(i));
+                    fprintf('  (%s)  %s\n', kstr, v);
+                end
             end
         end
     end
