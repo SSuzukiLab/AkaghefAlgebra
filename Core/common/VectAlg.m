@@ -10,6 +10,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         ZERO (1,:) cell %zero element of each vector space
         spec (1,1) SpaceSpec % specify principle of space
         % also, store structure constant 
+        sparse SparseEx
     end
     properties(Dependent)
         dim %dimension of the vector space
@@ -18,14 +19,22 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
     end
     %% binomial operation
     methods
+        % attempt: switch storage to SparseEx
+        function obj=set.cf(obj,value)
+            obj.sparse=SparseEx(value);
+        end
+        function value=get.cf(obj)
+            value=obj.sparse.toMatrix();
+        end
         function obj=setBase(obj,base)
             % setBase 基底の設定
             obj.bs=base;
             obj.cf=Czeros(obj,base.dim,1);
             obj.ZERO={obj};
         end
-        function ret=getSC(obj,arg)
-            ret=obj.spec.SC{arg};
+        function varargout=getSC(obj,arg)
+            varargout=cell(1,length(string(arg)));
+            [varargout{:}]=obj.spec.SC{arg};
         end
 
         function [i1,i2]=alignNum(i1,i2)
@@ -285,8 +294,16 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             obj.spec.SC{'_ε'}=ep;
             obj.spec.SC{'_S'}=S;
             Si=S^-1;
-            % obj.SC.insert([identifier '_Si'],Si);
             obj.spec.SC{'_Si'}=Si;
+            % Refer "Tensor_on_Vertex.jpg"
+            % issue: U^*=AとA^*=Uどっちの演算？
+            Tp=calcTensorExpression('mu{3,5,1}Delta{4,5,2}',[1,2,3,4]);
+            Tm=calcTensorExpression('mu{3,6,1}S{6,5}Delta{4,5,2}',[1,2,3,4]);
+            % Tp=TP(De,Mu,2,2); %250406
+            % % Tm=PE(TP(TP(De,An,2,2),De,3,2),[2 1 4 3]);
+            % Tm=eval(makeTensorExpression('De{1,4,0}An{4,5}Mu{3,5,2}',[0 1 2 3]));
+            obj.spec.SC{'Tp'}=Tp;
+            obj.spec.SC{'Tm'}=Tm;
             if isa(mu,'sym'), return; end
             P=tensorprod(tensorprod(tensorprod(mu,S,3,1),Delta,3,1),S,[3 1],[1 2]);
             [U,K,V] = svd(P);
