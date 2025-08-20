@@ -6,23 +6,30 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
     end
     properties
         N
+        M
         q
         style {mustBeMember(style,["L","R"])}="R"
     end
     methods(Static)
-        function [Z,K,E]=getGenerator(N,style,q)
+        function [Z,K,E]=getGenerator(ratio,style,arg)
             arguments
-                N
+                ratio % =M/N 
                 style {mustBeMember(style,["L","R"])}
-                q
+                arg.qtype {mustBeMember(arg.qtype,["complex","sym"])} = "complex"
+                arg.q
             end
+            [M,N]=rat(ratio);
             Z=Uqsl2BorelSmall();
             Z=Z.setBase(Z.bs0.get(N));
             Z.N=N;
-            if nargin==2
-                Z.q=exp(2*pi*1i/N);
+            Z.M=M;
+            if isfield(arg,'q')
+                Z.q = arg.q; % Set q if provided
+            elseif strcmp(arg.qtype,"complex")
+                Z.q=exp(2*pi*1i*M/N);
             else
-                Z.q = q; % Set q if provided
+                Z.q=sym("z"+N)^M;
+                assume(sym("z"+N)^N==1);
             end
             Z.setConst(style);
             K=Z.make(1,2);
@@ -42,9 +49,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
         function setConst(obj,style)
             % Set structure constants based on the chosen style
             % First, define with style=R: Δ(E)=1⊗E+E⊗K
-
+            
             % Basis: K^i E^j (i,j) i,j=0,1,...,N-1
-            % E^N=0, K^N=1
+            % E^N=0, K^N=1, KE=qEK
             % Multiplication tensor M(i,j,k): e_i * e_j = sum_k M(i,j,k) * e_k
             N=obj.N;
             q=obj.q;

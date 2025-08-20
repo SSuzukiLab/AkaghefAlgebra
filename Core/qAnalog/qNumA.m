@@ -1,6 +1,6 @@
 classdef qNumA
     properties
-        q
+        q % issue: qを明示的に引数に取る
     end
     methods
 

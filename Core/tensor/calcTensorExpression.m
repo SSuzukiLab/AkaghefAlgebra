@@ -26,6 +26,7 @@ function val=calcTensorExpression(str,ord,Elem2NonzeroIndices)
         try % Try evaluating the expression in the caller workspace
             T.value{i} = evalin('caller', T.labels(i));
         catch
+            disp(T)
             error('Expression "%s" cannot be evaluated in the base workspace.', T.labels(i));
         end
     end
@@ -38,6 +39,8 @@ end
 function T = parseFormulaArgument(arg)
     % Match chemical symbols with corresponding indices
     pattern = '(?<label>[A-Za-z\(\)\^\-\d]+)\{(?<indices>[0-9,]+)\}';
+    pattern = '(?<label>[A-Za-z\(\)\^\-\d]+(?:\.[A-Za-z\(\)\^\-\d]+)?)\{(?<indices>[0-9,]+)\}';
+    pattern = '(?<label>[A-Za-z\(\)\^\-\d\.]+)\{(?<indices>[0-9,]+)\}';
     tokens = regexp(arg, pattern, 'names');
 
     labels = string({tokens.label})';
@@ -180,7 +183,7 @@ function val=multiplyCoeff(tbl,T,ord)
     val.val=V;
     val.key=tbl{:,"v"+ord};
     val.size=dims;
-    val=val.simplify;
+    val=val.C;
     % 
     % % Initialize the result array with the appropriate class
     % val = zeros([dims, 1], class(V));
@@ -191,15 +194,6 @@ function val=multiplyCoeff(tbl,T,ord)
     %     coeffIndices(idx) = sub2ind([dims, 1], subscripts{idx,:});
     % end
     % 
-    % % Sort the coefficient indices and values for accumulation
-    % [sortedIndices, p] = sort(coeffIndices(:));          % index order
-    % sortedValues = V(p);                  % reorder values
-    % cumulativeSum = cumsum(sortedValues);            % cumulative sum in that order
-    % ends = [find(sortedIndices(1:end-1) ~= sortedIndices(2:end)); numel(sortedIndices)];  % group ends
-    % groupSums = cumulativeSum(ends) - [0; cumulativeSum(ends(1:end-1))];                     % sums per group
-    % 
-    % % Assign the computed group sums to the result array
-    % val(sortedIndices(ends)) = groupSums;                  % <-- single vectorized assignment
 end
 function [T, acc] = calcContractIndex(T)
     % calcContractIndex: calculate index for tensor network to contract

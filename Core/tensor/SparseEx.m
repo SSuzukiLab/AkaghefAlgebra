@@ -14,6 +14,12 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         rank             % rank of tensor
     end
     methods(Static)
+        function obj=set_vk(key,val,size)
+            obj = SparseEx();
+            obj.key = key;
+            obj.val = val;
+            obj.size = size;
+        end
         function obj=convert(arg,Elem2NonzeroIndices)
             if isa(arg, 'SparseEx')
                 obj = arg; % Already a SparseEx object
@@ -36,7 +42,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             elseif length(obj.size) ==2&& obj.size(2) == 1
                 if obj.size(1) == 1
                     obj.size = []; % scalar case
-                    obj.key=[];
+                    obj.key=zeros(1,0);
                     obj.val=arg;
                 else
                     obj.size = obj.size(1); % vector case
@@ -68,29 +74,53 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             % Return the rank of the tensor (number of dimensions)
             ret = length(obj.size);
         end
-        function obj=simplify(obj,arg)
+        function ret=toMatrix(obj)
+            if isempty(obj.size)
+                ret = obj.val; % scalar case
+                return;
+            end
+            ret = zeros([obj.size,1],'like',obj.val);
+            subscript=mat2cell(obj.key,obj.Nelem,ones(1,obj.rank));
+            Indices = sub2ind([obj.size,1], subscript{:});
+            ret(Indices) = obj.val;
+        end
+        % 簡約化=同次項括り＋零係数項削除+式の簡約化
+        function obj=C(obj,arg)
             arguments
                 obj SparseEx
-                arg.Elem2ZeroIndices function_handle = @(x)find(x~=0)
+                arg.isZero function_handle = @(x)logical(x==0)
                 arg.simplify_func = AlgebraConfig.H.simplify_func_Sparse;
+                arg.level  {mustBeMember(arg.level, {'','low', 'medium','high'})} =''  % 最適化の度合い
             end
-            idx=arg.Elem2ZeroIndices(obj.val);
-            if obj.rank~=0
-                obj.val(idx)=[];
-                obj.key(idx,:)=[];
-            else
-                obj.val=sum(obj.val,"all");
+            obj=combineTerm(obj);
+            if ~isempty(arg.level)&&strcmp(arg.level,'low')
+                arg.simplify_func=@(x)x;
             end
+            obj.val=arg.simplify_func(obj.val);
+            obj=obj.removeZero(arg.isZero);
+        end
+        function obj=removeZero(obj,isZero)
+            % Remove zero elements from the SparseEx object
+            idx=find(isZero(obj.val));
+            obj.val(idx)=[];
+            obj.key(idx,:)=[];
             if isempty(obj.val)
                 obj.val=0;
                 obj.key=ones(1,obj.rank);
             end
-            obj.val=arg.simplify_func(obj.val);
         end
-
-        function outputArg = method1(obj, inputArg)
-            % Placeholder method (not used)
-            outputArg = obj.Property1 + inputArg;
+        function obj=combineTerm(obj)
+            % Combine terms with the same key
+            if isempty(obj.key)
+                obj.val = sum(obj.val);
+                return;
+            end
+            [subscripts, sortIdx] = sortrows(obj.key); 
+            sortedValues = obj.val(sortIdx);
+            cumulativeSum = cumsum(sortedValues); % cumulative sum in that order
+            GrpEnds=[find(~all(subscripts(1:end-1,:)==subscripts(2:end,:),2))];  % group ends
+            obj.val = cumulativeSum([GrpEnds;end]) - [0; cumulativeSum(GrpEnds)];                     % sums per group
+            obj.key =subscripts([GrpEnds;end],:);
         end
         function ret= ge(arg1,arg2)
             % Greater than or equal comparison
@@ -108,6 +138,20 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             end
             arg.val = ~arg.val; % Negate the values for inequality
         end
+        function arg= abs(arg)
+            % Greater than or equal comparison
+            arguments
+                arg SparseEx
+            end
+            arg.val = abs(arg.val); 
+        end
+        function ret= max(arg)
+            % Greater than or equal comparison
+            arguments
+                arg SparseEx
+            end
+            ret = max(arg.val); 
+        end
 
         function ret= eq(arg1,arg2)
             % Greater than or equal comparison
@@ -117,6 +161,10 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             end
             ret=arg1-arg2;
             ret.val=ret.val==0;
+        end
+        function ret=eqD(arg1,arg2,tol)
+            A=isapprox(arg1,arg2,tol);
+            ret=all(A.val);
         end
         function ret= isapprox(arg1,arg2,tol)
             % Greater than or equal comparison
@@ -136,14 +184,16 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             end
             N = arg1.Nelem;
             ret = arg1;
-            [ret.key, ~, iC] = unique([arg1.key; arg2.key], 'rows');
-            if isempty(ret.key)
-                ret.val=arg1.val+arg2.val;
-            else
-            ret.val(iC(N+1:end)) = arg2.val;
-            ret.val(iC(1:N)) = ret.val(iC(1:N)) + arg1.val;
-            end
-            ret=ret.simplify;
+            % [ret.key, ~, iC] = unique([arg1.key; arg2.key], 'rows');
+            % if isempty(ret.key)
+            %     ret.val=arg1.val+arg2.val;
+            % else
+            % ret.val(iC(N+1:end)) = arg2.val;
+            % ret.val(iC(1:N)) = ret.val(iC(1:N)) + arg1.val;
+            % end
+            ret.val=[arg1.val;arg2.val];
+            ret.key=[arg1.key;arg2.key];
+            ret=ret.C;
         end
 
         function arg=uminus(arg)
@@ -159,7 +209,8 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             if isempty(obj.size)
                 fprintf('SparseEx scalar: %s\n', string(obj.val));
             else
-                fprintf('SparseEx with %d non-zero entries:\n', n);
+                fprintf('SparseEx [%s] with %d non-zero entries:\n', ...
+                    join(string(obj.size), ','), n);
                 for i = 1:n
                     k = obj.key(i, :);
                     kstr = join(string(k), ',');
