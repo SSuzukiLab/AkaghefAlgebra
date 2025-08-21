@@ -29,19 +29,19 @@ Z.verifyHopf(@(x,y)all(eqD(x,y,1e-5),"all")) %[output:26112a3f]
 %[text] 関係式はこれでチェックできる．そして構造定数を取得する．
 %%
 Un=eye(Z.dim);
-An=Z.getSC('_S');
-Mu=Z.getSC('_μ');
-De=Z.getSC('_Δ');
-Et=Z.getSC('_η');
-Ep=Z.getSC('_ε');
-Ir=Z.getSC('_intr');
-Il=Z.getSC('_intl');
-Cr=Z.getSC('_cointr');
-Cl=Z.getSC('_cointl');
+An=Z.getSC('antipode');
+Mu=Z.getSC('prod');
+De=Z.getSC('coprod');
+Et=Z.getSC('unit');
+Ep=Z.getSC('counit');
+Ir=Z.getSC('intr');
+Il=Z.getSC('intl');
+Cr=Z.getSC('cointr');
+Cl=Z.getSC('cointl');
 %C250406より
 Tp=Z.getSC('Tp');
 Tm=Z.getSC('Tm');
-qq=Z.getSC('_CrIl');
+qq=Z.getSC('CrIl');
 %%
 % save('D250815tensor_data_uq_Z5.mat', 'Un', 'An', 'Mu', 'De', 'Et', 'Ep', 'Ir', 'Il', 'Cr', 'Cl', 'Tp', 'Tm');
 

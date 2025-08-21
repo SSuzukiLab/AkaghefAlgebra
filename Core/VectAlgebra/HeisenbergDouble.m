@@ -57,26 +57,26 @@ classdef HeisenbergDouble<VectAlg
             % 
             H2=obj.H2;
             D=H2.dim;
-            M=H2.getSC('_μ');
-            C=H2.getSC('_Δ');
-            eta=H2.getSC('_η');
-            ep=H2.getSC('_ε');
+            M=H2.getSC('prod');
+            C=H2.getSC('coprod');
+            eta=H2.getSC('unit');
+            ep=H2.getSC('counit');
             MH2=permute(tensorprod(tensorprod(tensorprod(C,C) ...
                 ,M,[3 5],[1 2]),M,4,1),[2 3 4 5 1 6]);
             MH = reshape(MH2, D^2, D^2, D^2);
             etaH=reshape(ep*eta.',D^2,1);
-            obj.SC.insert([obj.identifier '_μ'],MH);
-            obj.SC.insert([obj.identifier '_η'],etaH);
+            obj.SC.insert([obj.identifier 'prod'],MH);
+            obj.SC.insert([obj.identifier 'unit'],etaH);
         end
 
         function [G,W,Wi]=getGW(obj)
             D=obj.rdim;
             Z=obj.H2;
-            S=Z.getSC('_S');
-            mu=Z.getSC('_μ');
-            Delta=Z.getSC('_Δ');
-            eta=Z.getSC('_η');
-            ep=Z.getSC('_ε');
+            S=Z.getSC('antipode');
+            mu=Z.getSC('prod');
+            Delta=Z.getSC('coprod');
+            eta=Z.getSC('unit');
+            ep=Z.getSC('counit');
             G=obj;
             G.cf=reshape(tensorprod(tensorprod(tensorprod(Delta,S^-1,3,1) ...
                 ,S^2,3,1),mu,[2 3],[1 2]),[D^2 1]);
@@ -87,10 +87,10 @@ classdef HeisenbergDouble<VectAlg
         end
         function ret=castype(obj,arg)
             if isequal(obj.H1.bs,arg.bs)
-                eta=obj.H2.getSC('_η');
+                eta=obj.H2.getSC('unit');
                 ret=obj.set_c(arg.cf*eta.');
             elseif isequal(obj.H2.bs,arg.bs)
-                ep=obj.H2.getSC('_ε');
+                ep=obj.H2.getSC('counit');
                 ret=obj.set_c(ep*arg.cf.');
             else
                 error("fail to cast")
@@ -100,8 +100,8 @@ classdef HeisenbergDouble<VectAlg
             % representation of Heisenberg double in matrix form
 
             A=reshape(obj.cf,obj.rdim*[1 1]);
-            mu=obj.H2.getSC('_μ');
-            Delta=obj.H2.getSC('_Δ');
+            mu=obj.H2.getSC('prod');
+            Delta=obj.H2.getSC('coprod');
             ret=tensorprod(tensorprod(A,mu,2,2),Delta,[1 3],[2 1]);
         end
         function ret=act(obj,arg)

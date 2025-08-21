@@ -34,7 +34,16 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function varargout=getSC(obj,arg)
             varargout=cell(1,length(string(arg)));
+            try
             [varargout{:}]=obj.spec.SC{arg};
+            catch ME
+                
+                if strcmp(ME.identifier, 'MATLAB:dictionary:ScalarKeyNotFound')
+                    error('The specified key "%s" was not found in the dictionary.',join(arg));
+                else
+                    rethrow(ME);
+                end
+            end
         end
 
         function [i1,i2]=alignNum(i1,i2)
@@ -120,12 +129,18 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             assert(isequal(i1.bs,i2.bs),'異なる空間での積エラー')
             ret=i1;
             R=i1.rank;
-            cf=tensorprod(i1.cf,i2.cf,Num=R);
+            Mu=struct;
+            sp1=i1.sparse;
+            sp2=i2.sparse;
+            expr=sprintf("sp1{%s}sp2{%s}", ...
+                join(string(1:R),","),join(string(R+1:2*R),","));
             for k=1:R
-                M=i1.ZERO{k}.getSC('_μ');
-                cf=tensorprod(cf,M,[1 R+2-k],[1 2]);
+                M=i1.ZERO{k}.getSC('prod');
+                Mu.("t"+k)=i1.ZERO{k}.getSC('prod');
+                expr=expr+sprintf("Mu.t%d{%d,%d,%d}",k,k,k+R,k+2*R);
             end
-            ret.cf=cf;
+            sp=calcTensorExpression(expr,(1:R)+2*R);
+            ret.sparse=sp;
         end
         function ret=times(i1,i2)
 
@@ -148,7 +163,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=unit(arg)
             eta=1;
             for k=1:arg.rank
-                eta_=arg.ZERO{k}.getSC('_η');
+                eta_=arg.ZERO{k}.getSC('unit');
                 eta=tensorprod(eta,eta_,Num=k);
             end
             ret=arg.set_c(shiftdim(eta,1));
@@ -181,7 +196,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=Delta(obj)
             ret=obj|obj;
             ret.cf(:)=0;
-            C=obj.getSC(['_Δ']);
+            C=obj.getSC(['coprod']);
             ret.cf=tensorprod(C,obj.cf,1,1);
             % for k1=1:obj.dim
             %     for k2=1:obj.dim
@@ -192,11 +207,11 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % end
         end
         function ret=counit(obj)
-            ep=obj.SC.get([obj.identifier '_ε']);
+            ep=obj.SC.get([obj.identifier 'counit']);
             ret=obj.cf.'*ep;
             ep=1;
             for k=1:arg.rank
-                eta_=arg.ZERO{k}.getSC('_ε');
+                eta_=arg.ZERO{k}.getSC('counit');
                 eta=tensorprod(eta,eta_,Num=k);
             end
             ret=arg.set_c(shiftdim(eta,1));
@@ -204,7 +219,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function ret=S(obj)
             % S: Hopf algebra antipode
-            S=obj.spec.SC{'_S'};
+            S=obj.spec.SC{'antipode'};
             ret=obj;
             ret.cf(:)=0;
             % for k1=1:obj.dim
@@ -283,18 +298,18 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function obj=setSC(obj,identifier,mu,eta,Delta,ep,S)
             % setSC ホップ代数の構造定数を設定する
-            % obj.SC.insert([identifier '_μ'],mu);
-            % obj.SC.insert([identifier '_η'],eta);
-            % obj.SC.insert([identifier '_Δ'],Delta);
-            % obj.SC.insert([identifier '_ε'],ep);
-            % obj.SC.insert([identifier '_S'],S);
-            obj.spec.SC{'_μ'}=mu;
-            obj.spec.SC{'_η'}=eta;
-            obj.spec.SC{'_Δ'}=Delta;
-            obj.spec.SC{'_ε'}=ep;
-            obj.spec.SC{'_S'}=S;
+            % obj.SC.insert([identifier 'prod'],mu);
+            % obj.SC.insert([identifier 'unit'],eta);
+            % obj.SC.insert([identifier 'coprod'],Delta);
+            % obj.SC.insert([identifier 'counit'],ep);
+            % obj.SC.insert([identifier 'antipode'],S);
+            obj.spec.SC{'prod'}=mu;
+            obj.spec.SC{'unit'}=eta;
+            obj.spec.SC{'coprod'}=Delta;
+            obj.spec.SC{'counit'}=ep;
+            obj.spec.SC{'antipode'}=S;
             Si=S^-1;
-            obj.spec.SC{'_Si'}=Si;
+            obj.spec.SC{'antipode_inv'}=Si;
             % Refer "Tensor_on_Vertex.jpg"
             % issue: U^*=AとA^*=Uどっちの演算？
             Tp=calcTensorExpression('mu{3,5,1}Delta{4,5,2}',[1,2,3,4]);
@@ -315,17 +330,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             obj.setIntegrals(Ir,Cr,Il,Cl);
         end
         function setIntegrals(obj,Ir,Cr,Il,Cl)
-            % Ir,Cr,Il,Cl (D,1) size
-            % obj.SC.insert([obj.identifier '_intr'],Ir);
-            % obj.SC.insert([obj.identifier '_cointr'],Cr);
-            % obj.SC.insert([obj.identifier '_intl'],Il);
-            % obj.SC.insert([obj.identifier '_cointl'],Cl);
-            % obj.SC.insert([obj.identifier '_CrIl'],dot(Cr,Il));      
-            obj.spec.SC{'_intr'}=Ir;
-            obj.spec.SC{'_cointr'}=Cr;
-            obj.spec.SC{'_intl'}=Il;
-            obj.spec.SC{'_cointl'}=Cl;
-            obj.spec.SC{'_CrIl'}=Cr.'*Il;
+            % Ir,Cr,Il,Cl (D,1) size    
+            obj.spec.SC{'intr'}=Ir;
+            obj.spec.SC{'cointr'}=Cr;
+            obj.spec.SC{'intl'}=Il;
+            obj.spec.SC{'cointl'}=Cl;
+            obj.spec.SC{'CrIl'}=Cr.'*Il;
         end
         function ret=verify(obj)
             try
@@ -339,13 +349,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % verifyHopf ホップ代数の構造定数を確認する
             D=obj.dim;
             I=eye(D);
-            mu=obj.getSC(['_μ']);
-            eta=obj.getSC(['_η']);
-            Delta=obj.getSC(['_Δ']);
-            ep=obj.getSC(['_ε']);
-            S=obj.getSC(['_S']);
-            Si=obj.getSC(['_Si']);
-
+            mu=obj.getSC('prod');
+            eta=obj.getSC('unit');
+            Delta=obj.getSC('coprod');
+            ep=obj.getSC('counit');
+            S=obj.getSC('antipode');
+            Si=obj.getSC('antipode_inv');
             % size
             assert(isequal(size(mu),[D D D]),"invalid size:μ")
             assert(isequal(size(eta),[D 1]),"invalid size:η")
@@ -405,10 +414,10 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             %  δ_r*u=ε(u)δ_r, u*δ_l=ε(u)δ_l,
             % ∫_r(u_1)u_2=∫_r(u), u_1∫_l(u_2)=∫_l(u)
 
-            intr=obj.getSC(['_intr']);
-            cointr=obj.getSC(['_cointr']);
-            intl=obj.getSC(['_intl']);
-            cointl=obj.getSC(['_cointl']);
+            intr=obj.getSC('intr');
+            cointr=obj.getSC('cointr');
+            intl=obj.getSC('intl');
+            cointl=obj.getSC('cointl');
             tmp=tensorprod(cointr,mu,1,1,Num=1);
             tmp2=tensorprod(ep,cointr,Num=1);
             assert(isequal_(tmp,tmp2),"right cointegral property error")
@@ -438,17 +447,17 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             isequal_=@(x,y)all(eqD(x,y,1e-5),"all");
             D=obj.dim;
             I=eye(D);
-            mu=obj.getSC(['_μ']);
-            eta=obj.getSC(['_η']);
-            Delta=obj.getSC(['_Δ']);
-            ep=obj.getSC(['_ε']);
-            S=obj.getSC(['_S']);
-            Si=obj.getSC(['_Si']);
+            mu=obj.getSC('prod');
+            eta=obj.getSC('unit');
+            Delta=obj.getSC('coprod');
+            ep=obj.getSC('counit');
+            S=obj.getSC('antipode');
+            Si=obj.getSC('antipode_inv');
 
-            intr=obj.getSC(['_intr']);
-            cointr=obj.getSC(['_cointr']);
-            intl=obj.getSC(['_intl']);
-            cointl=obj.getSC(['_cointl']);
+            intr=obj.getSC('intr');
+            cointr=obj.getSC('cointr');
+            intl=obj.getSC('intl');
+            cointl=obj.getSC('cointl');
             tmp=tensorprod(cointr,mu,1,1,Num=1);
             tmp2=tensorprod(ep,cointr,Num=1);
             assert(isequal_(tmp,tmp2),"right cointegral property error")
@@ -464,10 +473,10 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             
         end
         function dispInt(obj)
-            intr=obj.getSC(['_intr']);
-            cointr=obj.getSC(['_cointr']);
-            intl=obj.getSC(['_intl']);
-            cointl=obj.getSC(['_cointl']);
+            intr=obj.getSC('intr');
+            cointr=obj.getSC('cointr');
+            intl=obj.getSC('intl');
+            cointl=obj.getSC('cointl');
             T=table([intr cointr intl cointl].',VariableNames="coordinates",RowNames=["intr" "cointr" "intl" "cointl"]);
             disp(T)
         end
