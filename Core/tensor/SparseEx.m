@@ -1,12 +1,13 @@
 classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
     % SparseEx: A lightweight sparse array class using key-value representation
     %   Stores non-zero elements and their indices explicitly.
+    % if dims is empty, it is treated as a scalar and val is a scalar
 
     properties
         zero (1,1) =0; % Default value for zero elements
         key double       % NxR array: indices of non-zero elements
-        val (:,1)        % Nx1 array: corresponding non-zero values
-        size
+        val (:,1)=0        % Nx1 array: corresponding non-zero values
+        size % issue: rename size->dims
     end
 
     properties(Dependent)
@@ -92,12 +93,14 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                 arg.simplify_func = AlgebraConfig.H.simplify_func_Sparse;
                 arg.level  {mustBeMember(arg.level, {'','low', 'medium','high'})} =''  % 最適化の度合い
             end
+            if AlgebraConfig.H.DEBUG, obj.verify(); end
             obj=combineTerm(obj);
             if ~isempty(arg.level)&&strcmp(arg.level,'low')
                 arg.simplify_func=@(x)x;
             end
             obj.val=arg.simplify_func(obj.val);
             obj=obj.removeZero(arg.isZero);
+            if AlgebraConfig.H.DEBUG, obj.verify(); end
         end
         function obj=removeZero(obj,isZero)
             % Remove zero elements from the SparseEx object
@@ -111,10 +114,11 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         end
         function obj=combineTerm(obj)
             % Combine terms with the same key
-            if isempty(obj.key)
+            if isempty(obj.size)
                 obj.val = sum(obj.val);
                 return;
             end
+            if obj.Nelem==0, return; end
             [subscripts, sortIdx] = sortrows(obj.key); 
             sortedValues = obj.val(sortIdx);
             cumulativeSum = cumsum(sortedValues); % cumulative sum in that order
@@ -122,6 +126,20 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             obj.val = cumulativeSum([GrpEnds;end]) - [0; cumulativeSum(GrpEnds)];                     % sums per group
             obj.key =subscripts([GrpEnds;end],:);
         end
+        function verify(obj)
+            % Verify the integrity of the SparseEx object
+            if isempty(obj.size)
+                assert(isempty(obj.key) && isscalar(obj.val), ...
+                    'scalar error');
+            elseif isscalar(obj.size)
+                assert(size(obj.key, 1) == numel(obj.val), ...
+                    'Vector error: key and value sizes mismatch');
+            else
+                assert(isequal(size(obj.key), [obj.Nelem, obj.rank]), ...
+                    'Matrix error: key and value sizes mismatch');
+            end
+        end
+
         function ret= ge(arg1,arg2)
             % Greater than or equal comparison
             arguments

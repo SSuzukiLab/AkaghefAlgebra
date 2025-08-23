@@ -371,6 +371,7 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
             arg=removeZero(arg);
         end
         function obj=replace(obj,Ntimes)
+            if obj.term==0, return; end
             obj.sortedFlag=false(obj.term,obj.rank);
             obj.inverseSimplifiedFlag=false(obj.term,obj.rank);
             for i=1:Ntimes

@@ -10,7 +10,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         ZERO (1,:) cell %zero element of each vector space
         spec (1,1) SpaceSpec % specify principle of space
         % also, store structure constant 
-        sparse SparseEx
+        sparse SparseEx=SparseEx
     end
     properties(Dependent)
         dim %dimension of the vector space

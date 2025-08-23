@@ -7,18 +7,15 @@ classdef AlgebraConfig < dynamicprops & matlab.mixin.SetGet
         % Path of this class file
         ProjectPath = fileparts(mfilename('fullpath'));
     end
-
     properties
-
-
+        DEBUG=false
     end
-
     methods
         function obj = AlgebraConfig()
             persistent flag
             if ~isempty(flag)
-                error(['TopologyConfig is a singleton. ' ...
-                    'Use TopologyConfig.H to access the instance.']);
+                error(['AlgebraConfig is a singleton. ' ...
+                    'Use AlgebraConfig.H to access the instance.']);
             end
             flag=1;
         end
