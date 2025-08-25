@@ -1,7 +1,7 @@
 classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
     % SparseEx: A lightweight sparse array class using key-value representation
     %   Stores non-zero elements and their indices explicitly.
-    % if dims is empty, it is treated as a scalar and val is a scalar
+    % if dims is empty, it is treated as a scalar and val is a scalar825
 
     properties
         zero (1,1) =0; % Default value for zero elements
@@ -74,6 +74,63 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         function ret = get.rank(obj)
             % Return the rank of the tensor (number of dimensions)
             ret = length(obj.size);
+        end
+        function ret=permute(obj,dimorder)
+            % permute rearranges the dimensions of an array in the order 
+            % specified by the vector dimorder.
+            if isempty(obj.size)
+                ret = obj; % scalar case
+                return;
+            end
+            % Validate and adjust the permutation argument
+            assert(length(dimorder)==obj.rank,'rank mismatch')
+            obj.key = obj.key(:,dimorder);
+            obj.size = obj.size(dimorder);
+            ret = obj;
+        end
+        function ret=mtimes(i1,i2)
+            % Multiplication of two SparseEx objects (element-wise)
+            arguments
+                i1 SparseEx
+                i2 SparseEx
+            end
+            if isempty(i1.size)&&isempty(i2.size)
+                ret=SparseEx(i1.val.*i2.val);
+                return;
+            end
+            if isempty(i1.size)
+                ret=i2;
+                ret.val=i1.val.*ret.val;
+                return;
+            end
+            if isempty(i2.size)
+                ret=i1;
+                ret.val=i2.val.*ret.val;
+                return;
+            end
+            assert(i1.rank<=2 && i2.rank<=2,'Both inputs must be matrices')
+            ret=SparseEx(i1.toMatrix().*i2.toMatrix());
+        end
+        function obj=transpose(obj)
+            % Transpose the SparseEx object (swap first two dimensions)
+            warning("transpose")
+            switch obj.rank
+                case 0
+                    return;
+                case 1
+                    obj.key=[obj.key,ones(obj.Nelem,1)];
+                    obj.size=[obj.size,1];
+                case 2
+                otherwise
+                    error("transpose requires rank<=2")
+            end
+            obj.size=obj.size([2,1]);
+            obj.key(:,1:2) = obj.key(:,[2,1]);
+        end
+        function obj=ctranspose(obj)
+            % Transpose the SparseEx object (swap first two dimensions)
+            obj=transpose(obj);
+            obj.val = conj(obj.val);
         end
         function ret=toMatrix(obj)
             if isempty(obj.size)

@@ -20,7 +20,6 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             end
             [M,N]=rat(ratio);
             Z=Uqsl2BorelSmall();
-            Z=Z.setBase(Z.bs0.get(N));
             Z.N=N;
             Z.M=M;
             if isfield(arg,'q')
@@ -31,6 +30,7 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                 Z.q=sym("z"+N)^M;
                 assume(sym("z"+N)^N==1);
             end
+            Z=Z.setBase(Z.bs0.get(N));
             Z.setConst(style);
             K=Z.make(1,2);
             E=Z.make(1,N+1);

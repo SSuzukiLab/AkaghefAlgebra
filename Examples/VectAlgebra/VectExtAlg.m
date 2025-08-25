@@ -22,6 +22,7 @@ classdef(InferiorClasses=?sym) VectExtAlg<VectAlg
             end
         end
     end
+    
     methods
         function obj=simplify(obj)
             cf=obj.cf;
@@ -40,7 +41,7 @@ classdef(InferiorClasses=?sym) VectExtAlg<VectAlg
             end
         end
         function setConst(obj)
-            N=3;
+            N=obj.n;
             Z=StrExtAlg.getGenerator(N);
             b=fliplr(dec2bin(0:2^N-1)=='1');
             powerset = arrayfun(@(k){find(b(k,:))}, 1:2^N);
@@ -66,7 +67,8 @@ classdef(InferiorClasses=?sym) VectExtAlg<VectAlg
                     C(i,idx(j,1),idx(j,2))=cf(j);
                 end
             end
-            epsilon=zeros(2^N,1);1;
+            epsilon=zeros(2^N,1);
+            epsilon(1)=1;
             eta = epsilon;
             lp=cellfun(@length,powerset);
             S=diag((-1).^lp);
