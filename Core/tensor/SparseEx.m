@@ -113,7 +113,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                 return;
             end
             assert(i1.rank<=2 && i2.rank<=2,'Both inputs must be matrices')
-            ret=SparseEx(i1.toMatrix().*i2.toMatrix());
+            ret=SparseEx(i1.toMatrix()*i2.toMatrix());
         end
         function ret=mpower(obj,arg)
             % Power operation for SparseEx object
@@ -126,7 +126,14 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                 return;
             end
             assert(obj.rank==2,'Input must be a matrix')
-            if isnumeric(arg) && rem(arg,1)==0 && arg > 0
+            if arg==0
+                ret=SparseEx(eye(obj.size(1),'like',obj.val));
+            elseif isnumeric(arg) && rem(arg,1)==0 
+                if arg<0
+                    M=obj.toMatrix()^-1;
+                    obj=SparseEx(M);
+                    arg=-arg;
+                end
                 ret = obj;
                 base = obj;
                 exp = arg-1;
@@ -137,8 +144,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                     base = base * base;
                     exp = floor(exp / 2);
                 end
-            elseif arg==0
-                ret=SparseEx(eye(obj.size(1),'like',obj.val));
+            
             else
                 M=obj.toMatrix();
                 ret=SparseEx(M^arg);
@@ -164,6 +170,9 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             % Transpose the SparseEx object (swap first two dimensions)
             obj=transpose(obj);
             obj.val = conj(obj.val);
+        end
+        function ret=sparse(obj)
+            ret=sparse(obj.toMatrix);
         end
         function ret=toMatrix(obj)
             if isempty(obj.size)
