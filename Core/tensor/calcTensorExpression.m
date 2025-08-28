@@ -183,7 +183,7 @@ function val=multiplyCoeff(tbl,T,ord)
     val.val=V;
     val.key=tbl{:,"v"+ord};
     val.size=dims;
-    val=val.C;
+    val=val.C(level="low");
     % 
     % % Initialize the result array with the appropriate class
     % val = zeros([dims, 1], class(V));

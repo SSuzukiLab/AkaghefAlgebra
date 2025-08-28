@@ -15,7 +15,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         rank             % rank of tensor
     end
     methods(Static)
-        function obj=set_vk(key,val,size)
+        function obj=set_vkd(val,key,size)
             obj = SparseEx();
             obj.key = key;
             obj.val = val;
@@ -61,9 +61,13 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
     methods
         function obj = SparseEx(arg)
             % Constructor: Converts numeric array into SparseEx format
-            if nargin>0&&~isa(arg, 'SparseEx')
+            if nargin>0
                 % issue:sparseExへの変換メソッドを持っていた場合はどうする？
-                obj=SparseEx.convert(arg);
+                if ~isa(arg, 'SparseEx')
+                    obj=SparseEx.convert(arg);
+                elseif isa(arg,"SparseEx")
+                    obj=SparseEx.set_vkd(arg.val,arg.key,arg.size);
+                end
             end
         end
 
@@ -110,6 +114,35 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             end
             assert(i1.rank<=2 && i2.rank<=2,'Both inputs must be matrices')
             ret=SparseEx(i1.toMatrix().*i2.toMatrix());
+        end
+        function ret=mpower(obj,arg)
+            % Power operation for SparseEx object
+            arguments
+                obj SparseEx
+                arg (1,1)
+            end
+            if isempty(obj.size)
+                ret=SparseEx(obj.val^arg);
+                return;
+            end
+            assert(obj.rank==2,'Input must be a matrix')
+            if isnumeric(arg) && rem(arg,1)==0 && arg > 0
+                ret = obj;
+                base = obj;
+                exp = arg-1;
+                while exp > 0
+                    if mod(exp, 2) == 1
+                        ret = ret * base;
+                    end
+                    base = base * base;
+                    exp = floor(exp / 2);
+                end
+            elseif arg==0
+                ret=SparseEx(eye(obj.size(1),'like',obj.val));
+            else
+                M=obj.toMatrix();
+                ret=SparseEx(M^arg);
+            end
         end
         function obj=transpose(obj)
             % Transpose the SparseEx object (swap first two dimensions)
@@ -162,6 +195,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         function obj=removeZero(obj,isZero)
             % Remove zero elements from the SparseEx object
             idx=find(isZero(obj.val));
+            if obj.rank==0, return; end
             obj.val(idx)=[];
             obj.key(idx,:)=[];
             if isempty(obj.val)
@@ -268,7 +302,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             % end
             ret.val=[arg1.val;arg2.val];
             ret.key=[arg1.key;arg2.key];
-            ret=ret.C;
+            ret=ret.C(level='low');
         end
 
         function arg=uminus(arg)
