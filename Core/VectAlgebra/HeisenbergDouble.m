@@ -16,7 +16,7 @@ classdef HeisenbergDouble<VectAlg
             D=H1.dim;
             Z=HeisenbergDouble();
             Z.rdim=D;
-            Z.cf=H1.Czeros([D D]);
+            Z.cf=H1.Czeros([D^2,1]);
             Z.H1=H1;
             Z.H2=H2;
             Z=Z.setBase(TensorBases([H1.bs H2.bs],name));
@@ -61,12 +61,14 @@ classdef HeisenbergDouble<VectAlg
             C=H2.getSC('coprod');
             eta=H2.getSC('unit');
             ep=H2.getSC('counit');
-            MH2=permute(tensorprod(tensorprod(tensorprod(C,C) ...
-                ,M,[3 5],[1 2]),M,4,1),[2 3 4 5 1 6]);
+            MH2=calcTensorExpression('C{5,1,7}C{2,9,8}M{7,9,3}M{8,4,6}',[5,6]);
+            % MH2=permute(tensorprod(tensorprod(tensorprod(C,C) ...
+            %     ,M,[3 5],[1 2]),M,4,1),[2 3 4 5 1 6]);
             MH = reshape(MH2, D^2, D^2, D^2);
+            
             etaH=reshape(ep*eta.',D^2,1);
-            obj.SC.insert([obj.identifier 'prod'],MH);
-            obj.SC.insert([obj.identifier 'unit'],etaH);
+            obj.SC.insert(['prod'],MH);
+            obj.SC.insert(['unit'],etaH);
         end
 
         function [G,W,Wi]=getGW(obj)

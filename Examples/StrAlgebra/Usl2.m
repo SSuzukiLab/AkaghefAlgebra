@@ -22,9 +22,9 @@ classdef(InferiorClasses=?sym) Usl2<StrAlg&UEAlg
             persistent S
             if isempty(S)
                 S=struct;
-                S.rel(1)=Usl2.make([1 -1 -1],{[1 2] [2 1] 3});
-                S.rel(2)=Usl2.make([1 -1 -2],{[3 1] [1 3] 1});
-                S.rel(3)=Usl2.make([1 -1 2],{[3 2] [2 3] 2});
+                S.rel(1)=obj.make([1 -1 -1],{[1 2] [2 1] 3});
+                S.rel(2)=obj.make([1 -1 -2],{[3 1] [1 3] 1});
+                S.rel(3)=obj.make([1 -1 2],{[3 2] [2 3] 2});
                 S.comm=[nan;nan];
                 S.inv=[nan;nan];
                 S=obj.get2vRelation_(S);

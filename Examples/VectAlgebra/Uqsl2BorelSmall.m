@@ -15,10 +15,11 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             arguments
                 ratio % =M/N 
                 style {mustBeMember(style,["L","R"])}
-                arg.qtype {mustBeMember(arg.qtype,["complex","sym"])} = "complex"
+                arg.qtype {mustBeMember(arg.qtype,["complex","sym"])} = "complex" % not suppoerted for sym
                 arg.q
             end
             [M,N]=rat(ratio);
+            assert(0<M&&M<N,"r=ratio must be inside (0,1), q=exp(2πir)")
             Z=Uqsl2BorelSmall();
             Z.N=N;
             Z.M=M;
@@ -27,8 +28,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             elseif strcmp(arg.qtype,"complex")
                 Z.q=exp(2*pi*1i*M/N);
             else
-                Z.q=sym("z"+N)^M;
-                assume(sym("z"+N)^N==1);
+                zN=sym("z"+N);
+                Z.q=zN^M;
+                assume([zN^N==1,sum(zN.^(0:N-1))==0]);
             end
             Z=Z.setBase(Z.bs0.get(N));
             Z.setConst(style);
@@ -55,7 +57,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             % Multiplication tensor M(i,j,k): e_i * e_j = sum_k M(i,j,k) * e_k
             N=obj.N;
             q=obj.q;
-            M = zeros(N*[1 1 1 1 1 1],'like',q);
+            % M = zeros(N*[1 1 1 1 1 1],'like',q);
+            key=[];
+            val=[];
             for i1=0:N-1
                 for i2=0:N-1
                     for j1=0:N-1
@@ -63,26 +67,33 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                             if j1+j2>=N
                                 continue
                             end
-                            M(i1+1,j1+1,i2+1,j2+1,mod(i1+i2,N)+1,j1+j2+1) = q^(-j1*i2);
+                            % M(i1+1,j1+1,i2+1,j2+1,mod(i1+i2,N)+1,j1+j2+1) = q^(-j1*i2);
+                            key=[key;J(i1,j1),J(i2,j2),J(mod(i1+i2,N),j1+j2)];
+                            val=[val;q^(-j1*i2)];
                         end
                     end
                 end
             end
-            M=reshape(M,N^2*[1 1 1]);
-
+            % M=reshape(M,N^2*[1 1 1]);
+            M=SparseEx.set_vkd(val,key,N^2*[1 1 1]);
             qN=qNumA(q);
             % Comultiplication tensor C(i,j,k): Δ(e_i) = sum_{j,k} C(i,j,k) * (e_j ⊗ e_k)
             % Δ(E)=1⊗E+E⊗K, Δ(K)=K⊗K,
-            C = zeros(N*[1 1 1 1 1 1],'like',q);
+            % C = zeros(N*[1 1 1 1 1 1],'like',q);
+            val=[];
+            key=[];
             for i=0:N-1
                 for j=0:N-1
                     for k=0:j
-                        C(i+1,j+1,i+1,k+1,mod(i+k,N)+1,j-k+1) = ...
-                            qN.nchoosek(j,k)*q^(-k*(j-k));
+                        % C(i+1,j+1,i+1,k+1,mod(i+k,N)+1,j-k+1) = ...
+                        %     qN.nchoosek(j,k)*q^(-k*(j-k));
+                            key=[key;J(i,j),J(i,k),J(mod(i+k,N),j-k)];
+                            val=[val;qN.nchoosek(j,k)*q^(-k*(j-k))];
                     end
                 end
             end
-            C=reshape(C,N^2*[1 1 1]);
+            % C=reshape(C,N^2*[1 1 1]);
+            C=SparseEx.set_vkd(val,key,N^2*[1 1 1]);
 
             % Counit vector: epsilon_i = ε(e_i)
             % ε(E)=0, ε(K)=1
@@ -93,16 +104,21 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             eta(1) = 1;
             % Antipode matrix: S(j,i) = coefficient of e_j in S(e_i)
             % S(E)=-EK^-1, S(K)=K^-1
-            S = zeros(N*[1 1 1 1],'like',q);
+            % S = zeros(N*[1 1 1 1],'like',q);
+            key=[];
+            val=[];
             for i=0:N-1
                 for j=0:N-1
-                    S(mod(-i-j,N)+1,j+1,i+1,j+1)=(-1)^j*q^(i*j+j*(j+1)/2);
+                    % S(mod(-i-j,N)+1,j+1,i+1,j+1)=(-1)^j*q^(i*j+j*(j+1)/2);
+                    key=[key;J(mod(-i-j,N),j),J(i,j)];
+                    val=[val;(-1)^j*q^(i*j+j*(j+1)/2)];
                 end
             end
-            S=reshape(S,N^2*[1 1]);
+            % S=reshape(S,N^2*[1 1]);
+            S=SparseEx.set_vkd(val,key,N^2*[1 1]);
             if style=="L"
                 C=permute(C,[1,3,2]);
-                S=S^-1;
+                S=S.toMatrix()^-1;
             end
             obj.setSC(obj.identifier,M,eta,C,epsilon,S);
             
@@ -128,6 +144,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             obj.setIntegrals(Ir,Cr,Il,Cl);
             
             % obj.setIntegrals()
+            function idx=J(idx1,idx2)
+                idx=idx1+N*idx2+1;
+            end
         end
     end
 end

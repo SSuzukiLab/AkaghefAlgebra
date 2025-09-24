@@ -54,8 +54,8 @@ classdef(InferiorClasses=?sym) SweedlerAlg<VectAlg
             S = zeros(4,4);
             S(1,1) = 1;
             S(2,2) = 1;
-            S(3,4) = -1;
-            S(4,3) = 1;
+            S(3,4) = 1;
+            S(4,3) = -1;
             
             
             

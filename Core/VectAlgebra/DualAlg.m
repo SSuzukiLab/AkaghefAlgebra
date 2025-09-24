@@ -33,13 +33,13 @@ classdef DualAlg<VectAlg
         function setConst(obj)
             SCdual=dictionary;
             SC=obj.spec.data.dual.SC;
-            SCdual{'prod'}=SC{'coprod'};
-            SCdual{'coprod'}=SC{'prod'};
+            SCdual{'prod'}=permute(SC{'coprod'},[2,3,1]);
+            SCdual{'coprod'}=permute(SC{'prod'},[3,1,2]);
             SCdual{'unit'}=SC{'counit'};
             SCdual{'counit'}=SC{'unit'};
             SCdual{'antipode'}=SC{'antipode'}.';
             obj.spec.SC=SCdual;
-
+            obj.setHP();
         end
 
 
@@ -91,33 +91,32 @@ classdef DualAlg<VectAlg
         %     sObj = DualAlg(obj.basis, sCoeffs);
         % end
 
-        function setHP(obj)
+        function setHP(obj,hp)
             % Set the structure constants for the Hopf algebra pairing
             % This is a placeholder; actual implementation will depend on the specific algebra
-            hp=eye(obj.dim);
-            obj.SC.insert([obj.identifier '_HP'],hp);
+            if nargin==1
+                hp=SparseEx(eye(obj.dim));
+            end
+            obj.spec.SC{'HP'}=hp;
         end
         function ret=HP(i1,i2)
             % Hopf algebra pairing
             % i1: StrAlg
             % i2: StrAlg
-            % [i1,i2]=alignNum(i1,i2);
-            assert(isequal(i1.bs,i2.bs),'異なる空間での積エラー')
-            if isa(i1,'DualAlg')
-                z=i1.ZERO{1};
+            % M_ij=<dualobj_i,obj_j>
+            assert(isa(i1,"VectAlg")&&isa(i2,"VectAlg"))
+            dualpair=[(isa(i1,"DualAlg")&&i1.dualobj.spec==i2.spec), ...
+                (isa(i2,"DualAlg")&&i2.dualobj.spec==i1.spec)];
+            if dualpair(1)
+                M=i1.getSC('HP');
+            elseif dualpair(2)
+                M = i2.getSC('HP').';
             else
-                z=i2.ZERO{1};
+                error("must be dual pair")
             end
-            M=z.SC.get([z.identifier '_HP']);
-            ret=i1;
-            ret.cf(:)=0;
-            for k1=1:i1.dim
-                for k2=1:i2.dim
-                    for k3=1:i1.dim
-                        ret.cf(k3)=ret.cf(k3)+M(k1,k2,k3)*i1.cf(k1)*i2.cf(k2);
-                    end
-                end
-            end
+            s1=i1.sparse;
+            s2=i2.sparse;
+            ret=toMatrix(calcTensorExpression('s1{1}M{1,2}s2{2}',[]));
         end
     end
 end

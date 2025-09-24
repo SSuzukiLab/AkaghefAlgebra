@@ -11,7 +11,7 @@ classdef qNumS
             if n==0
                 ret=1;
             else
-                ret=(1-x*q^(n-1))*qNumS.pch(x,n-1,q);
+                ret=(1-x*q^(n-1))*qNumS.pch(q,x,n-1);
             end
         end
         function out=fac(q,n)

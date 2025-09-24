@@ -8,7 +8,7 @@ function ret = coeffsFixed(expr,maxDeg,var)
         maxDeg 
         var =symvar(expr)
     end
-    ret=zeros([maxDeg numel(expr)],'sym');
+    ret=zeros([maxDeg+1 numel(expr)],'sym');
     Nvar=1:numel(var);
     if isempty(Nvar)
         ret=zeros([maxDeg+1 1]);

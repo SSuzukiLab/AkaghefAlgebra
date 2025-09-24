@@ -173,12 +173,16 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             end
         end
         function ret=unit(arg)
-            eta=1;
-            for k=1:arg.rank
-                eta_=arg.bs(k).ZERO.getSC('unit');
-                eta=tensorprod(eta,eta_,Num=k);
+            eta=struct;
+            expr="";
+            R=arg.rank;
+            for k=1:R
+                eta.("t"+k)=arg.bs(k).ZERO.getSC('unit');
+                expr=expr+sprintf("eta.t%d{%d}",k,k);
             end
-            ret=arg.set_c(shiftdim(eta,1));
+            eta=calcTensorExpression(expr,1:R);
+            ret=arg;
+            ret.sparse=eta;
         end
         %テンソル積
         function o=or(i1,i2)
@@ -208,26 +212,19 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function ret=Delta(obj)
             ret=obj|obj;
             ret.cf(:)=0;
-            C=obj.getSC(['coprod']);
-            ret.cf=tensorprod(C,obj.cf,1,1);
-            % for k1=1:obj.dim
-            %     for k2=1:obj.dim
-            %         for k3=1:obj.dim
-            %             ret.cf(k2,k3)=ret.cf(k2,k3)+C(k1,k2,k3)*obj.cf(k1);
-            %         end
-            %     end
-            % end
+            C=obj.getSC('coprod');
+            % ret.cf=tensorprod(C,obj.cf,1,1);
+            ret.sparse=calcTensorExpression("obj.cf{1}C{1,2,3}",[2,3]);
         end
         function ret=counit(obj)
-            ep=obj.SC.get([obj.identifier 'counit']);
-            ret=obj.cf.'*ep;
-            ep=1;
-            for k=1:arg.rank
-                eta_=arg.bs(k).ZERO.getSC('counit');
-                eta=tensorprod(eta,eta_,Num=k);
+            ep=struct;
+            R=obj.rank;
+            expr="obj.cf{"+join(string(1:R),",")+"}";
+            for k=1:R
+                ep.("t"+k)=obj.bs(k).ZERO.getSC('counit');
+                expr=expr+sprintf("ep.t%d{%d}",k,k);
             end
-            ret=arg.set_c(shiftdim(eta,1));
-
+            ret=calcTensorExpression(expr,[]);
         end
         function ret=S(obj)
             % S: Hopf algebra antipode
@@ -385,30 +382,30 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % unitality
             % tmp=tensorprod(eta,mu,1,1,Num=1);
             tmp=calcTensorExpression('eta{1}mu{1,2,3}',[2,3]);
-            assert(isequal_(tmp,I),"left unitality error")
+            assertT(tmp,I,"left unitality error")
             % tmp=tensorprod(eta,mu,1,2,Num=1);
             tmp=calcTensorExpression('eta{2}mu{1,2,3}',[1,3]);
-            assert(isequal_(tmp,I),"right unitality error")
+            assertT(tmp,I,"right unitality error")
             % counitality
             % tmp=tensorprod(ep,Delta,1,2,Num=1);
             tmp=calcTensorExpression('ep{2}Delta{1,2,3}',[1,3]);
-            assert(isequal_(tmp,I),"left counitality error")
+            assertT(tmp,I,"left counitality error")
             % tmp=tensorprod(ep,Delta,1,3,Num=1);
             tmp=calcTensorExpression('ep{3}Delta{1,2,3}',[1,2]);
-            assert(isequal_(tmp,I),"right counitality error")
+            assertT(tmp,I,"right counitality error")
 
             % associativity
             % tmp=tensorprod(mu,mu,3,1);
             tmp=calcTensorExpression('mu{1,2,3}mu{3,4,5}',[1,2,4,5]);
             % tmp2=permute(tensorprod(mu,mu,2,3),[1 3 4 2]);
             tmp2=calcTensorExpression('mu{1,2,3}mu{4,5,2}',[1,4,5,3]);
-            assert(isequal_(tmp,tmp2),"associativity error")
+            assertT(tmp,tmp2,"associativity error")
             % coassociativity
             % tmp=permute(tensorprod(Delta,Delta,2,1),[1 3 4 2]);
             tmp=calcTensorExpression('Delta{1,2,3}Delta{2,4,5}',[1,4,5,3]);
             % tmp2=tensorprod(Delta,Delta,3,1);
             tmp2=calcTensorExpression('Delta{1,2,3}Delta{3,4,5}',[1,2,4,5]);
-            assert(isequal_(tmp,tmp2),"coassociativity error")
+            assertT(tmp,tmp2,"coassociativity error")
 
             % bialgebra property
             %  Δ∘μ = (μ⊗μ)∘τ23∘(Δ⊗Δ)
@@ -421,8 +418,7 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 'Delta{1,3,4}Delta{2,5,6}mu{3,5,7}mu{4,6,8}',[1,2,7,8]);
             tmp2=calcTensorExpression( ...
                 'mu{1,2,3}Delta{3,7,8}',[1,2,7,8]);
-            dif=tmp-tmp2;
-            assert(isequal_(dif.val,0),"bialgebra property error")
+            assertT(tmp,tmp2,"bialgebra property error")
 
 
             % antipode property
@@ -433,12 +429,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % tmp=tensorprod(S,Delta,2,2);
             % tmp=tensorprod(tmp,mu,[1,3],[1,2]);
             tmp=calcTensorExpression('S{2,3}Delta{1,3,4}mu{2,4,5}',[1,5]);
-            assert(isequal_(tmp,tmp2),"antipode left inverse error")
+            assertT(tmp,tmp2,"antipode left inverse error")
 
             % tmp=tensorprod(Delta,S,3,2);
             % tmp=tensorprod(tmp,mu,[2 3],[1 2]);
             tmp=calcTensorExpression('Delta{1,2,3}S{4,3}mu{2,4,5}',[1,5]);
-            assert(isequal_(tmp,tmp2),"antipode right inverse error")
+            assertT(tmp,tmp2,"antipode right inverse error")
 
             % integral property
             %  δ_r*u=ε(u)δ_r, u*δ_l=ε(u)δ_l,
@@ -452,12 +448,12 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             tmp=calcTensorExpression('cointr{1}mu{1,2,3}',[2,3]);
             % tmp2=tensorprod(ep,cointr,Num=1);
             tmp2=calcTensorExpression('ep{1}cointr{2}',[1,2]);
-            assert(isequal_(tmp,tmp2),"right cointegral property error")
+            assertT(tmp,tmp2,"right cointegral property error")
             % tmp=tensorprod(intr,Delta,1,2,Num=1);
             tmp=calcTensorExpression('intr{2}Delta{1,2,3}',[1,3]);
             % tmp2=tensorprod(intr,eta,Num=1);
             tmp2=calcTensorExpression('intr{1}eta{2}',[1,2]);
-            assert(isequal_(tmp,tmp2),"right integral property error")
+            assertT(tmp,tmp2,"right integral property error")
             % tmp=tensorprod(intl,cointr,1,2,Num=1);
             % tmp2=tensorprod(intl,cointr,Num=1);
             % issue:leftはまだ未実装
@@ -466,13 +462,10 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             assert(isequal_(tmp([1 2 4]),[1 1 1]),"integral normalization error")
             % intl*cointrのみCrIlになる．他はnormalizeされる
             disp("Confirmed to be a Hopf algebra")
-            function assertT(expr1,ord1,expr2,ord2,msg)
-                % assertT: assert with tensor order
-                val1=calcTensorExpression(expr1,ord1);
-                val2=calcTensorExpression(expr2,ord2);
-                diff=val1-val2;
-                
-                if ~isequal(size(expr1),ord1) || ~isequal(size(expr2),ord2)
+            function assertT(val1,val2,msg)
+                diff=C(val1-val2);
+                cond=isequal_(diff.val,0);
+                if ~cond
                     error("VectAlg:verifyHopf",msg)
                 end
             end
@@ -507,10 +500,10 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             
         end
         function dispInt(obj)
-            intr=obj.getSC('intr');
-            cointr=obj.getSC('cointr');
-            intl=obj.getSC('intl');
-            cointl=obj.getSC('cointl');
+            intr=toMatrix(obj.getSC('intr'));
+            cointr=toMatrix(obj.getSC('cointr'));
+            intl=toMatrix(obj.getSC('intl'));
+            cointl=toMatrix(obj.getSC('cointl'));
             T=table([intr cointr intl cointl].',VariableNames="coordinates",RowNames=["intr" "cointr" "intl" "cointl"]);
             disp(T)
         end
@@ -581,7 +574,11 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             base=categorical(join(fliplr(T{:,:})," ⊗ ",2));
             coeff=arg.cf(:);
             if CR.H.vectD1removeZero
-                idx=arg.removeZero;
+                if ~isa(coeff,'sym')
+                    idx=arg.removeZero;
+                else
+                    idx=logical(coeff~=0);
+                end
                 coeff=coeff(idx);
                 base=base(idx);
                 if ~any(idx)
