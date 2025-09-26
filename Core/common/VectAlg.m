@@ -57,6 +57,31 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 end
             end
         end
+        function ret=getMor(obj,arg)
+            % getMor(obj,arg) get morphism of operation
+            %   obj: VectAlg instance, arg:morphism name
+            % arg: 'prod','unit','coprod','counit','antipode','antipode_inv'
+            arguments
+                obj VectAlg
+                arg (1,1) string {mustBeMember(arg,["id","prod","unit","coprod","counit","antipode","antipode_inv"])}
+            end
+            sp=obj.spec;
+            bs=sp.base;
+            switch arg
+                case "prod", Nio=[2,1];
+                case "unit", Nio=[0,1];
+                case "coprod", Nio=[1,2];
+                case "counit", Nio=[1,0];
+                case "antipode", Nio=[1,1];
+                case "antipode_inv", Nio=[1,1];
+                case "id"
+                    ret=VectHomAlg.id(obj);
+                    return
+                otherwise
+                    error("PolAlg:getMor","invalid input")
+            end
+            ret=VectHomAlg.get(sp.SC{arg},repmat(bs,1,Nio(1)),repmat(bs,1,Nio(2)),sp,sp);
+        end
 
         function [i1,i2]=alignNum(i1,i2)
             % 型をStrAlgにする
@@ -564,14 +589,36 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
         % テーブル形式表示
         function disp1(arg)
+            base_=arg.bs;
+            idx_conv=BaseConverter.H.getIdx(base_);
+            base_(idx_conv>0)=BaseConverter.H.base1(idx_conv(idx_conv>0));
 
-            bsnames=fliplr(arrayfun(@string,arg.bs,UniformOutput=false));
+            bsnames=fliplr(arrayfun(@string,base_,UniformOutput=false));
             if isempty(bsnames)
                 disp(table(arg.cf,VariableNames="coeff"))
                 return
             end
             T=combinations(bsnames{:});
             base=categorical(join(fliplr(T{:,:})," ⊗ ",2));
+            sp=arg.sparse;
+            R=arg.rank;
+            e1=zeros(1,R);
+            e2=strings(1,R);
+            L=struct;
+            for i=1:R
+                if idx_conv(i)==0
+                    e1(i)=i;
+                    e2(i)="";
+                else
+                    e1(i)=i+R;
+                    e2(i)=sprintf("L.m%d{%d,%d}",i,i,i+R);
+                    L.("m"+i)=BaseConverter.H.matrix{idx_conv(i)};
+                end              
+            end
+            expr=sprintf("sp{%s}",join(string(1:R),","))+join(e2);
+            sp=calcTensorExpression(expr,e1);
+            arg.sparse=sp;
+            arg.bs=base_;
             coeff=arg.cf(:);
             if CR.H.vectD1removeZero
                 if ~isa(coeff,'sym')

@@ -5,6 +5,8 @@ classdef Bases<matlab.mixin.Heterogeneous&handle
     end
     properties
         name (1,:) char='basis' %name of basis
+    end
+    properties(Transient)
         ZERO 
     end
     properties
