@@ -150,6 +150,32 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                 ret=SparseEx(M^arg);
             end
         end
+        function ret=tensorprod(i1,i2,arg1,arg2)
+            arguments
+                i1 SparseEx
+                i2 SparseEx
+                arg1 (1,:) double=[]
+                arg2 (1,:) double=[]
+            end
+            idx1=1:i1.rank;
+            idx2=1:i2.rank;
+            assert(all(ismember(arg1,idx1)),'arg1 out of range')
+            assert(all(ismember(arg2,idx2)),'arg2 out of range')
+            assert(length(arg1)==length(arg2),'arg1 and arg2 must have the same length')
+            N=i1.rank+ i2.rank;
+            N2=length(arg1);
+            idx1(arg1)=N+(1:N2);
+            idx2=idx2+i1.rank;
+            idx2(arg2)=N+(1:N2);
+            idxo=setdiff([idx1,idx2],N+(1:N2));
+            if isempty(arg1), arg1=1:i1.rank; end
+            if isempty(arg2), arg2=1:i2.rank; end
+            idx1=join(string(idx1),",");
+            idx2=join(string(idx2),",");
+            if isempty(arg1), idx1=""; end
+            if isempty(arg2), idx2=""; end
+            ret=calcTensorExpression(sprintf('i1{%s}i2{%s}',idx1,idx2),idxo);
+        end
         function obj=transpose(obj)
             % Transpose the SparseEx object (swap first two dimensions)
             warning("transpose")

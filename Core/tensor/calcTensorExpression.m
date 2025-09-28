@@ -19,6 +19,7 @@ function val=calcTensorExpression(str,ord,Elem2NonzeroIndices)
     %   - indexTable (cell array)       : table of subscripts and coefficients of terms of tensor
     %   - ID (uint)               : numbering of input tensors
     %
+    str=strip(str);
     T=parseFormulaArgument(str);
     % Refactor to avoid cross-frame eval. Treat variables as function inputs/outputs. This is fastest, safest, and debuggable.
     % Use nested functions when you need true shared workspace (lexical scoping) instead of dynamic scoping.
@@ -40,12 +41,14 @@ function T = parseFormulaArgument(arg)
     % Match chemical symbols with corresponding indices
     pattern = '(?<label>[A-Za-z\(\)\^\-\d]+)\{(?<indices>[0-9,]+)\}';
     pattern = '(?<label>[A-Za-z\(\)\^\-\d]+(?:\.[A-Za-z\(\)\^\-\d]+)?)\{(?<indices>[0-9,]+)\}';
-    pattern = '(?<label>[A-Za-z\(\)\^\-\d\.]+)\{(?<indices>[0-9,]+)\}';
+    pattern = '(?<label>[A-Za-z\(\)\^\-\d\.]+)\{(?<indices>[0-9,]*)\}';
     tokens = regexp(arg, pattern, 'names');
 
     labels = string({tokens.label})';
     legList={tokens.indices};
+    scalar_idx=cellfun(@isempty,legList);
     legList=cellfun(@(str){str2double(strsplit(str, ','))},legList).';
+    legList(scalar_idx)={zeros(1,0)};
     ID=(1:length(labels)).';
 
     T = table(ID,labels, legList);
