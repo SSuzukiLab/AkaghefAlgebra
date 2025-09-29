@@ -31,6 +31,9 @@ classdef BaseConverter<handle
             obj.base1(end+1)=base1;
             obj.matrix{end+1}=matrix;
         end
+        function setEn(obj,base,en)
+            obj.enable(obj.base==base)=en;
+        end
 
         function ret=getIdx(obj,base)
             [~,ret]=ismember(base,obj.base0);

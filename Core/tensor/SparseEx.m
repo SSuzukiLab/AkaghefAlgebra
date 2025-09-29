@@ -176,6 +176,33 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             if isempty(arg2), idx2=""; end
             ret=calcTensorExpression(sprintf('i1{%s}i2{%s}',idx1,idx2),idxo);
         end
+        function obj=reshape(obj,newsize)
+            % Reshape the SparseEx object to new dimensions
+            if any(isnan(newsize))
+                nanidx=isnan(newsize);
+                assert(sum(nanidx)==1,'Only one dimension can be inferred');
+                newsize(nanidx)=prod(obj.size)/prod(newsize(~nanidx));
+                if newsize(nanidx)~=round(newsize(nanidx))
+                    error('Inferred dimension must be an integer');
+                end
+            end
+            % allow one dimension to be inferred
+            if length(newsize)==2&&any(isnan(newsize)) 
+                if isnan(newsize(1))
+                    newsize(1)=prod(obj.size)/newsize(2);
+                else
+                    newsize(2)=prod(obj.size)/newsize(1);
+                end
+            end
+            assert(prod(newsize)==prod(obj.size),'Total number of elements must remain the same');
+            subs=mat2cell(obj.key,obj.Nelem,ones(1,obj.rank));
+            ind=sub2ind(obj.size,subs{:});
+            newSubs=cell(1,length(newsize));
+            [newSubs{1:length(newsize)}] = ind2sub(newsize, ind);
+            obj.size=newsize;
+            obj.key=horzcat(newSubs{:});
+        end
+
         function obj=transpose(obj)
             % Transpose the SparseEx object (swap first two dimensions)
             warning("transpose")

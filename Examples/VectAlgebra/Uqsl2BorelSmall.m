@@ -32,6 +32,7 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                 Z.q=zN^M;
                 assume([zN^N==1,sum(zN.^(0:N-1))==0]);
             end
+            Z.cf=zeros(N^2,1);
             Z=Z.setBase(Z.bs0.get(N));
             Z.setConst(style);
             K=Z.make(1,2);

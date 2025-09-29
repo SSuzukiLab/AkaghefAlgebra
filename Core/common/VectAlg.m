@@ -589,6 +589,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
 
         % テーブル形式表示
         function disp1(arg)
+            cname=class(arg);
+            fprintf('    <a href="matlab:help %s">%s</a> object\n',cname,cname)
             base_=arg.bs;
             idx_conv=BaseConverter.H.getIdx(base_);
             base_(idx_conv>0)=BaseConverter.H.base1(idx_conv(idx_conv>0));

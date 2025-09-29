@@ -2,6 +2,7 @@ classdef VectQuasiC2<VectQuasiHopfAlg
 
     properties
         N=2
+        bs2=Bases(2,["p0","p1"],"Z/2Z")
     end
     methods(Static)
         function [Z,g]=getGenerator()
