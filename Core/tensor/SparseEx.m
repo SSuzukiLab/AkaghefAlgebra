@@ -196,7 +196,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             end
             assert(prod(newsize)==prod(obj.size),'Total number of elements must remain the same');
             subs=mat2cell(obj.key,obj.Nelem,ones(1,obj.rank));
-            ind=sub2ind(obj.size,subs{:});
+            ind=sub2ind([obj.size,1],subs{:});
             newSubs=cell(1,length(newsize));
             [newSubs{1:length(newsize)}] = ind2sub(newsize, ind);
             obj.size=newsize;
@@ -376,6 +376,7 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         end
         function disp(obj)
             % disp method: Display non-zero entries in sparse-like format
+            % issue:極端に小さい値の場合は指数表記をやめて0として表示させる？　複素数？
             n = obj.Nelem;
             if isempty(obj.size)
                 fprintf('SparseEx scalar: %s\n', string(obj.val));

@@ -44,6 +44,11 @@ classdef HeisenbergDouble<VectAlg
         end
     end
     methods
+        function ret=split(obj)
+            ret=obj;
+            ret.sparse=reshape(obj.sparse,[obj.rdim,obj.rdim]);
+            ret.bs=obj.bs.bases;
+        end
         function setConst(obj)
             % set constants of Heisenberg double
             % MH: multiplication tensor MH\indices{^1_2^3_{45}^6}
@@ -54,18 +59,30 @@ classdef HeisenbergDouble<VectAlg
             % =MH\indices{^1_2^3_{45}^6}c\indices{_1^2}c\indices{_3^4}e^5\#e_6
             % =MH\indices{^1_2^3_{45}^6}c\indices{_1^2}c\indices{_3^4}*
             % Δ\indices{_5^{17}}Δ\indices{_2^{98}}μ\indices{_{79}^3}μ\indices{_{84}^6}e^5e_6
-            % 
+            %
+            isQuasi=isa(obj.H1,"VectQuasiHopfAlg")||isa(obj.H2,"VectQuasiHopfAlg");
+            
             H2=obj.H2;
             D=H2.dim;
             M=H2.getSC('prod');
             C=H2.getSC('coprod');
             eta=H2.getSC('unit');
             ep=H2.getSC('counit');
-            MH2=calcTensorExpression('C{5,1,7}C{2,9,8}M{7,9,3}M{8,4,6}',1:6);
-            % MH2=permute(tensorprod(tensorprod(tensorprod(C,C) ...
-            %     ,M,[3 5],[1 2]),M,4,1),[2 3 4 5 1 6]);
-            MH = reshape(MH2, [D^2, D^2, D^2]);
-            etaH=reshape(ep*eta.',[D^2,1]);
+            if ~isQuasi
+                MH2=calcTensorExpression('C{5,1,7}C{2,9,8}M{7,9,3}M{8,4,6}',1:6);
+                % MH2=permute(tensorprod(tensorprod(tensorprod(C,C) ...
+                %     ,M,[3 5],[1 2]),M,4,1),[2 3 4 5 1 6]);
+                MH = reshape(MH2, [D^2, D^2, D^2]);
+                etaH=reshape(ep*eta.',[D^2,1]);
+            else
+                Psi=H2.getSC('associator');
+                % (f#a) · (g#b) = ∑ f(? ψ_1 )*g(? ψ_2 a_1 )# ψ_3 a_2 b   (f#a, g#b ∈ H^* #H)
+                %                   1,  7,    3,  8,  2(13), 9,  2(14),4   
+                MH2=calcTensorExpression( ...
+                    'M{10,7,1}C{5,10,11}M{11,8,12}M{12,13,3}M{9,14,15}M{15,4,6}C{2,13,14}Psi{7,8,9}',1:6);
+                MH = reshape(MH2, [D^2, D^2, D^2]);
+                etaH=reshape(ep*eta.',[D^2,1]);
+            end
             SC=obj.spec.SC;
             SC{'prod'}=MH;
             SC{'unit'}=etaH;

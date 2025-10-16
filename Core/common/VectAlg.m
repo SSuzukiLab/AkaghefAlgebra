@@ -83,20 +83,21 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             ret=VectHomAlg.get(sp.SC{arg},repmat(bs,1,Nio(1)),repmat(bs,1,Nio(2)),sp,sp);
         end
 
-        function [i1,i2]=alignNum(i1,i2)
+        function [i1,i2]=alignNum(i1,i2,is_one_rank)
+            if nargin<3, is_one_rank=false; end
             % 型をStrAlgにする
             if ~isequal(class(i1),class(i2))||~isequal(i1.bs,i2.bs)
                 tf=[isa(i1,"VectAlg") isa(i2,"VectAlg")];
                 if isequal(tf,[1 0])
-                    i2=castCtype(i1,i2);
+                    i2=castCtype(i1,i2,is_one_rank);
                 elseif isequal(tf,[0 1])
-                    i1=castCtype(i2,i1);
+                    i1=castCtype(i2,i1,is_one_rank);
                 elseif isequal(tf,[1 1])
                     try
-                        i2=i1.casttype(i2);
+                        i2=i1.casttype(i2,is_one_rank);
                     catch
                         try
-                            i1=i2.casttype(i1);
+                            i1=i2.casttype(i1,is_one_rank);
                         catch
                             error("PolAlg:alignNum","invalid input")
                         end
@@ -105,18 +106,20 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 end
             end
         end
-        function ret=casttype(obj,arg)
+        function ret=casttype(obj,arg,is_one_rank)
             % casttype 型を合わせる
+            if nargin<3, is_one_rank=false; end
             if arg.rank==0
-                ret=obj.unit;
+                ret=obj.unit(is_one_rank);
                 ret.cf=arg*ret.cf;
             else
                 error not_impl
             end
         end
-        function ret=castCtype(obj,arg)
+        function ret=castCtype(obj,arg,is_one_rank)
             % casttype 型を合わせる
-            ret=obj.unit;
+            if nargin<3, is_one_rank=false; end
+            ret=obj.unit(is_one_rank);
             ret.cf=arg*ret.cf;
         end
         function ret=identifier(obj)
@@ -197,25 +200,34 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
                 ret=i1*ret;
             end
         end
-        function ret=unit(arg)
-            eta=struct;
-            expr="";
-            R=arg.rank;
-            for k=1:R
-                eta.("t"+k)=arg.bs(k).ZERO.getSC('unit');
-                expr=expr+sprintf("eta.t%d{%d}",k,k);
+        function ret=unit(arg,is_one_rank)
+            if nargin==1, is_one_rank=false; end
+            if is_one_rank
+                spec=arg.spec;
+                ret=arg;
+                ret.bs=spec.base;
+                eta=spec.base.ZERO.getSC('unit');
+                ret.sparse=eta;
+            else
+                eta=struct;
+                expr="";
+                R=arg.rank;
+                for k=1:R
+                    eta.("t"+k)=arg.bs(k).ZERO.getSC('unit');
+                    expr=expr+sprintf("eta.t%d{%d}",k,k);
+                end
+                eta=calcTensorExpression(expr,1:R);
+                ret=arg;
+                ret.sparse=eta;
             end
-            eta=calcTensorExpression(expr,1:R);
-            ret=arg;
-            ret.sparse=eta;
         end
         %テンソル積
         function o=or(i1,i2)
             try
-                [i1,i2]=alignNum(i1,i2);
+                [i1,i2]=alignNum(i1,i2,true);
             catch ME
                 if ~(isa(i1,"VectAlg")&&isa(i2,"VectAlg"))
-                    % (g|g)|gのような元に対処する
+                    % issue:(g|g)|gのような元に対処する
                     rethrow(ME)
                 end
             end
@@ -666,12 +678,20 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
         function ret=convertTermToSym(arg)
             % 数式表示の
-            bsstr=string(arg.bs);
-            if isempty(bsstr)
+            bsC=arrayfun(@string,arg.bs,UniformOutput=false);
+            cf=arg.sparse.val;
+            key=arg.sparse.key;
+
+            if isempty(bsC) %imcomplete
                 disp(table(arg.cf,VariableNames="coeff"))
                 return
             end
-            base=join(cellfun(@(bsstr)join(bsstr,"*"),bsstr),"|",2);
+            base=strings(length(cf),1);
+            for i=1:length(cf)
+                base(i)=join(arrayfun(@(b_,s_)b_{1}(s_),bsC,(key(i,:))),"|");
+            end
+            coeff="("+string(cf)+")";
+            
             % Term="zzzz"+(1:arg.term)';
             % format=sum(sym(arg.cf).*(1+sym(Term)));
             % formatstr=string(format);
@@ -685,11 +705,15 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
             % else
             %     coeff=string(arg.cf);
             % end
-            coeff="("+string(arg.cf)+")";
+            
             if arg.rank>1
                 base="("+base+")";
             end
+            
             ret=coeff+"*"+base;
+            if isscalar(cf)&&cf==0
+                ret="0";
+            end
 
         end
         % convert to sym

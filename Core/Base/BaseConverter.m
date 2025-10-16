@@ -32,11 +32,17 @@ classdef BaseConverter<handle
             obj.matrix{end+1}=matrix;
         end
         function setEn(obj,base,en)
-            obj.enable(obj.base==base)=en;
+            obj.enable(obj.base0==base)=en;
         end
 
         function ret=getIdx(obj,base)
-            [~,ret]=ismember(base,obj.base0);
+            % [~,ret]=ismember(base,obj.base0);
+            ret=zeros(size(base));
+            for ib=1:length(base)
+                idx=find(arrayfun(@(b)b==base(ib),obj.base0),1);
+                if isempty(idx), idx=0; end
+                ret(ib)=idx;
+            end
             dis=find(~obj.enable);
             ret(ismember(ret,dis))=0;
         end
