@@ -39,6 +39,7 @@ classdef(InferiorClasses=?Pol) PolC2modalg<PolAlg
         function ret=prodeval4(arg)
             persistent M oper
             if isempty(M)
+            % if true % 一時的に毎回呼ぶ
                 M=tril(ones(4),-1);
                 M([4 7])=2
                 I=StrEndV.makeV(4);
@@ -48,7 +49,7 @@ classdef(InferiorClasses=?Pol) PolC2modalg<PolAlg
             end
             depth=max(min(arg.pw(:,[3 6])'));
             evaluated1=arg.lfun(@fun2);
-            evaluated2=act(qNumS(arg.q).exp(oper,depth,true),evaluated1);
+            evaluated2=act(qNumS.exp(arg.q,oper,depth,true),evaluated1);
             ret=prodeval(evaluated2);
 
             function [c,p]=fun2(p)

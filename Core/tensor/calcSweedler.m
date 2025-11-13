@@ -110,7 +110,7 @@ Each function has a clear purpose and consistent naming, making the overall pars
 
     % ステップ4: ノードから式（atom）を抽出し、ユニークな式のリストを作成
     atoms=unique(string({nodes.atom}));
-    values=cell(size(atoms));
+    values=cell(size(atoms));                   
     for i=1:length(atoms)
         if ~startsWith(atoms(i),'?')
             % 呼び出し元のワークスペースで変数を評価

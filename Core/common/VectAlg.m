@@ -84,7 +84,8 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         end
 
         function [i1,i2]=alignNum(i1,i2,is_one_rank)
-            if nargin<3, is_one_rank=false; end
+            %is_one_rank: tensor積のときに1rankとしてcastさせるために追加したパラメータ
+            if nargin<3, is_one_rank=false; end 
             % 型をStrAlgにする
             if ~isequal(class(i1),class(i2))||~isequal(i1.bs,i2.bs)
                 tf=[isa(i1,"VectAlg") isa(i2,"VectAlg")];

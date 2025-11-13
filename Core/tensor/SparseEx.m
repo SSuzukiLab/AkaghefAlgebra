@@ -150,6 +150,9 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
                 ret=SparseEx(M^arg);
             end
         end
+        function ret=or(i1,i2)
+            ret=tensorprod(i1,i2,[],[]);
+        end
         function ret=tensorprod(i1,i2,arg1,arg2)
             arguments
                 i1 SparseEx

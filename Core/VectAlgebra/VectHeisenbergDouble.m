@@ -1,4 +1,4 @@
-classdef HeisenbergDouble<VectAlg
+classdef VectHeisenbergDouble<VectAlg
     % HEISENBERGDOUBLE heisenberg double of Hopf algebra H1#H2
     properties
         rdim %  dimension of H1
@@ -14,7 +14,7 @@ classdef HeisenbergDouble<VectAlg
                 name (1,:) char=''
             end
             D=H1.dim;
-            Z=HeisenbergDouble();
+            Z=VectHeisenbergDouble();
             Z.rdim=D;
             Z.cf=H1.Czeros([D^2,1]);
             Z.H1=H1;
@@ -31,7 +31,7 @@ classdef HeisenbergDouble<VectAlg
                 name (1,1) string
             end
             dualobj=DualAlg.getGenerator(H1);
-            Z=HeisenbergDouble.getGenerator(H1,dualobj,name);
+            Z=VectHeisenbergDouble.getGenerator(H1,dualobj,name);
         end
         function Z=getGenerator2(H2,name)
             % getGenerator2 H(H2)=(H2^*)#H2
@@ -40,14 +40,19 @@ classdef HeisenbergDouble<VectAlg
                 name (1,1) string
             end
             dualobj=DualAlg.getGenerator(H2);
-            Z=HeisenbergDouble.getGenerator(dualobj,H2,name);
+            Z=VectHeisenbergDouble.getGenerator(dualobj,H2,name);
         end
     end
     methods
         function ret=split(obj)
             ret=obj;
-            ret.sparse=reshape(obj.sparse,[obj.rdim,obj.rdim]);
+            ret.sparse=reshape(obj.sparse,repmat(obj.rdim,1,2*obj.rank));
             ret.bs=obj.bs.bases;
+        end
+        function obj=setMerge(obj,sparse)
+            rank=sparse.rank/2;
+            mustBeInteger(rank)
+            obj.sparse=reshape(sparse,repmat(obj.rdim^2,1,rank));
         end
         function setConst(obj)
             % set constants of Heisenberg double
