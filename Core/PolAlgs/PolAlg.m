@@ -242,7 +242,11 @@ classdef (InferiorClasses={?sym})PolAlg
         function ret=testFunc(i1,i2,i3)
             [ret,ret1]=helpdiv(i1,i2,i3)
         end
-        function ret=pol(arg)
+        function ret=string(arg)
+            ret=string(sum(arg.getSym)); 
+            %issue:symbolicを経由してstringに変換しているので変数の非可換性が反映されていない
+        end
+        function ret=getSym(arg)
             if arg.dim~=0
                 vars=sym(arg.base.string);
                 G=prod(vars.^arg.pw,2);
@@ -322,9 +326,9 @@ classdef (InferiorClasses={?sym})PolAlg
                 Name='ans';
             end
             if numel(i1)==1
-                disp(Name==sum(i1.pol))
+                disp(Name==sum(i1.getSym))
             else
-                disp(sum(i1.pol))
+                disp(sum(i1.getSym))
             end
         end
         % 多数項の表示
@@ -461,20 +465,25 @@ function ret=combineTerm(i1)
     %     S(jj)=S(jj)+c(vidx(ii));
     % end
     % ret=i1.set_cp(S,u);
-    [v,vidx]=sortrows(p);
-    S=repmat(i1.ctype.zero,numel(vidx),1);
+    [v,vidx]=sortrowCustom(p);
+    % S=repmat(i1.ctype.zero,numel(vidx),1);
     c=c(vidx);
-    uidx=zeros(1,numel(vidx));
-    N=1;
-    v_=v(1,:);
-    for ii=1:numel(vidx)
-        if ~isequal(v_,v(ii,:))
-            N=N+1;
-            v_=v(ii,:);
-        end
-        uidx(N)=ii;
-        S(N)=S(N)+c(ii);
-    end
+    % uidx=zeros(1,numel(vidx));
+    % N=1;
+    % v_=v(1,:);
+    GrpEnds = [find(any(diff(v,1,1),2)); numel(c)];
+    cumC = cumsum(c);
+    S = cumC(GrpEnds) - [i1.ctype.zero; cumC(GrpEnds(1:end-1))];
+    N = numel(GrpEnds);
+    uidx = GrpEnds.';
+    % for ii=1:numel(vidx)
+    %     if ~isequal(v_,v(ii,:))
+    %         N=N+1;
+    %         v_=v(ii,:);
+    %     end
+    %     uidx(N)=ii;
+    %     S(N)=S(N)+c(ii);
+    % end
     uidx(uidx==0)=[];
     ret=i1.set_cp(S(1:N),v(uidx,:));
 

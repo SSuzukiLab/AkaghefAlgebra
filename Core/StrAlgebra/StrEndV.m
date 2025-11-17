@@ -59,9 +59,9 @@ TBD ITEMS
     properties(Hidden,Constant)
         types=["id","d","x","xd","dd","th","qth"]
         NargRequired=[0 2 1 4 1 1 2]
+        B TypeParam=TypeParam(@(N)Bases(1,"oper","StrEndV_"+N))
     end
     properties
-        bs
         varname=@(x)x
         dimV (1,:) =0
     end
@@ -75,6 +75,7 @@ TBD ITEMS
             %METHOD1 このメソッドの概要をここに記述
             %   詳細説明をここに記述
             ret.ctype="S";
+            ret.base=ret.B.get(0);
         end
         function arg=castV(obj,arg)
             if isa(arg,'sym')||isnumeric(arg)
@@ -85,6 +86,9 @@ TBD ITEMS
             dimV=[i1.dimV i2.dimV];
             ret=or@StrAlg(i1,i2);
             ret.dimV=dimV;
+        end
+        function arg=calc(arg)
+            arg=removeZero(arg);
         end
         function ret=plus(i1,i2)
             [i1,i2]=alignNum(i1,i2);
@@ -104,30 +108,31 @@ TBD ITEMS
 
             function ret=plus_(i1,i2)
                 % PLUS_ supplementary method for scalar
-                ret=i1.set_cpb([i1.cf;i2.cf],[i1.pw;i2.pw],[i1.bs;i2.bs]).calc();
+                ret=i1.set_cp([i1.cf;i2.cf],[i1.pw;i2.pw]).calc();
             end
         end
         % 零係数項削除,係数簡約化ステップ
-        function obj=removeZero(obj)
-            if isequal(obj.ctype,NumericType.S)
-                idx=~isAlways(obj.cf==0,Unknown="false");
-                % idx=abs(subs(i1.cf,retq(),0.71))>0.000001;
-                % idx=1:length(i1.cf);
-                % idx=find(i1.cf);
-                % s=@(x)x;
-                % s=@simplify
-                obj=obj.set_cp(simplify(sym(obj.cf(idx))),obj.pw(idx,:));
-            else
-                idx=abs(obj.cf)>1000*eps(obj.cf);
-                obj=obj.set_cpb(obj.cf(idx),obj.pw(idx,:),obj.bs(idx,:));
-            end
-        end
+        % function obj=removeZero(obj)
+        %     if isequal(obj.ctype,NumericType.S)
+        %         idx=~isAlways(obj.cf==0,Unknown="false");
+        %         % idx=abs(subs(i1.cf,retq(),0.71))>0.000001;
+        %         % idx=1:length(i1.cf);
+        %         % idx=find(i1.cf);
+        %         % s=@(x)x;
+        %         % s=@simplify
+        %         obj=obj.set_cp(simplify(sym(obj.cf(idx))),obj.pw(idx,:));
+        %     else
+        %         idx=abs(obj.cf)>1000*eps(obj.cf);
+        %         obj=obj.set_cpb(obj.cf(idx),obj.pw(idx,:),obj.bs(idx,:));
+        %     end
+        % end
         function obj=replace(obj,~)
         end
         function ret=getActMono(obj,idxTens,idxFactor)
             % ["id","d","x","xd","dd","th","qth"]
-            opKind=obj.pw{idxTens}(idxFactor);
-            opArgs=obj.bs{idxTens}{idxFactor};
+            factor=obj.pw{idxTens}{idxFactor};
+            opKind=factor{1};
+            opArgs=factor(2:end);
             switch opKind
                 case 1, ret=@id;
                 case 2, ret=@d;
@@ -144,7 +149,7 @@ TBD ITEMS
             end
             % q微分演算子
             function [c,p]=d(p)
-                c=qNumS(opArgs{2}).n(p(opArgs{1}));
+                c=qNumS.n(opArgs{2},p(opArgs{1}));
                 p(opArgs{1})=p(opArgs{1})-1;
             end
             % 微分演算子
@@ -156,7 +161,7 @@ TBD ITEMS
 
             % M_ij の演算子
             function [c, p] = xd(p)
-                c = qNumS(opArgs{4}).n(p(opArgs{2})) * opArgs{4}^(opArgs{3} * p.');
+                c = qNumS.n(opArgs{4},p(opArgs{2})) * opArgs{4}^(opArgs{3} * p.');
                 p(opArgs{1}) = p(opArgs{1}) + 1;
                 p(opArgs{2}) = p(opArgs{2}) - 1;
             end
@@ -171,6 +176,7 @@ TBD ITEMS
                 end
                 p(opArgs{1}) = p(opArgs{1}) + power;
             end
+            % dilation演算子q^cθ_i
             function [c, p] = qth(p)
                 c = opArgs{3}^(opArgs{2}*p(opArgs{1}));
             end
@@ -222,15 +228,20 @@ TBD ITEMS
                 ret=0;
                 % tmp=obj;
                 for i=1:obj.term
-                    tmp=obj.set_cpb(obj.cf(i),obj.pw(i,:),obj.bs(i,:));
+                    tmp=obj.set_cp(obj.cf(i),obj.pw(i,:));
                     acted=tmp.act(arg);
                     ret=acted+ret;
                 end
             end
         end
+        function verifyBase(obj,arg)
+            assert(isa(arg,"cell")&&isscalar(arg))
+            assert(isa(arg{1},"cell"))
+            
+        end
         function ret=unit(obj)
             ret=obj.make("id");
-            ret=ret.set_cpb(1,repmat(ret.pw,1,obj.rank),repmat(ret.bs,1,obj.rank));
+            ret=ret.set_cp(1,repmat(ret.pw,1,obj.rank));
         end
         function ret=mtimes(i1,i2)
             ret=mtimes@StrAlg(i1,i2);
@@ -244,24 +255,24 @@ TBD ITEMS
         function obj=updateDispContents(obj)
             contents=strings(obj.term,obj.rank);
             for j=1:numel(contents)
-                opArgs=obj.bs{j};
-                pw=obj.pw{j};
+                monomial=obj.pw{j};
                 V=obj.varname;
                 content="";
-                if isempty(pw)
+                if isempty(monomial)
                     content="id";
                 end
-                for i=1:length(pw)
-                    opArgs_=opArgs{i};
-                    switch pw(i)
+                for i=1:length(monomial)
+                    opKind=monomial{i}{1};
+                    opArgs=monomial{i}(2:end);
+                    switch opKind
                         case 1, tmp="id";
                         case 2
-                            q=getQstr(opArgs_{2});
-                            tmp="D"+q+"_"+V(opArgs_{1});
-                        case 3, tmp="X_"+V(opArgs_{1});
+                            q=getQstr(opArgs{2});
+                            tmp="D"+q+"_"+V(opArgs{1});
+                        case 3, tmp="X_"+V(opArgs{1});
                         case 4
-                            q=getQstr(opArgs_{4});
-                            eigv=opArgs_{3};
+                            q=getQstr(opArgs{4});
+                            eigv=opArgs{3};
                             idx=find(eigv);
                             eigs=string(eigv);
                             if numel(idx)==0
@@ -272,12 +283,12 @@ TBD ITEMS
                                 if q=="q", q2="q^"; else, q2=q; end
                                 qth=q2+"{"+join(eigs(idx)+"θ_"+V(idx),"+")+"}";
                             end
-                            tmp="X_"+V(opArgs_{1})+"D"+q+"_"+V(opArgs_{2})+qth;
-                        case 5, tmp="∂_"+V(opArgs_{1});
-                        case 6, tmp="θ_"+V(opArgs_{1});
+                            tmp="X_"+V(opArgs{1})+"D"+q+"_"+V(opArgs{2})+qth;
+                        case 5, tmp="∂_"+V(opArgs{1});
+                        case 6, tmp="θ_"+V(opArgs{1});
                         case 7
-                            q=getQstr(opArgs_{3});
-                            tmp=sprintf(q+"^{%sθ_%s}",string(opArgs_{2}),string(V(opArgs_{1})));
+                            q=getQstr(opArgs{3});
+                            tmp=sprintf(q+"^{%sθ_%s}",string(opArgs{2}),string(V(opArgs{1})));
                         case 8
                         otherwise
                             tmp="?";
@@ -321,10 +332,10 @@ TBD ITEMS
             % ["id","d","x","xd","dd","th","qth"]
             content=obj.dispContents(pw);
         end
-        function obj=set_cpb(obj,varargin)
-            obj=obj.set_cp(varargin{1:end-1});
-            obj.bs=varargin{end};
-        end
+        % function obj=set_cpb(obj,varargin)
+        %     obj=obj.set_cp(varargin{1:end-1});
+        %     obj.bs=varargin{end};
+        % end
         function ret=make(obj,type,arg)
             arguments
                 obj
@@ -335,7 +346,7 @@ TBD ITEMS
             end
             pw=getType(type);
             assert(obj.NargRequired(pw)<=length(arg),'Too few arguments')
-            ret=obj.set_cp(1,{[{pw},arg]});
+            ret=obj.set_cp(1,{{[{pw},arg]}});
         end
     end
     methods(Static)
@@ -344,8 +355,7 @@ TBD ITEMS
             ret.dimV=dimV;
             ret.ZERO={ret};
             ret.cf=1;
-            ret.bs={{}};
-
+            ret.base=ret.B.get(dimV);
         end
     end
 end

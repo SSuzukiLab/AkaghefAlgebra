@@ -44,9 +44,10 @@ classdef(InferiorClasses=?Pol) PolC2modalg<PolAlg
                 M([4 7])=2
                 I=StrEndV.makeV(4);
                 q=arg.q;
-                oper=I.make("xd",4,3,[0 -1 0 0],q)|I.make("xd",1,2,[0 0 -1 0],q);
+                oper=I.make("xd",4,3,[0 1 0 0],q)|I.make("xd",1,2,[0 0 1 0],q);
                 oper.cf=q-q^-1;
             end
+
             depth=max(min(arg.pw(:,[3 6])'));
             evaluated1=arg.lfun(@fun2);
             evaluated2=act(qNumS.exp(arg.q,oper,depth,true),evaluated1);

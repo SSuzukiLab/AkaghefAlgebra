@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
+classdef(InferiorClasses=?sym) StrCnmodalg<StrAlg
     properties(Constant,Hidden)
         B=TypeParam(@(l)Bases(2*l,["x_m"+(l:-1:1) "x_"+(1:l)],"StrC"+l+"alg"))
     end
@@ -12,9 +12,23 @@ classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
         function o=times(i1,i2)
             o=commeval(i1|i2);
         end
-        function obj=StrCnmodalg2(l)
+        function ret=getPolAlg(obj)
+            l=obj.l;
+            plist=1:2*l;
+            ZERO=PolCnmodalg(1,zeros(1,2*l));
+            pw=cellfun(@(p){sum(plist==p',1)},obj.pw);
+            pw=cell2mat(pw);
+            ret=ZERO;
+            for i=2:obj.rank
+                ret=ret|ZERO;
+            end
+            ret.cf=obj.cf;
+            ret.pw=pw;
+            
+        end
+        function obj=StrCnmodalg(l)
             % コンストラクタ　C_l型の代数を生成する
-            obj.priority=1:2*l;
+            % obj.priority=1:2*l;
             obj.l=l;
             obj.ctype="S";
         end
@@ -39,7 +53,7 @@ classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
                 q=sym('q');
                 S(ll)={struct};
                 S{ll}.rel=obj.empty;
-                O=StrCnmodalg2.getGenerator(ll);
+                O=StrCnmodalg.getGenerator(ll);
                 % x_i,x_j q-commutative
                 for i=-ll:ll
                     for j=-ll:ll
@@ -75,16 +89,16 @@ classdef(InferiorClasses=?sym) StrCnmodalg2<StrAlg
         end
         
         function obj=make(obj,cf,pw)
-            obj=obj.make@StrAlg(cf,pw,StrCnmodalg2.B.get(obj.l));
+            obj=obj.make@StrAlg(cf,pw,StrCnmodalg.B.get(obj.l));
         end
     end
     methods(Static)
         function [O,varargout]=getGenerator(l,opt)
             arguments
                 l {mustBeInteger}
-                opt String {mustBeMember(opt,["all","dict"])}="dict"
+                opt string {mustBeMember(opt,["all","dict"])}="dict"
             end
-            O=StrCnmodalg2(l).make(0,{[]});
+            O=StrCnmodalg(l).make(0,{[]});
             X=cell(0);
             for i=1:2*l
                 X{end+1}=O.make(1,{i});

@@ -504,10 +504,11 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
             N=obj.term;
             R=size(obj.pw,2);
             L=cellfun(@(x)size(x,2),obj.pw);
-            assert(isa(obj.cf,obj.ctype.class), ...
-                '係数体エラー\n expected:%s, actual:%s', ...
-                class(obj.cf),obj.ctype.class)
-            assert(isequal(size(obj.pw),[N R]))
+            if ~isa(obj.cf,obj.ctype.type)
+                warning('Invalid Coefficient field\n expected:%s, actual:%s', ...
+                class(obj.cf),obj.ctype.type)
+            end
+            assert(isequal(size(obj.pw),[N R]),"invalid pw size")
             for i=1:N
                 for j=1:R
                     % assert(length(obj.bs{i,j})==L(i,j),'bsサイズエラー')
@@ -661,6 +662,9 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
             % emptyBase=cellfun(@isempty,obj.b);
             % baseStr(emptyBase)={""};
             % ret=join("("+c_s(:)+")"+[baseStr{:}]',"+");
+        end
+        function ret=getExpression(arg)
+            ret=join(arg.convertTermToSym," + ");
         end
         function ret=latex(arg)
             str=join(arg.convertTermToSym," + ");
