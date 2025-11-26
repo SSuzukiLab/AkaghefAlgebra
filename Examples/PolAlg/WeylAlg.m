@@ -30,7 +30,7 @@ classdef WeylAlg<PolAlg&IAlg
                 n=NvarMax;
                 Kmax=min(p([n+i 2*n+i]));
                 K=(0:Kmax)';
-                c=arrayfun(@(k)nchoosek(p(n+i),k)*nchoosek(p(2*n+i),k)*factorial(k),K);
+                c=arrayfun(@(k)binom(p(n+i),k)*binom(p(2*n+i),k)*factorial(k),K);
                 % p=(p(1:2)+p(3:4))-K;
                 p=repmat(p,Kmax+1,1);
                 p(:,[i n+i ])=p(:,[i n+i])+p(:,[2*n+i 3*n+i])-K;

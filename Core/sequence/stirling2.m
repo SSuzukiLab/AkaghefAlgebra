@@ -25,6 +25,9 @@ function S = stirling2(m, n, c)
 %   This convention is used internally, if it is empirically determined
 %   that S > intmax('unit64'). You can use it directly to force double
 %   precision.
+% convergion: stirling2(n,0:n).*(x!/(x-(0:n))!)==x^n
+% syms n 
+%  SI(sum(stirling2(3,0:3).*binom(n,0:3).*factorial(0:3)))==n^3
 
 arguments
     m 

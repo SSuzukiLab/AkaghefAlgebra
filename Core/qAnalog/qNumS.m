@@ -38,7 +38,7 @@ classdef qNumS
                 out=out+(q^(k*(k-1)/2)/qNumS.fac(q,k))*X^k;
             end
         end
-        function ret=binomial(q,n,m)
+        function ret=binom(q,n,m)
             if ~isa(n,'sym')&&n<m
                 ret=0;
                 return

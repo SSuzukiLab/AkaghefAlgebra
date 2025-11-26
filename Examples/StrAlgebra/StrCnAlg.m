@@ -24,7 +24,7 @@ classdef(InferiorClasses=?sym) StrCnAlg<StrQUEAlg
         %     obj=unit@StrAlg(obj);
         % end
         function obj=make(obj,cf,pw)
-            obj=obj.make@StrAlg(sym(cf),pw,obj.algbase);
+            obj=obj.make@StrAlg(sym(cf),pw,obj.base);
         end
         function ret=get.dimV(obj)
             ret=obj.Nvar+1;
@@ -38,7 +38,7 @@ classdef(InferiorClasses=?sym) StrCnAlg<StrQUEAlg
             O=StrCnAlg();
             O.ctype="S";
             O.Nvar=Nvar;
-            O.algbase=O.B.get(Nvar);
+            O.base=O.B.get(Nvar);
             O=O.make(0,{[]});
             C=num2cell(1:Nvar);
             C(2:5,:)=reshape(arrayfun(@(i){O.make(1,{i})},1:4*Nvar),Nvar,4).';

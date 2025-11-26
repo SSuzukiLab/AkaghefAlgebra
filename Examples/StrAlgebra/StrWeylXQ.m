@@ -1,4 +1,4 @@
-classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
+classdef(InferiorClasses=?sym) StrWeylXQ<StrAlg
     properties(Constant,Hidden)
         B=TypeParam(@(N)Bases(4*N,reshape(["X","Xi","qt","qti"]+(1:N)',1,4*N),"weyl_"+N))
     end
@@ -9,34 +9,31 @@ classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
 
     %% generation
     methods
-        function obj=StrWeylXQ(Nvar)
-            obj.Nvar=Nvar;
-            obj.algbase=obj.B.get(Nvar);
+        function obj=StrWeylXQ(varargin)
+            obj@StrAlg(varargin{:})
+            obj.ctype="S";
         end
         function ret=getActMono(obj,idxTesor,idxFactor)
             pw=obj.pw{idxTesor}(idxFactor);
             N=obj.Nvar;
+            O=StrEndV();
             if any(1:N==pw)
-                obj=obj.make("x",pw);
+                O=O.make("x",pw);
             elseif any(1:N==pw-N)
-                obj=obj.make("x",pw-N,-1);
+                O=O.make("x",pw-N,-1);
             elseif any(1:N==pw-2*N)
-                obj=obj.make("qth",pw-2*N,1,obj.q);
+                O=O.make("qth",pw-2*N,1,obj.q);
             elseif any(1:N==pw-3*N)
-                obj=obj.make("qth",pw-3*N,-1,obj.q);
+                O=O.make("qth",pw-3*N,-1,obj.q);
             end
-            ret=obj.getActMono@StrEndV(1,1);
+            ret=O.getActMono@StrEndV(1,1);
         end
         function obj=unit(obj)
             obj=unit@StrAlg(obj);
         end
-        function obj=make(obj,arg,varargin)
-            if isString(arg)
-                obj=obj.make@StrEndV(arg,varargin{:});
-            else
-                obj=obj.make@StrAlg(arg,varargin{1},obj.algbase);
-            end
-        end
+        % function obj=make(obj,arg,varargin)
+        %     obj=obj.make@StrAlg(arg,varargin{1},obj.algbase);
+        % end
         function ret=mpower(i1,i2)
             if isa(i2,'double')&&i2<0
                 assert(i1.term==1,"minus power not allowed")
@@ -51,7 +48,7 @@ classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
             Nvar=i2.Nvar;
             arr=(1:Nvar)'+[1 0 3 2]*Nvar;
             arr=arr(:)';
-            i2inv=i2.set_cp(i2.cf,cellfun(@(p){arr(flip(p))},i2.pw),i2.bs);
+            i2inv=i2.set_cp(i2.cf,cellfun(@(p){arr(flip(p))},i2.pw));
             ret=i1*i2inv;
         end
     end
@@ -60,7 +57,10 @@ classdef(InferiorClasses=?sym) StrWeylXQ<StrEndV
             arguments
                 Nvar
             end
-            O=StrWeylXQ(Nvar);
+            O=StrWeylXQ();
+            O.Nvar=Nvar;
+            O.base=O.B.get(Nvar);
+            O.spec.base=O.base;
             O=O.make(0,{[]});
             C=num2cell(1:Nvar);
             C(2,:)=cellfun(@(i){O.make(1,{i})},C(1,:));

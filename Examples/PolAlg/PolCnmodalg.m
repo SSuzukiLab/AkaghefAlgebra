@@ -1,9 +1,9 @@
 classdef(InferiorClasses=?Pol) PolCnmodalg<PolAlg
     %SYMC2 このクラスの概要をここに記述
     %   詳細説明をここに記述
-properties(Constant,Hidden)
+    properties(Constant,Hidden)
         B=TypeParam(@(l)Bases(2*l,["x_m"+(l:-1:1) "x_"+(1:l)],"symC"+l+"modalg"))
-        
+
     end
     properties
         l
@@ -34,11 +34,11 @@ properties(Constant,Hidden)
             % B.ptype="S";
             obj.base=B;
         end
-        
+
         function ret=normaltimes(i1,i2)
             ret=prodeval(i1|i2);
         end
-        
+
         function ret=mtimes(i1,i2)
             ret=prodeval5(i1|i2);
             % ret=prodeval(tmp);
@@ -49,6 +49,59 @@ properties(Constant,Hidden)
             ret=prodeval(i1|i2);
         end
 
+        function ret=prodeval5(arg)
+            persistent MC operC
+            if isempty(MC)
+                MC=TypeParam(@getM);
+                operC=TypeParam(@getOper);
+            end
+            l=arg.l;
+            M=MC.get(l);
+            % M=M{1};
+            oper=operC.get(l);
+            pw=arg.pw;
+            expr=arg.lfun(@fun2);
+            for i=l-1:-1:1
+                mpw1=max(pw(:,l+i));
+                mpw2=max(pw(:,3*l+1-i));
+                cnd=[isAlways(mpw1>=0,"Unknown","false");
+                     isAlways(mpw2>=0,"Unknown","false")];
+                assert(any(cnd),"cannot evaluate")
+                depth=min([mpw1(cnd(1)),mpw2(cnd(2))]);
+                for j=l:-1:i+1
+                    expr=act(qNumS.exp(arg.q,oper(j,i),depth,true),expr);
+                end
+            end
+            ret=prodeval(expr);
+
+            function [c,p]=fun2(p)
+                p1=p(:,1:2*l);
+                p2=p(:,2*l+1:4*l);
+                c=arg.q^(p1*M*p2.');
+            end
+            function ret=getM(ll)
+                ret=tril(ones(2*ll),-1);
+                ret(1+(2*ll-1)*(1:ll))=2
+            end
+            function op=getOper(l)
+                q=arg.q; % issue: qを変更できない
+                tau=q-q^-1;
+                I=StrEndV.makeV(2*l);
+                op=repmat(I,[l,l]);
+                for i_=1:l-1
+                    for j_=i_+1:l
+                        v=zeros(2,2*l);
+                        for k=i_:j_-1
+                            v(1:2,[l+1-k,l+k])=1;
+                        end
+                        v(1,l+i_)=v(1,l+i_)-1;%+
+                        v(2,l+1-i_)=v(2,l+1-i_)-1;%-
+                        op(j_,i_)=(tau*q^(j_-i_-1))*...
+                            (I.make("xd",l+j_,l+i_,v(1,:),q)|I.make("xd",l+1-j_,l+1-i_,v(2,:),q));
+                    end
+                end
+            end
+        end
         function ret=prodeval4(arg)
             persistent MC operC
             if isempty(MC)
@@ -68,11 +121,11 @@ properties(Constant,Hidden)
             oper=oper{1};
             evaluated1=arg.lfun(@fun2);
             if l==2
-            evaluated2=act(qNumS(arg.q).exp(oper,depth,true),evaluated1);
+                evaluated2=act(qNumS.exp(arg.q,oper,depth,true),evaluated1);
             elseif l==3
-                evaluated2=act(qNumS(arg.q).exp(oper(1),depth(1),true),evaluated1);
-                evaluated2=act(qNumS(arg.q).exp(oper(2),depth(2),true),evaluated2);
-                evaluated2=act(qNumS(arg.q).exp(oper(3),depth(2),true),evaluated2);
+                evaluated2=act(qNumS.exp(arg.q,oper(1),depth(1),true),evaluated1);
+                evaluated2=act(qNumS.exp(arg.q,oper(2),depth(2),true),evaluated2);
+                evaluated2=act(qNumS.exp(arg.q,oper(3),depth(2),true),evaluated2);
             end
             ret=prodeval(evaluated2);
 
@@ -89,7 +142,7 @@ properties(Constant,Hidden)
                 %     M=tril(ones(4),-1);
                 %     M([4 7])=2;
                 % elseif arg==3
-                % 
+                %
                 % end
             end
             function ret=getOper(ll)
@@ -98,63 +151,18 @@ properties(Constant,Hidden)
                 if ll==2
                     I=StrEndV.makeV(4);
                     op=tau*I.make("xd",4,3,[0 -1 0 0],q)|I.make("xd",1,2,[0 0 -1 0],q);
-                    
+
                 elseif ll==3
                     I=StrEndV.makeV(2*ll);
                     op(1)=tau*I.make("xd",6,5,[0 1 0 0 0 0],q)|...
-                          I.make("xd",1,2,[0 0 0 0 1 0],q);
+                        I.make("xd",1,2,[0 0 0 0 1 0],q);
                     op(2)=tau*q*I.make("xd",6,4,[0 1 1 0 1 0],q)|...
-                          I.make("xd",1,3,[0 1 0 1 1 0],q);
+                        I.make("xd",1,3,[0 1 0 1 1 0],q);
                     op(3)=tau*I.make("xd",5,4,[0 0 1 0 0 0],q)|...
-                          I.make("xd",2,3,[0 0 0 1 0 0],q);
+                        I.make("xd",2,3,[0 0 0 1 0 0],q);
                 end
                 ret={op};
-                
-            end
-        end
-        function ret=prodeval5(arg)
-            persistent MC operC
-            if isempty(MC)
-                MC=TypeParam(@getM);
-                operC=TypeParam(@getOper);
-            end
-            l=arg.l;
-            M=MC.get(l);
-            % M=M{1};
-            oper=operC.get(l);
-            expr1=arg.lfun(@fun2);
-            expr2=act(oper,expr1);
-            ret=prodeval(expr2);
 
-            function [c,p]=fun2(p)
-                p1=p(:,1:2*l);
-                p2=p(:,2*l+1:4*l);
-                c=arg.q^(p1*M*p2.');
-            end
-            function ret=getM(ll)
-                ret=tril(ones(2*ll),-1);
-                ret(1+(2*ll-1)*(1:ll))=2
-            end
-            function ret=getOper(l)
-                q=arg.q;
-                tau=q-q^-1;
-                ret=1;
-                I=StrEndV.makeV(2*l);
-                for i=1:l-1
-                    op=1;
-                    for j=i+1:l
-                        v=zeros(2,2*l);
-                        for k=i:j-1
-                            v(1:2,[l+1-k,l+k])=1;
-                        end
-                        v(1,l+i)=v(1,l+i)-1;%+
-                        v(2,l+1-i)=v(2,l+1-i)-1;%-
-                        op=op+(tau*q^(l-j))*...
-                        (I.make("xd",l+j,l+i,v(1,:),q)|I.make("xd",l+1-j,l+1-i,v(2,:),q));
-                    end
-                    
-                    ret=ret*op;
-                end
             end
         end
         function ret=prodeval3(arg)
@@ -165,7 +173,7 @@ properties(Constant,Hidden)
             end
             q=arg.q;
             qN=qNumS(q);
-            
+
             % arg2=arg.lfun(@fun);
             % ret=arg2.lfun(@fun2);
             arg2=arg.lfun(@fun2);
@@ -191,7 +199,7 @@ properties(Constant,Hidden)
                 e5=q.^((0:N)'*e4);
                 c=prod(cumprod(e1),2)./e2.*e3.*e5;
 
-                
+
             end
             function [c,p]=fun2(p)
                 p1=p(:,1:4);
@@ -217,9 +225,9 @@ properties(Constant,Hidden)
                     idx=1;
                 elseif p2(2)~=0
                     c=[q^(2*p1(3)+p1(4));
-                       q^(sum(p1(2:4)))*(q^(2*p1(3))-1)];
+                        q^(sum(p1(2:4)))*(q^(2*p1(3))-1)];
                     p=[p1 p2]+[0 1 0 0,  0 -1 0 0;
-                               1 0 -1 1, 0 -1 0 0];
+                        1 0 -1 1, 0 -1 0 0];
                     return
                 elseif p2(3)~=0
                     c=q^(p1(4));
@@ -231,9 +239,9 @@ properties(Constant,Hidden)
                     c=1;
                     return
                 end
-                    p1(idx)=p1(idx)+1;
-                    p2(idx)=p2(idx)-1;
-                    p=[p1,p2];
+                p1(idx)=p1(idx)+1;
+                p2(idx)=p2(idx)-1;
+                p=[p1,p2];
             end
         end
     end

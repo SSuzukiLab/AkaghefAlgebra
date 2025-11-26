@@ -370,6 +370,20 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
             arg=combineTerm(arg);
             arg=removeZero(arg);
         end
+        function arg=calcComplete(arg)
+            iter=0;
+            while true
+                cond=cellfun(@(p)isequal(sort(p),p),arg.pw);
+                arg=replace(arg,30);
+                if all(cond), break; end 
+                if iter>10
+                    warning("simplify not completed")
+                    break
+                end
+            end
+            
+            arg=arg.calc();
+        end
         function obj=replace(obj,Ntimes)
             if obj.term==0, return; end
             obj.sortedFlag=false(obj.term,obj.rank);
@@ -537,7 +551,7 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
                 obj
                 cf
                 pw (:,1) cell {verifyPW}
-                bs (1,1) Bases 
+                bs (1,1) Bases =obj.base
             end
             bs.ZERO=[obj.set_cp(0,{[]})];
             obj.base=bs;
@@ -555,7 +569,8 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
                 obj.base=X.base;
                 return
             end
-                % disp(class(obj))
+            % disp(class(obj))
+            obj.spec=SpaceSpec;
         end
         
 

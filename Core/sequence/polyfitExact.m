@@ -1,4 +1,4 @@
-function f = polyfitExact(y, dmax, x)
+function f = polyfitExact(y,v)
 % POLYFITEXACT  Exact-fitting polynomial (minimal degree) as symfun
 %   f = exactPolyFit(y, dmax, x)
 %     y    : vector of values y_i (length N)
@@ -15,25 +15,25 @@ function f = polyfitExact(y, dmax, x)
 
     arguments
         y sym {mustBeVector}
-        dmax (1,1) double {mustBeNonnegative} = numel(y)-1
-        x {mustBeVector} = 0:length(y)-1
+        v.dmax (1,1) double {mustBeNonnegative} = numel(y)-1
+        v.x {mustBeVector} = 0:length(y)-1
+        v.var (1,1) string ="n"
     end
-
     y = y(:);
     N = numel(y);
-    if numel(x) ~= N, error('x and y must have the same length.'); end
+    if numel(v.x) ~= N, error('x and y must have the same length.'); end
 
-    dmax = min(dmax, N-1);
+    v.dmax = min(v.dmax, N-1);
 
     % Use exact rationals
     % x = sym(x, 'r');
     % y = sym(y, 'r');
 
-    for k = 0:dmax
+    for k = 0:v.dmax
         % Vandermonde (ascending powers 0..k)
         A = sym(zeros(N, k+1));
         for j = 0:k
-            A(:, j+1) = x.^j;
+            A(:, j+1) = v.x.^j;
         end
 
         % Symbolic solve (works even if overdetermined); check exactness
@@ -44,7 +44,7 @@ function f = polyfitExact(y, dmax, x)
         warning('off','symbolic:sym:isAlways:TruthUnknown')
         c=mldivide(A,y);
         if all(isAlways(simplify(A*c - y) == 0))
-            syms n
+            n=str2sym(v.var);
             poly = poly2sym(flip(c.'), n);  % flip to descending powers
             f = symfun(poly, n);
             warning('on', 'symbolic:mldivide:InconsistentSystem');
@@ -56,5 +56,5 @@ function f = polyfitExact(y, dmax, x)
         end
     end
 
-    error('No exact polynomial of degree ≤ %d fits all points. Try increasing dmax (≤ %d).', dmax, N-1);
+    error('No exact polynomial of degree ≤ %d fits all points. Try increasing dmax (≤ %d).', v.dmax, N-1);
 end

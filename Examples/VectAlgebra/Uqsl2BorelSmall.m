@@ -87,9 +87,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                 for j=0:N-1
                     for k=0:j
                         % C(i+1,j+1,i+1,k+1,mod(i+k,N)+1,j-k+1) = ...
-                        %     qN.nchoosek(j,k)*q^(-k*(j-k));
+                        %     qN.binom(j,k)*q^(-k*(j-k));
                             key=[key;J(i,j),J(i,k),J(mod(i+k,N),j-k)];
-                            val=[val;qN.nchoosek(j,k)*q^(-k*(j-k))];
+                            val=[val;qN.binom(j,k)*q^(-k*(j-k))];
                     end
                 end
             end

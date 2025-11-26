@@ -47,7 +47,7 @@ classdef(InferiorClasses=?sym) VectFpX<VectAlg
             C = zeros(P*[1 1 1]);
             for i=0:P-1
                 for k=0:i
-                    C(i+1,k+1,i-k+1) = nchoosek(i,k);
+                    C(i+1,k+1,i-k+1) = binom(i,k);
                 end
             end
             [epsilon,eta] =deal(zeros(P,1));

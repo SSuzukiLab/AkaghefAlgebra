@@ -1,50 +1,70 @@
 classdef qNumA
-    properties
-        q % issue: qを明示的に引数に取る
-    end
-    methods
-
-        function out=qNumA(q)
-            out.q=q;
+    methods(Static)
+        
+        % q-epsilon: out = 1 - q^-2
+        function out=eps(q)
+            out=1-q^-2;
         end
-        function out=eps(in)
-            out=1-in.q^-2;
-        end
-        function out=num(in,n)
-            out=(in.q^n-1)/(in.q-1);
-        end
-        function out=pch(in,z,n)
-            outs=ones(1,numel(z),class(in.q));
-            for ii=1:numel(outs)
+        
+        % q-number [n]_q: out = (q^n - 1) / (q - 1)
+        function out=n(q,n,is_series)
+            if nargin<3||~is_series
+                out=(q^n-1)/(q-1);
+            else
+                out=0;
                 for kk=0:n-1
-                    outs(ii)=outs(ii)*in.num(z(ii)+kk);
+                    out=out+q^kk;
                 end
+            end     
+        end
+        
+        % q-Pochhammer symbol (z; q)_n
+        % オリジナル: in.num(z(ii)+kk) の使用を確認
+        function out=pch(q,z,n)
+            out=ones(size(z),class(q));
+            assert(isscalar(n))
+            if n<0
+                out=1./qNumA.pch(q^-1,z*q,-n);
+                return
             end
-            out=prod(outs);
+            for ii=1:numel(out)
+                out(ii)=prod(1-z(ii)*q.^(0:n-1));
+            end
         end
-        function out=fac(in,n)
-            out=in.pch(1,n);
+        
+        % q-factorial [n]!_q: out = (1; q)_n
+        % pch(q, 1, n) を使用
+        function out=fac(q,n)
+            out=qNumA.pch(q,1,n);
         end
-        function out=exp(in,z,n)
-            q=in.q;
-            out=q-q;
+        
+        % q-exponential E_q(z)
+        % pch と fac が q を第一引数として取るよう変更したため、呼び出しも修正
+        function out=exp(q,z,n)
+            out=q-q; % 0を生成
             for kk=0:n
-                out=out+(q^(kk*(kk-1)/2)/in.fac(kk,q))*z^kk;
+                % fac(q, kk) を使用
+                out=out+(q^(kk*(kk-1)/2)/qNumA.fac(q,kk))*z^kk; 
             end
         end
-        function ret=nchoosek(in,a,b)
-            q=in.q;
-            ret=q-q+1;
+        
+        % q-binomial coefficient [a choose b]_q
+        function ret=binom(q,a,b)
+            ret=q-q+1; % 1を生成
             for i=0:b-1
                 ret=ret*((1-q^(a-i))/(1-q^(b-i)));
             end
         end
-        function out=phi(in,a,b,z,n)
+        
+        % q-hypergeometric function: _r phi _s (a; b; q, z)_n
+        % pch が q を第一引数として取るよう変更したため、呼び出しも修正
+        function out=phi(q,a,b,z,n)
             val=numel(a)-numel(b)-1;
             Z=z/q^(sum(a)-sum(b)-1);
-            out=in.q-in.q;
+            out=q-q; % 0を生成
             for kk=0:n
-                out=out+in.pch(a,kk,q)/in.pch([b(:);1],kk,q)...
+                % pch(q, a, kk) と pch(q, [b(:);1], kk) を使用
+                out=out+qNumA.pch(q,a,kk)/qNumA.pch(q,[b(:);1],kk)...
                     *((q^-1-q)^kk*q^(kk*(kk-1)/2))^val*Z^kk;
             end
         end

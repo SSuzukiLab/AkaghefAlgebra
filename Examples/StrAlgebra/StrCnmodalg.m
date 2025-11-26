@@ -15,6 +15,7 @@ classdef(InferiorClasses=?sym) StrCnmodalg<StrAlg
         function ret=getPolAlg(obj)
             l=obj.l;
             plist=1:2*l;
+            obj=calcComplete(obj);
             ZERO=PolCnmodalg(1,zeros(1,2*l));
             pw=cellfun(@(p){sum(plist==p',1)},obj.pw);
             pw=cell2mat(pw);

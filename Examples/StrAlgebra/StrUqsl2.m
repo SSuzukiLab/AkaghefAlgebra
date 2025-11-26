@@ -61,8 +61,8 @@ classdef(InferiorClasses=?sym) StrUqsl2<StrAlg&HopfAlg
                 % % 
             end
             converted=obj.algfun(@fun,I);
-            ret=I.set_cp(converted.cf,converted.pw,converted.bs);
-            ret.dimV=2;
+            ret=I.set_cp(converted.cf,converted.pw);
+            % ret.Nvar=2;
             function ret=fun(p,b)
                 % assert(b==StrUqsl2.B)
                 ret=arr(p);
