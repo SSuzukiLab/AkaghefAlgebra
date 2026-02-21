@@ -37,11 +37,10 @@ classdef(InferiorClasses=?sym) VectAlg<IAdditive&matlab.mixin.indexing.Redefines
         function obj=setBase(obj,base)
             % setBase 基底の設定
             obj.bs=base;
+            obj.cf=Czeros(obj,base.dim,1);
             base.ZERO=obj.zeros;
             obj.spec.base=base;
             % obj.spec=SpaceSpec(base); %issue: space specをここで決めるか？
-            obj.cf=Czeros(obj,base.dim,1);
-            
             % obj.ZERO={obj};
         end
         function varargout=getSC(obj,arg)

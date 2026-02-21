@@ -1,13 +1,13 @@
 %[text] # TestCalcSweedler
 % help calcSweedler
 [Z,g]=CyclicGroupAlg.getGenerator(3);
-ZH=HeisenbergDouble.getGenerator2(Z,'HZ3'); %[output:1a15317c] %[output:704f9238]
+ZH=VectHeisenbergDouble.getGenerator2(Z,'HZ3'); %[output:196fdde3] %[output:695947db]
 S=Z.getSC('antipode');
 fa=ZH.make(2,2).split;
 gb=ZH.make(3,5).split;
 
 %%
-[A,B,C]=calcSweedler('fa{1}|fa{2}') %[output:960c2312] %[output:4ef66d6b] %[output:86e9717a] %[output:6485eb35]
+[A,B,C]=calcSweedler('fa{1}|fa{2}') %[output:2c1f8038] %[output:10046210] %[output:3d3b36c8] %[output:84d60360]
 
 %%
 A %[output:11bc8874]
@@ -44,22 +44,22 @@ A.left.right %[output:2158ccca]
 %[metadata:view]
 %   data: {"layout":"inline"}
 %---
-%[output:1a15317c]
+%[output:196fdde3]
 %   data: {"dataType":"warning","outputData":{"text":"警告: transpose"}}
 %---
-%[output:704f9238]
+%[output:695947db]
 %   data: {"dataType":"warning","outputData":{"text":"警告: transpose"}}
 %---
-%[output:960c2312]
+%[output:2c1f8038]
 %   data: {"dataType":"textualVariable","outputData":{"name":"ans","value":"3"}}
 %---
-%[output:4ef66d6b]
+%[output:10046210]
 %   data: {"dataType":"textualVariable","outputData":{"header":"フィールドをもつ struct:","name":"A","value":"     expr: 'fa{1}|fa{2}'\n      num: 1\n     type: 'op'\n     oper: '|'\n     left: [1×1 struct]\n    right: [1×1 struct]"}}
 %---
-%[output:86e9717a]
-%   data: {"dataType":"textualVariable","outputData":{"header":"フィールドをもつ struct:","name":"B","value":"    itype: 'dim'\n    index: [2×3 double]\n     rank: 2\n      num: [2 3]\n    value: [1×1 HeisenbergDouble]\n     type: 'vec'"}}
+%[output:3d3b36c8]
+%   data: {"dataType":"textualVariable","outputData":{"header":"フィールドをもつ struct:","name":"B","value":"    itype: 'dim'\n    index: [2×3 double]\n     rank: 2\n      num: [2 3]\n    value: [1×1 VectHeisenbergDouble]\n     type: 'vec'"}}
 %---
-%[output:6485eb35]
+%[output:84d60360]
 %   data: {"dataType":"tabular","outputData":{"columnNames":["type","expr","num","atom","index","kind"],"columns":6,"cornerText":"フィールド","dataTypes":["char","char","double","char","cell","cell"],"header":"フィールドをもつ 1×2 の struct 配列:","name":"C","rows":2,"type":"struct","value":[["'leaf'","'fa{1}'","2","'fa'","1×1 cell","1×1 cell"],["'leaf'","'fa{2}'","3","'fa'","1×1 cell","1×1 cell"]]}}
 %---
 %[output:11bc8874]

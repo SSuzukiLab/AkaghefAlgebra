@@ -1,13 +1,6 @@
 classdef(InferiorClasses=?sym) StrAnAlg<StrQUEAlg
     properties(Constant,Hidden)
         % B
-        B            =TypeParam(@(N)Bases(5*N,reshape(["E","F","K","Ki" "H"]+(1:N)',1,5*N),"Uqsl_"+(N+1)))
-        CM           =TypeParam(@createDelta)
-        RVL          =TypeParam(@createRVL)
-        DeltaStorage =TypeParam(@createDelta)
-        RepStorage   =TypeParam(@createRep)
-        RelStorage   =TypeParam(@createRel)
-        Vtype='symAnmodlg'
     end
     properties(Dependent)
         dimV
@@ -31,6 +24,15 @@ classdef(InferiorClasses=?sym) StrAnAlg<StrQUEAlg
         end
     end
     methods(Static)
+        % function [obj,E,F,K,Ki,H]=getGenerator(obj,rank)
+        %     % Template for getGenerator at subclass
+        %     obj.rank=rank;
+        %     obj.CD=CartanData("X"+rank);
+        %     % obj.q=sym('q');
+        %     [obj,E,F,K,Ki,H]=getGenerator@StrQUEAlg(obj,rank,base);
+        %     obj.setRelation();
+        %     obj.setDelta("R");
+        % end
         function [O,E,F,K,Ki]=getGenerator(Nvar)
             arguments
                 Nvar {mustBeInteger}

@@ -330,6 +330,10 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
         function ret=algID(obj)
             ret=@(p,b)obj.make(1,{p},b);
         end
+        function ret=antialgfun(obj,varargin)
+            obj.pw=cellfun(@(x){fliplr(x)},obj.pw);
+            ret=algfun(obj,varargin{:});
+        end
         function ret=algfun(obj,funs,units)
             % algfun 代数準同型の作用
             % funs,unitsをテンソル階数の分だけ繰り返し入力する
@@ -480,7 +484,7 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
                             rel(j).pw(1:end-1),UniformOutput=false);
                         % b(:,Fidx)=cellfun(@(x)[b{1}(1:i-1) x b{1}(i+lens(j):end)], ...
                         %     rel(j).bs(1:end-1),UniformOutput=false);
-                        sortedFlag=[sortedFlag([1:cnt-1 cnt*ones(1,length(c)) cnt+1:end],:)];
+                        sortedFlag=sortedFlag([1:cnt-1 cnt*ones(1,length(c)) cnt+1:end],:);
                         sortedFlag(cnt+(1:length(c))-1,Fidx)=false;
                         cnt=cnt+length(c)-1;
                         return
@@ -489,7 +493,7 @@ classdef(InferiorClasses=?sym) StrAlg<IAdditive&matlab.mixin.Heterogeneous
                     end
                 end
                 c=1;
-                sortedFlag(cnt)=true;
+                sortedFlag(cnt,Fidx)=true; % serious bug(forget Fidx)
             end
         end
 

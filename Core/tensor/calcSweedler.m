@@ -126,7 +126,7 @@ Each function has a clear purpose and consistent naming, making the overall pars
     %構文木の各分岐に対して，実行時に決まる型の情報をzero objとして与える．
     % 
     info=struct(dualzero=nan);
-    dict_num2nodeU=getDictOfGroup([nodesU.num]);
+    dict_num2nodeU=getDictOfGroup({nodesU.num});
     st=evaluateTypes(st,nodesU,dict_num2nodeU,info);
     
 
@@ -153,7 +153,7 @@ function st=evaluateTypes(st,nodesU,dict_num2nodeU,info)
     %   info - 追加情報の構造体 ?の型を決めるためにdualzeroを与える
     % 出力:
     %   st     - 型情報が評価された構文木
-    %
+    %   st.zeroを追加する
     switch st.type
         case 'leaf'
             idx=dict_num2nodeU(st.num); % index of nodesU
@@ -163,9 +163,9 @@ function st=evaluateTypes(st,nodesU,dict_num2nodeU,info)
                     % not impl
                 case 'vec'
                     val=nodesU(idx).value;
-                    switch nodes(idx).itype
+                    switch nodesU(idx).itype
                         case 'dim'
-                            % not impl
+                            
                         case 'dp'
                             % not impl
                         case 'dia'
@@ -181,7 +181,8 @@ function st=evaluateTypes(st,nodesU,dict_num2nodeU,info)
         case 'fun'
             2
         otherwise
-            3
+            st.left=evaluateTypes(st.left,nodesU,dict_num2nodeU,info);
+            st.right=evaluateTypes(st.right,nodesU,dict_num2nodeU,info);
     end
 
 end
@@ -455,7 +456,7 @@ function [node,num] = parseExpr(s,num)
         return;
     end
     % 4) leaf
-    node = struct('type','leaf','expr',s,'num',num);
+    node = struct(type='leaf',expr=s,num=num);
 end
 
 function k = findTopLevelOp(s, op)

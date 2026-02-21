@@ -1,16 +1,16 @@
 classdef CartanData
     % CartanData - A class to represent simple Lie Algebras (Classical Types)
     %   Properties:
-    %       TypeCharacter : Char ('A', 'B', 'C', 'D') - Internal storage
-    %       Rank          : Integer
+    %       TypeCharacter : Char ('A', 'B', 'C', 'D') - Classification symbol
+    %       N_DynkinNodes : Integer (n, the number of simple roots/nodes)
     %       Type          : String (e.g., 'A3') - Dependent property
-    %       SimpleRoots   : Matrix (Rank x Dimension)
-    %       CartanMatrix  : Matrix (Rank x Rank)
-    %       Symmetrizer   : Vector (1 x Rank)
+    %       SimpleRoots   : Matrix (N_DynkinNodes x Dimension)
+    %       CartanMatrix  : Matrix (N_DynkinNodes x N_DynkinNodes)
+    %       Symmetrizer   : Vector (1 x N_DynkinNodes)
     
     properties (SetAccess = private)
         TypeCharacter % Stores the classification char (A, B, C, D)
-        Rank          % Stores the rank integer
+        N_DynkinNodes   % Stores the number of simple roots (n)
         SimpleRoots   % Alpha
         CartanMatrix  % A
         Symmetrizer   % d
@@ -35,15 +35,15 @@ classdef CartanData
             rankInt = str2double(tokens{2});
             
             if isnan(rankInt) || rankInt < 1
-                 error('Invalid rank detected. Rank must be a positive integer.');
+                 error('Invalid size/rank detected. It must be a positive integer.');
             end
             
             % Assign to stored properties
             obj.TypeCharacter = upper(typeChar);
-            obj.Rank = rankInt;
+            obj.N_DynkinNodes = rankInt; % Updated property name
             
             % 1. Construct Simple Roots using TypeCharacter
-            obj.SimpleRoots = obj.constructRoots(obj.TypeCharacter, obj.Rank);
+            obj.SimpleRoots = obj.constructRoots(obj.TypeCharacter, obj.N_DynkinNodes);
             
             % 2. Compute Cartan Matrix
             obj.CartanMatrix = obj.computeCartanFromRoots(obj.SimpleRoots);
@@ -54,8 +54,8 @@ classdef CartanData
         
         function val = get.Type(obj)
             % Getter for dependent property Type
-            % Combines TypeCharacter and Rank into a string
-            val = sprintf('%s%d', obj.TypeCharacter, obj.Rank);
+            % Combines TypeCharacter and N_DynkinNodes into a string
+            val = sprintf('%s%d', obj.TypeCharacter, obj.N_DynkinNodes);
         end
         
         function res = verifySymmetrization(obj)
@@ -74,7 +74,7 @@ classdef CartanData
         function disp(obj)
             % Custom display method uses the dynamic Type property
             fprintf('Lie Algebra Type: %s\n', obj.Type);
-            fprintf('   (Character: %s, Rank: %d)\n', obj.TypeCharacter, obj.Rank);
+            fprintf('   (Character: %s, N_DynkinNodes: %d)\n', obj.TypeCharacter, obj.N_DynkinNodes);
             fprintf('------------------------\n');
             disp('Simple Roots (Alpha):');
             disp(obj.SimpleRoots);

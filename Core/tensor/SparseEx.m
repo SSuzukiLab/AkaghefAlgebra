@@ -200,10 +200,10 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             assert(prod(newsize)==prod(obj.size),'Total number of elements must remain the same');
             subs=mat2cell(obj.key,obj.Nelem,ones(1,obj.rank));
             ind=sub2ind([obj.size,1],subs{:});
-            newSubs=cell(1,length(newsize));
-            [newSubs{1:length(newsize)}] = ind2sub(newsize, ind);
+            newSubs=cell(1,length(newsize)+1);
             obj.size=newsize;
-            obj.key=horzcat(newSubs{:});
+            [newSubs{:}] = ind2sub([newsize,1], ind);
+            obj.key=horzcat(newSubs{1:obj.rank});
         end
 
         function obj=transpose(obj)
@@ -239,6 +239,10 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
             subscript=mat2cell(obj.key,obj.Nelem,ones(1,obj.rank));
             Indices = sub2ind([obj.size,1], subscript{:});
             ret(Indices) = obj.val;
+        end
+        function ret=double(obj)
+            % warning("cast")
+            ret=toMatrix(obj);
         end
         % 簡約化=同次項括り＋零係数項削除+式の簡約化
         function obj=C(obj,arg)
@@ -373,6 +377,14 @@ classdef(InferiorClasses=?sym) SparseEx<IAdditive&ICompare
         function arg=uminus(arg)
             % Negation of SparseEx object
             arg.val = -arg.val;
+        end
+        function plot(obj)
+            figure;
+            parallelcoords(obj.key, ...
+                'Group', obj.val, ...
+                'Labels', "dim"+(1:obj.rank));
+            colorbar;
+            title('SparseEx key grouped by obj.cf');
         end
         function disp0(obj)
             builtin('disp', obj)

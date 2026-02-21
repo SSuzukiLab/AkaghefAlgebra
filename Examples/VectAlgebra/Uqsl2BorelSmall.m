@@ -27,6 +27,9 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                 Z.q = arg.q; % Set q if provided
             elseif strcmp(arg.qtype,"complex")
                 Z.q=exp(2*pi*1i*M/N);
+                if N==2||N==4
+                    Z.q=1i^(M*4/N);
+                end
             else
                 zN=sym("z"+N);
                 Z.q=zN^M;
@@ -77,7 +80,7 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
             end
             % M=reshape(M,N^2*[1 1 1]);
             M=SparseEx.set_vkd(val,key,N^2*[1 1 1]);
-            qN=qNumA(q);
+            qN=qNumA();
             % Comultiplication tensor C(i,j,k): Δ(e_i) = sum_{j,k} C(i,j,k) * (e_j ⊗ e_k)
             % Δ(E)=1⊗E+E⊗K, Δ(K)=K⊗K,
             % C = zeros(N*[1 1 1 1 1 1],'like',q);
@@ -89,7 +92,7 @@ classdef(InferiorClasses=?sym) Uqsl2BorelSmall<VectAlg
                         % C(i+1,j+1,i+1,k+1,mod(i+k,N)+1,j-k+1) = ...
                         %     qN.binom(j,k)*q^(-k*(j-k));
                             key=[key;J(i,j),J(i,k),J(mod(i+k,N),j-k)];
-                            val=[val;qN.binom(j,k)*q^(-k*(j-k))];
+                            val=[val;qN.binom(q,j,k)*q^(-k*(j-k))];
                     end
                 end
             end
