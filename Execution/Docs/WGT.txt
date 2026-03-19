@@ -1,0 +1,4259 @@
+\documentclass[dvipdfmx,autodetect-engine]{jsarticle}
+\usepackage{amsmath, amssymb}
+\usepackage{type1cm}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{url}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{ifthen}
+\usepackage[dvipdfmx]{hyperref}
+% \hyperrefsetup{%
+%  setpagesize=false,%
+%  bookmarks=true,%
+%  bookmarksdepth=tocdepth,%
+%  bookmarksnumbered=true,%
+%  colorlinks=true
+% %  ,hidelinks
+%  }
+\usepackage[style=alphabetic,backend=biber]{biblatex}
+\addbibresource{references.bib}
+\newcommand{\uln}[1]{\underline{#1}}
+
+
+\theoremstyle{definition}
+\newtheorem{dfn}{定義}[section]
+\newtheorem{prop}[dfn]{命題}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{定理}
+\newtheorem{cor}[dfn]{系}
+\newtheorem{rem}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\newtheorem{eg}[dfn]{例}
+\newtheorem{cnj}[dfn]{予想}
+
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\numberwithin{equation}{section}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\combination}[2]{{}_{#1}\mathrm{C}_{#2}}
+\newcommand{\permutation}[2]{{}_{#1}\mathrm{P}_{#2}}
+\newcommand{\cat}[1]{\mathscr{#1}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\ob}{\mathrm{ob}}
+\newcommand{\ops}[1]{{#1}^{\mathrm{op}}}
+\newcommand{\kernel}[1]{\mathrm{Ker}\ {#1}}
+\newcommand{\image}[1]{\mathrm{Im}\ {#1}}
+\newcommand{\rnk}[1]{\mathrm{rk}\ {#1}}
+\newcommand{\Hom}[2]{\mathrm{Hom}({#1},{#2})}
+\newcommand{\End}[1]{\mathrm{End}({#1})}
+\newcommand{\qbinom}[2]{\genfrac{[}{]}{0pt}{}{#1}{#2}}
+
+% tikz
+\usetikzlibrary{arrows.meta,positioning,decorations.pathmorphing}
+\usetikzlibrary{graphs}
+
+
+\newcommand{\kk}[0]{\mathbb K}
+\newcommand{\kq}[0]{\mathbb K_q}
+\newcommand{\de}[1]{\partial_{#1}}
+\newcommand{\te}[1]{\theta_{#1}}
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{corollary}{Corollary}[theorem]
+% \newtheorem{lemma}[theorem]{Lemma}
+
+
+% % ページ色設定
+% \usepackage{pagecolor}
+% \definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
+% \color{darkpastelgreen}
+% \pagecolor{black}
+
+
+% \title{微分演算子によるA,D型量子群のmodule algebraと\\
+% Heisenberg Doubleの実現}
+
+\title{\large{2024年度3月卒業~学士特定課題研究}\\
+\LARGE{Derivative operator realization of A,C,D type quantum groups \\
+and representation of Heisenberg double}}
+
+\author{21B30669 西森湧也 \qquad 指導教員 鈴木咲衣 准教授}
+\date{}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+    本稿ではA,C,D型量子群 \( U_q(\mathfrak{g}) \)を
+    \( q \)微分演算子全体である \( q \)ワイル代数\( \mathbb W_q \)で実現した．
+    特にC型の場合は生成元に2階\( q \)微分演算子が対応する．
+    \(  U_q(\mathfrak{g}) \)の作用する関数環\( F(G) \)の
+    変形量子化された積\( * \)の双微分演算子による明示式を \( q\textrm{-}\exp \) を用いて示した．
+    \( U_q(\mathfrak{g}) \)の余積は\( * \)に関するライプニッツ則を表し，
+    スマッシュ積\( F(G) \#  U_q(\mathfrak{g}) \)により\( \mathbb W_q \)全体を得ることが分かった．
+    \( \mathfrak{sl}_2 \)に限定してQuantum Groupoidを具体的に計算し，
+    Yetter-Drinfeld module algebraの条件を確かめた．
+
+\tableofcontents
+
+
+    
+\end{abstract}
+\section{イントロダクション}
+\subsection{動機と概要}
+
+1984年にジョーンズは新たな結び目の多項式不変量を構成し
+\footnote{V. F. R. Jones, A polynomial invariant for knots via von Neumann algebras, Bull. Amer. Math. Soc. 12 (1985).},
+ その後のさまざまな量子不変量の発見へと繋がった．
+ 同時期に神保・ドリンフェルトはカッツ・ムーディー代数の普遍包絡代数の$q$類似に相当する量子群を導入した
+ \footnote{V. G. Drinfeld, Quantum Groups, Proceedings of the International Congress of Mathematicians, 1986.}．
+ その後，レシェトキン・トゥラエフにより，量子群の表現を用いてジョーンズ多項式の一般化が構成され，結び目の量子不変量して系統的に扱われるようになった\footnote{N. Reshetikhin \& V. G. Turaev, Ribbon Graphs and Their Invariants Derived from Quantum Groups, Commun. Math. Phys., 127 (1990), 1–26.}．これは半単純リー代数ごとに不変量が作られるが，それらをコンツェビッチ不変量が統一した\cite{Ohtsuki2015}．
+  
+  一方で，結び目不変量の発展により，閉3次元多様体の量子不変量に対しても類似の統一的な構成がなされた．たとえば，Le, 村上，大槻によるLMO不変量があり，こちらも普遍的な性質を持つ．他にも，Witten-Reshetikhin-Turaev(WRT)不変量は向き付け可能な閉3次元多様体の重要な不変量である．
+  
+  一方で，ルーにより，量子群の多対象の類似である Quantum Groupoid が導入された\cite{Lu1996}．
+  その後シューにより改良が加えられた\cite{Xu2001}．
+また，normal o-graphとして表示された多様体に対し，図式の交点にinvolutiveなホップ代数のハイゼンベルグダブルの表現を対応させてトレースを取ることで，その多様体の不変量を構成できる．
+
+しかし，Quantum Groupoidの表現から多様体の不変量を直接構成する方法があるかが疑問となった．量子群はinvolutiveではない．また，変数$q$を制限しなければ関数空間は無限次元である．また，Quantum Groupoidは関数環の非可換性に由来して2通りの両側加群構造を持つ．したがって，量子不変量構成にあたって具体的に計算することは困難を伴う．
+
+そこで本研究では，量子群およびQuantum Groupoidの代数構造を微分演算子の言葉で統一的に記述し，
+特にその余積構造と関数環への作用を明示することを目指した．
+A型の量子群の$q$-微分演算子を用いた多項式環上の表現は\cite{Kassel1995}に紹介されている．
+先行研究では，微分作用素同士が非可換となる非可換空間上でのワイル代数の一般化を用いた表現の表示があり，
+C型では\cite{ZhangHu2017}で，D型では\cite{Fiore1994}で紹介されている．
+しかし，量子群のタイプによって，演算子の関係式が異なるため，統一的に記述することはできない．
+また，関数環も非可換化されるため，計算規則は複雑である．
+
+本研究では微分作用素$\de x$と乗算作用素$x$から生成される通常のワイル代数を共通の土台として用いて，量子群の忠実な表現を構成することを目的とした．
+リー代数はリー群の接空間における左不変な微分演算子と捉えられ，
+その普遍包絡代数はそれらの微分演算子によって生成される結合代数と同型である．
+したがって，量子群も何らかの微分演算子の$q$類似と対応していると考えた．
+そして，微分演算子としての表現の枠組みで，量子群やQuantum Groupoidの余積に自然な解釈を与えることを試みた．
+
+主結果としてA,C,D型の量子群 \( U_q(\mathfrak{g}) \)を
+\( q \)微分演算子全体である \( q \)ワイル代数\( \mathbb W_q \)で実現した．
+A,D型の場合は生成元に1階の$q$微分演算子が対応するが，C型の場合は古典的なリー代数にはなかった現象として，生成元に2階\( q \)の微分演算子が対応するということがわかった．
+またその\(  U_q(\mathfrak{g}) \)の作用する関数環\( F(G) \)の
+変形量子化された積\( * \)を明示した．つまり$q$微分演算子と \( q\textrm{-}\exp \) を用いて積を表示した．
+さらに\( U_q(\mathfrak{g}) \)の余積は\( * \)に関するライプニッツ則を表し，
+リー代数に由来するbialgebroidの場合も余積は積\( * \)に関する拡張されたライプニッツ則を表すことが分かった．
+
+Quantum Groupoidはbialgebroidの一種である．\cite{BrzezinskiMilitaru2003}により，bialgebroid構造とbraided commutative Yetter Drinfeld module algebra構造との一対一対応がある．その中の
+Yetter-Drinfeld conditionも，\( * \)に関する右乗算演算子と微分演算子のライプニッツ則との関係の一般化であると捉えることができた．
+\( \mathfrak{sl}_2 \)に限定してQuantum Groupoidを具体的に計算し，双対基底を構成して5角関係式や6角関係式の確認を行った．
+
+本研究では3次元多様体の量子不変量の構成を目指したが，十分な進展には至らなかった．
+その主な要因として双対基底の存在性やフィルターによる完備化の理解に時間を要したことが挙げられる．
+さらに，本研究で構成された表現は無限次元表現であるため，単純にはトレースが定義できない，
+仮に定義できたとしてもワイル代数の関係式によりトレースの巡回性が成り立たないなどの問題がある．
+今後は既存の量子不変量との比較を通じて，適切なトレースの定義方法を検討し，それを基に多様体の不変量の構成を目指す．    
+
+\subsection{コンピュータ計算について}
+
+具体的に表現の作用を計算するために多項式および演算子のクラスをMATLAB上で実装した．\\
+多項式クラスの指数や係数はsymbolic計算に対応しており，数式計算を行うことができるので，q数を扱うことができる．\\
+メソッドとして加減乗除や$*$積の計算やテンソル積，微分作用を計算でき，二項演算をオーバーロードして直感的な記法で計算ができるようにした．
+他にも$q$類似の様々な関数を扱うクラスを作成し，$q$-expなどを実装した．また，微分演算子のなすワイル代数やホップ代数の演算も実装した．
+
+\subsection{論文の構成}
+最初にリー代数やホップ代数，ワイル代数の計算などの古典的な概念を復習する．
+次に$q$類似，$\hbar$進位相，量子群，そしてフィルター構造を導入する．
+3章ではA, C, D 型の量子群の$q$微分演算子による表現を構成する．
+4章ではライプニッツ則がmodule algebraとして定式化され，リー群の関数環の$*$積を明示し，
+量子群の余積が$*$積に関するライプニッツ則を満たすことを見る．
+5章では$\mathfrak{sl}_2$に限定してハイゼンベルグダブルやQuantum Groupoidとその表現を具体的に計算する．
+
+\section{基本概念}
+\subsection{本稿で用いる記号}
+$\kk$を標数$0$の体とする．$n,m\in \Z,n\leq m$に対して，$n:m=\{n,n+1,\dots,m\}$と記す．$0\in\N$とする．
+
+変数$x$による微分作用素を$\de{x}=\frac{\partial}{\partial x}$とし，オイラー作用素を$\te x=x\de x$と記す．
+
+$\delta$をクロネッカーのデルタとする．$\delta_{ij}$は$i=j$のとき$1$，それ以外のとき$0$となる．
+
+しばしば，$\{0\}$を単に$0$と書く．
+
+配列$\alpha \in\mathbb Z^n$と同じサイズの変数$X=(X_1,\dots,X_n)$に対して，指数表記$X^\alpha=X_1^{\alpha_1}\cdots X_n^{\alpha_n}$を用いる．
+
+$M_n(\kk)$を$n$次正方行列全体の集合とする．$n\in \N$に対して次の行列の集合を定義する：
+
+ $\mathfrak{sl}_n(\kk)=\{X\in M_n(\kk)|\mathrm{tr}(X)=0\},\qquad \mathfrak{so}_n(\kk)=\{X\in M_n(\kk)|X^T=-X\},$
+ $\mathfrak{sp}_{2n}(\kk)=\{X\in M_{2n}(\kk)|X^T\Omega+\Omega X=0\}.\qquad ただし，\Omega=\begin{pmatrix}0&I_n\\-I_n&0\end{pmatrix},~~I_n$はn次単位行列とする．
+
+  テンソル積の成分を縦に並べて表記する．すなわち$f(A\otimes B)=f\binom{A}{B}$のように書く．\label{def:verttens}
+
+\subsection{古典的な話題}
+\cite{Tanizaki2018}や\cite{Matsumoto1988}に従って，基本事項の復習を行う．
+\begin{dfn}[$n次元C^\infty$級多様体]
+  $C^\infty$級多様体 $M=(M,\{(U_i,\varphi_i)\})$ とは，
+  局所的にユークリッド空間 $\mathbb{R}^n$ に同相なハウスドルフ空間であり，滑らかな局所座標系を持つものをいう．すなわち
+  \begin{itemize}
+    \item $M$はハウスドルフ位相空間であり$\{U_i\}$ はその開被覆である．
+      \item どの点の近傍も同相写像$\varphi_i:U_i\rightarrow \varphi_i(U_i)\subset \R^n$により局所座標を持つ． 
+      \item 各局所座標の間の座標変換 $\varphi_j \circ \varphi_i^{-1}|_{U_i \cap U_j}$ は滑らか（無限回微分可能）である．
+  \end{itemize}
+  \end{dfn}
+
+  \begin{dfn}[滑らかな写像]
+    $m$ 次元多様体 $M$ から $n$ 次元多様体 $N$ への連続写像 $f$
+    が次の条件を満たすとき，$f$を$C^\infty$級写像と呼び，滑らかであるという．
+    $C^\infty$級写像全体を$C^\infty(M,N)$と書く．
+
+    \begin{itemize}
+      \item $f(U) \subset V$ を満たす $M$ の任意の局所座標 $(U, \varphi)$ と $N$ の任意の局所座標
+      $(V, \psi)$ に対して，写像 $\psi \circ f \circ \varphi^{-1}$ は $C^\infty$ 級写像
+    \end{itemize}
+    $M$ から $N$ への $C^\infty$ 級写像 $f$ が逆写像 $f^{-1}: N \to M$ を持ち，
+    $f^{-1}$ もまた $C^\infty$ 級写像になるとき，$f$ を微分同相写像と呼び，$M$ と $N$ は微分同相であるという．
+  \end{dfn}
+
+\begin{dfn}[接ベクトルと接空間]
+  $n$ 次元多様体$M$の点 $p$ における滑らかな曲線 $\gamma: (-\epsilon, \varepsilon) \to M,~~\gamma(0) = p$ に対して
+    $$\gamma'(0): C^\infty(M) \to \mathbb{R} : f \mapsto \frac{d}{dt}(f \circ \gamma)(0)$$
+     を $p$ における接ベクトルという．
+     点 $p$ におけるすべての接ベクトル全体のなすn次元ベクトル空間 $T_p M$を接空間という．
+
+\end{dfn}
+  \begin{dfn}[リー群]
+    リー群 $G=(G,\mu,\iota)$ とは，群構造を持つ滑らかな多様体であり，群の積 $\mu: G \times G \to G:(g,h)\mapsto gh$ および逆元 $\iota: G \to G:g\mapsto g^{-1}$の演算が滑らかなものである．
+    \end{dfn}
+  
+  \begin{dfn}[リー代数]
+  $\kk$上のリー代数 $\mathfrak{g}=(\mathfrak{g},[,])$ とは，$\kk$上のベクトル空間 $\mathfrak{g}$とリー括弧積という次の性質を満たす演算
+  $[ -,-]:\mathfrak{g}\times \mathfrak{g}\rightarrow\mathfrak{g}$ の組である．
+      \begin{enumerate}
+          \item 双線型性: 任意の$X\in\mathfrak{g}$に対して$[X, -],[-,X]$は線形写像,
+          \item 反対称性: $\forall X,Y\in\mathfrak{g},[X, Y] = -[Y, X]$,
+          \item ヤコビ恒等式: $\forall X,Y,Z\in\mathfrak{g},[X, [Y, Z]] + [Y, [Z, X]] + [Z, [X, Y]] = 0$.
+      \end{enumerate}
+  \end{dfn}
+  % リー代数 $\mathfrak{g}$ とは，リー群 $G$ の単位元 $e \in G$ における接空間 $T_e G$ であり，リー括弧積と呼ばれる二項演算 $[ \cdot , \cdot ]$ を備えたベクトル空間である．
+  % \item $\mathfrak{g} = T_e G$ はベクトル空間であり，リー括弧積 $[X, Y]$ は，$G$ 上の左不変ベクトル場 $X$ と $Y$ の交換子で定義される．
+\begin{dfn}[線形リー代数]
+  一般線形リー代数$\mathfrak{gl}(V)$とは，ベクトル空間 $V$ の線形変換全体 $\operatorname{End} (V)$ と，\\
+    括弧積$[f,g]=f\circ g-g\circ f~~(f,g\in \operatorname{End} (V))$のなすリー代数$\mathfrak{gl}(V)=(\operatorname{End} (V),[-,-])$である．
+
+    リー代数$\mathfrak{g}$が\textbf{線形リー代数}であるとは，あるベクトル空間$V$が存在して$\mathfrak{gl}(V)$のある部分リー代数と$\mathfrak{g}$が同型となることをいう．
+
+    % \textcolor{red}{↑線形の定義が意図したものではなかったので，修正しました．}
+\end{dfn}
+
+  \begin{dfn}[準同型]
+    リー代数 \( \mathfrak{g} \) からリー代数 \( \mathfrak{h} \) への
+    準同型 \( \phi: \mathfrak{g} \to \mathfrak{h} \) とは，任意の$X, Y \in \mathfrak{g}$に対して
+    次をみたす写像である．
+    \[
+    \phi([X, Y]) = [\phi(X), \phi(Y)] \qquad 
+    \]
+  \end{dfn}
+  
+  \begin{dfn}[部分リー代数]
+  特に準同型 \( \phi: \mathfrak{g} \to \mathfrak{h} \) が包含写像のとき，リー代数 \( \mathfrak{g} \) を \( \mathfrak{h} \) の\textbf{部分リー代数}と呼ぶ．
+  \end{dfn}
+    
+  \begin{eg}[行列のリー代数]　\\
+    $M_n (\kk)$ は$\text{End}(\kk^n)$と同一視でき，線形リー代数である．
+
+   $\mathfrak{sl}_n(\kk),\mathfrak{so}_{n}(\kk) ,\mathfrak{sp}_{2n}(\kk)$ は$M_n(\kk)$ の部分リー代数であり，従って線形リー代数である．
+   \end{eg}
+   \begin{dfn}[リー代数の表現]
+     リー代数 \( \mathfrak{g} \) の  \( V \) 上の\textbf{表現}とは，ベクトル空間 \( V \) と準同型 \( \rho: \mathfrak{g} \to \mathrm{End}(V) \)の組 \( (V, \rho) \) である．
+
+     また，\( V \) を \( \mathfrak{g} \) の\textbf{表現空間}と呼ぶ．
+   \end{dfn}
+   \begin{dfn}[部分表現]
+     リー代数 \( \mathfrak{g} \) の表現  \( (V, \rho) \) について，
+     \textbf{部分表現}\( (W, \rho) \)とは，部分空間 \( W\subset V \) であって，$\rho(\mathfrak{g})W\subset W$を満たすものをいう．
+     
+   \end{dfn}
+   \begin{eg}[随伴表現]
+     リー代数 \( \mathfrak{g} \) は自身に
+      $$ \mathrm{ad}: \mathfrak{g} \to \mathrm{End}(\mathfrak{g}):u\mapsto [u,-] $$
+      と作用する．\( (\mathfrak{g}, \mathrm{ad}) \)をリー代数 \( \mathfrak{g} \) の\textbf{随伴表現}と呼ぶ．
+   \end{eg}
+
+   \begin{dfn}[既約表現]
+   表現 \((V, \rho)\) が\textbf{既約}であるとは，$0,V$以外の部分表現を持たないことをいう．
+   \end{dfn}
+   
+   \begin{dfn}[忠実表現]
+   表現 \( \rho: \mathfrak{g} \to \mathrm{End}(V) \) が単射であるとき，\( \rho \) を \( \mathfrak{g} \) の\textbf{忠実表現}と呼ぶ．
+   \end{dfn}
+   
+
+    
+
+  \begin{dfn}[普遍包絡代数]　\\
+    % テンソル代数の商として定義したい
+    リー代数$\mathfrak {g}$ に対して \textbf{普遍包絡代数} $U(\mathfrak{g})$とは，括弧積から自然に定まる結合代数である．
+$T({\mathfrak {g}})$ を
+$\mathfrak {g}$のベクトル空間としてのテンソル代数とし，${\mathfrak {I}}$ を $x \otimes y - y \otimes x - [x, y] \quad (x, y \in {\mathfrak {g}})$ で
+生成される$T({\mathfrak {g}})$ の両側イデアルとして，\[ U({\mathfrak {g}}) = {T({\mathfrak {g}})}/{\mathfrak{I}} \]と定める．
+\end{dfn}
+自然な商写像 $T({\mathfrak {g}}) \to U({\mathfrak {g}})$ を
+ ${\mathfrak {g}}$ に制限して $i: {\mathfrak {g}} \to U({\mathfrak {g}})$ が定まる．また，
+ 結合代数は括弧積$[x,y]=xy-yx$により自然にリー代数としてみなせる．
+\begin{prop}[包絡代数の普遍性]　$(U({\mathfrak {g}}), i)$ は次の普遍性をもつ．\\
+          任意の結合代数 $A$ と任意のリー代数の準同型 $\phi: \mathfrak{g} \to A$ に対して，
+          % 自然な準同型$i:\mathfrak{g}\rightarrow U(\mathfrak{g})$  を通して，
+          唯一つの代数の準同型 $\tilde{\phi}: U(\mathfrak{g}) \to A$ 
+           が存在し，次を満たす:
+          \[
+          \tilde{\phi} \circ i = \phi
+          \]
+\end{prop}
+
+  
+  \begin{rem}
+    リー代数 $\mathfrak{g}$ の表現$(V,\rho)$は $U(\mathfrak{g})$加群Vとして見ることができる．
+  \end{rem}
+  
+
+  \begin{eg}[ハイゼンベルグリー代数とワイル代数,フォック空間表現]　\\ \label{def:heisenberg}
+  ハイゼンベルグリー代数 $\mathfrak h_n$ とは，$n$ 対の位置演算子と運動量演算子と定数 $\{x_i, p_i,h\}_{i\in 1:n}$ によって生成されるリー代数であり，次の関係式を満たす．
+  \[
+  [p_i, x_j] = h\delta_{ij}, \quad [x_i, x_j] = 0, \quad [p_i, p_j] = 0, \quad [h, x_i] = [h, p_i] = 0
+  \]
+  ワイル代数$\mathbb W_n$とは，ハイゼンベルグリー代数の普遍包絡代数$U(\mathfrak h_n)$において$h$を環の単位元$1_\kk$と同一視したものであり，
+  生成子 $\{x_i, p_i\}_{i\in 1:n}$ から代数として生成される．つまり，
+  \[
+  \mathbb W_n=U(\mathfrak h_n)/(h-1_\kk)=\kk[x_i,p_i]_{i\in 1:n}.
+  \]
+  ワイル代数は次の，フォック空間表現$( \kk[x_i]_{i\in 1:n},\rho)$を持つ:
+  $$ \rho(x_i) = \hat x_i, \quad \rho(p_i) = \frac{\partial}{\partial x_i}$$
+  $ \hat x_i:f(x)\mapsto x_if(x)$は乗算作用素を表す．
+
+  
+  \end{eg}
+  \begin{rem}[乗算作用素の表記に関する注意]　\\
+    以後，関数は作用素としては乗算作用素として扱う．逆に，演算子$u$を関数に作用させる際は，$u\cdot f(x)$のように表記する．
+    演算子としては$ \de xx=x\de x+1$が成立するが，これは$\de x\cdot x=1$と区別しなければならない．
+
+    上述の表現$\rho$が忠実であることから，演算子としての意味を忘れて，ワイル代数の生成元を
+    $\{x_i, p_i\}_{i\in 1:n}$ではなく，$\{x_i, \de i\}_{i\in 1:n}$とも記す．ワイル代数の元を微分演算子と呼ぶことにする．
+  \end{rem}
+  ワイル代数やハイゼンベルグ代数は，他の文献では逆の意味で用いられていたり，
+  定数を同一視したものも同じ名前で読んだりすることがあるので注意が必要である．
+  % 変数の数にも違いがあるので，本稿では章ごとに定義を変更する．
+  
+  \begin{eg}[$\mathfrak{sl}_2$と行列表現，微分演算子表現]　\label{def:sl2}\\
+    $\mathfrak{sl}_2(\kk)$は$H,E,F$という$\mathfrak{sl}_2$-tripleと呼ばれる元から生成されるリー代数で，関係式
+\begin{align*}
+    [H,E] = 2E, \quad [H,F] = -2F, \quad [E,F] = H.
+\end{align*}
+を持つ．一般の半単純リー代数のカルタンワイル基底(標準基底)では，各正ルートに対応する$\mathfrak{sl}_2$-tripleによって
+リー代数が直和分解されるので，非常に重要な例である．また，カシミール元と呼ばれる$U(\mathfrak{sl}_2)$の中心に属する元$\Omega=EF+\frac14(H-1)^2$がある．
+行列表現$(\kk^2,\rho)$は次の通りである:
+
+\begin{align*}
+    \rho(H) = \begin{pmatrix} 1 & 0 \\ 0 & -1 \end{pmatrix}, \quad \rho(E) = \begin{pmatrix} 0 & 1 \\ 0 & 0 \end{pmatrix}, \quad \rho(F) = \begin{pmatrix} 0 & 0 \\ 1 & 0 \end{pmatrix}, \quad \rho(\Omega) = \begin{pmatrix} 1 & 0 \\ 0 & 1 \end{pmatrix}.
+\end{align*}
+微分演算子による表現$V=(\kk [x,y],\rho)$は次の通りである:
+\begin{align*}
+    \rho(H) = x\frac{\partial}{\partial x} - y\frac{\partial}{\partial y}, \quad \rho(E) = x\frac{\partial}{\partial y}, \quad \rho(F) = y\frac{\partial}{\partial x}, \quad \rho(\Omega) = \frac14\left(x\frac{\partial}{\partial x}+y\frac{\partial}{\partial y}+1\right)^2
+\end{align*}
+
+$V$の基底$x^ny^m(n,m\geq 0)$に対して作用させることで，実際に表現であることが確かめられる:
+\begin{align*}
+    [\rho(E),\rho(F)]\cdot x^n y^m &= (n-m)x^n y^m = \rho(H)\cdot x^n y^m\\ 
+    [\rho(H),\rho(E)]\cdot x^n y^m &= 2nx^{n-1}y^{m+1} = 2\rho(E)\cdot x^n y^m\\
+    [\rho(H),\rho(F)]\cdot x^n y^m &= -2my^{m-1}x^{n+1} = -2\rho(F)\cdot x^n y^m.
+\end{align*}
+$E,F$は昇降演算子とも呼ばれる．実際，これらの作用は$x,y$の次数を上下させる．
+
+多項式の次数を$\deg (x^ny^m)=n+m$と定義する．斉次$N$次式の部分集合\\ $V_N=0\cup \{f(x,y)\in V|\deg f=N\}$は$N+1$次元ベクトル空間である．
+$H,E,F$の作用は多項式の次数を保つので，$V_N$はそれぞれの作用に関して不変部分空間である．また，$F$の作用を見れば分かるように，作用の軌道について
+$V_N=\rho(U(\mathfrak{sl}_2(\kk)))\cdot x^N$が成り立つ．さらに$\Omega$は$V_N$の次元を取り出す演算子となる．
+\[
+\rho(\Omega)\cdot v=\frac14(N+1)^2v\qquad(v\in V_N)
+\]
+以上より$V_N$は$x^N$を最高ウェイトベクトルとする既約表現であり，$V=\bigoplus_{N\geq 0}V_N$と直和分解される．
+
+逆に$\mathfrak{sl}_2(\kk)$の任意の有限次元表現は何個かの$V_N$の直和と加群として同型であることが知られている．
+
+  \end{eg}
+このような微分演算子による多項式上の表現が本稿では中心的な役割を果たす．より一般の代数での表現の構成については次章で述べる．
+
+
+\begin{prop}[Poincaré–Birkhoff–Witt の定理(PBWの定理)]\label{prop:PBW}
+  $ \mathfrak{g} $ を $\kk$ 上のリー代数とする．
+  $\Lambda$を添え字の全順序集合，$B=\{b_i\}_{i\in \Lambda}$を$\mathfrak{g}$の基底の集合とする．
+  $\Lambda$の有限な上昇列$\lambda=(\lambda_1,\lambda_2,\cdots,\lambda_n)\quad (\lambda_1\leq \lambda_2\leq \cdots \leq \lambda_n)$
+  全体を$L(\Lambda)$とする．$b_\lambda=b_{\lambda_1}b_{\lambda_2}\cdots b_{\lambda_n}$と定める．$\lambda$が空列のとき，$b_\lambda=1$とする．このとき次が成立する．
+
+  $$U(\mathfrak{g})\cong\bigoplus_{\lambda\in L(\Lambda)}\kk b_\lambda$$
+      % \item したがって，$ U(\mathfrak{g}) $ は $ \mathfrak{g} $ の対称代数 $ S(\mathfrak{g}) $ としての構造に関して次の次元的同型を持つ：
+      % \[
+      % \dim_k U(\mathfrak{g}) = \dim_k S(\mathfrak{g}) .
+      % \]
+  
+      % \item さらに，埋め込み写像
+      % \[
+      % \iota: S(\mathfrak{g}) \hookrightarrow U(\mathfrak{g})
+      % \]
+      % により，$ U(\mathfrak{g}) $ の随伴次数付き代数（associated graded algebra）は $ S(\mathfrak{g}) $ に同型となる：
+      % \[
+      % \mathrm{gr}(U(\mathfrak{g})) \cong S(\mathfrak{g}) .
+      % \]
+\end{prop}
+  
+  \begin{dfn}[ホップ代数]\label{def:hopf_alg}
+    ホップ代数 $H$ とは，双代数に加えて，antipodeを備えた代数構造である．
+    \begin{itemize}
+        \item \textbf{双代数}: $H$ は，代数の積 $\mu: H \otimes H \to H$ と単位 $\eta: \mathbb{K} \to H$ ，余代数の余積 $\Delta: H \to H \otimes H$ と余単位 $\varepsilon: H \to \mathbb{K}$ を持ち，$\Delta,\varepsilon$が代数$(H,\mu,\eta)$の準同型である．
+        
+        \item \textbf{antipode(対蹠射)}: $S: H \to H$ は，次を満たす写像である．
+        \[
+        \mu \circ (S \otimes \mathrm{id}) \circ \Delta = \mu \circ (\mathrm{id} \otimes S) \circ \Delta = \eta \circ \varepsilon
+        \]
+    \end{itemize}
+    \end{dfn}
+
+余積はスウィードラー記法を用いて，複数項をまとめて$\Delta(a)=a_{(1)}\otimes a_{(2)}$と表す．
+3つの場合も$\Delta(1\otimes \Delta)(a)=a_{(1)}\otimes a_{(2)}\otimes a_{(3)}$のように表す．
+
+\begin{eg}[群環]
+  群環 \( \mathbb{K}[G] \) とは，基底 \( \{e_g \mid g \in G\} \) で張られる \( \mathbb{K} \) 上のベクトル空間であり，積を次で定める．
+  \[
+  \left( \sum_{g \in G} c_g \, e_g \right) \cdot \left( \sum_{h \in G} d_h \, e_h \right) = \sum_{g, h \in G} c_g d_h \, e_{gh}, \quad c_g,d_h \in \mathbb{K}.
+  \]
+  群環 \( \mathbb{K}[G] \) には以下のような {ホップ代数}構造を与えることができる：
+  $$ \Delta(e_g) = e_g \otimes e_g,\qquad  \varepsilon(e_g) = 1,\qquad S(e_g) = e_{g^{-1}}\qquad (\forall g \in G) $$
+  \end{eg}
+
+  \begin{dfn}[イデアル]
+    $\mathfrak{g}$の \textbf{イデアル} $\mathfrak{I}$とは，$[\mathfrak{g},\mathfrak{I}]\subset \mathfrak{I}$となる$\mathfrak{g}$の部分空間である．
+    \end{dfn}
+    $\mathfrak{g}$は自明なイデアル$0,\mathfrak{g}$を持つ．
+    \begin{dfn}[単純リー代数]　\\ 
+        リー代数が \textbf{単純} であるとは，自明でないイデアルを持たないことをいう．\\
+        \textbf{半単純}リー代数とは，単純リー代数の直和と同型なリー代数のことである．
+        \end{dfn}
+    
+        \begin{prop}[単純リー代数の表現の単射性]　\\
+            半単純リー代数$\mathfrak{g}$の0でない表現$(V,\rho)$は単射である．
+          \end{prop}
+          % 証明
+          \begin{proof}
+            $\ker \rho$は$\mathfrak{g}$のイデアルである．
+            $\mathfrak{g}$は単純リー代数であり，$\rho$はつねに0でないので$\ker \rho =0$となる．\\
+            準同型定理より$\rho$は単射である．
+          \end{proof}
+        
+      
+      \begin{prop}[アドの定理]　\\
+        標数0において，任意の有限次元半単純リー代数はある線形リー代数と同型である．
+      \end{prop}
+
+  \begin{dfn}[カルタン行列]
+  カルタン行列 ( Cartan Matrix) は次の条件を満たす 整数行列 $A = (a_{ij})\in M_l(\Z)$ である：
+  \begin{itemize}
+      \item 対角成分は $a_{ii} = 2$．
+      \item 非対角成分は $a_{ij} \leq 0 \quad (i \neq j)$．
+      \item $a_{ij} = 0 \quad \mathrm{ならば}  a_{ji} = 0$．
+  \end{itemize}
+  \end{dfn}
+添字集合を$I=1:l$としておく．
+  \begin{dfn}[ディンキン図形]
+      ディンキン図形 (Dynkin Diagram) は，カルタン行列 $A = (a_{ij})$ に対応するグラフであり，次のように定義される．
+    \begin{itemize}
+      \item 各頂点は，Iに対応する．
+      \item 頂点 $i$ と $j$ の間に，$a_{ij} a_{ji}$ に対応する辺を引く．
+      \begin{itemize}
+        \item \quad $a_{ij} a_{ji} = 0$ の場合，頂点 $i$ と $j$ の間に辺を引かない．
+        \item \quad  $a_{ij} a_{ji} = 1$ の場合，頂点 $i$ と $j$ の間に単一の辺を引く．
+        \item \quad  $a_{ij}=-n, a_{ji} = -m$ $(m>n>0)$の場合，頂点 $i$ と $j$ の間に$n$重辺を引き，\\
+        \qquad 矢印を $i\to j$ を$m-n$重に書く．
+      \end{itemize}
+    \end{itemize}
+  \end{dfn}
+
+  \begin{eg}[ディンキン図形の例]\label{fig:dynkin}
+  \[\begin{tikzcd}
+	{A_l型} & 1 & 2 & 3 & {l-1} & l
+	\arrow[no head, from=1-2, to=1-3]
+	\arrow[no head, from=1-3, to=1-4]
+	\arrow[dashed, no head, from=1-4, to=1-5]
+	\arrow[no head, from=1-5, to=1-6]
+\end{tikzcd}\]
+\[\begin{tikzcd}
+	{B_l型} & 1 & 2 & 3 & {l-1} & l
+	\arrow[no head, from=1-3, to=1-4]
+	\arrow[shift right, no head, from=1-2, to=1-3]
+	\arrow[shift right, from=1-3, to=1-2]
+	\arrow[dashed, no head, from=1-4, to=1-5]
+	\arrow[no head, from=1-5, to=1-6]
+\end{tikzcd}\]
+
+\[\begin{tikzcd}
+	{C_l型} & 1 & 2 & 3 & {l-1} & l
+	\arrow[no head, from=1-3, to=1-4]
+	\arrow[shift right, no head, from=1-2, to=1-3]
+	\arrow[shift left, from=1-2, to=1-3]
+	\arrow[dashed, no head, from=1-4, to=1-5]
+	\arrow[no head, from=1-5, to=1-6]
+\end{tikzcd}\]
+\[\begin{tikzcd}
+	&& 1 \\
+	{D_l型} & 2 & 3 & 4 & {l-1} & l
+	\arrow[no head, from=1-3, to=2-3]
+	\arrow[no head, from=2-3, to=2-2]
+	\arrow[no head, from=2-3, to=2-4]
+	\arrow[dashed, no head, from=2-4, to=2-5]
+	\arrow[no head, from=2-5, to=2-6]
+\end{tikzcd}\]
+
+他にも，例外型と呼ばれる$E_6,E_7,E_8,F_4,G_2$型のディンキン図形があるが，ここでは省略する．
+
+  \end{eg}
+
+  \begin{dfn}[対称化可能カルタン行列]
+    対称化可能なカルタン行列 (Symmetrizable Cartan Matrix) とは，次の条件を満たすカルタン行列 $A = (a_{ij})$ である．
+    \begin{itemize}
+      \item $A$ に対して，整数成分の対角行列 $D = \mathrm{diag}(d_1, d_2, \ldots, d_l)$ が存在し，$S=DA\label{cartanSymmetric}$ が対称行列になる．
+    \end{itemize}
+    \end{dfn}
+      
+      \begin{dfn}[基本ルートデータ]
+          基本ルートデータ (Fundamental Root Data) とは，対称化可能なカルタン行列Aに対して定まる次の組 $\Phi=(\mathfrak{h},\{H_i\}_{i\in I}, \{\alpha_i\}_{i\in I})$ である．
+            \begin{itemize}
+              \item $\mathfrak{h}$: $2l-\operatorname{rank}(A)$次元のユークリッド空間．
+              \item 線形独立な部分集合$\{H_i\}_{i\in I}\subset\mathfrak{h}$
+              \item 双対空間$\mathfrak{h}^*$の線形独立な部分集合$ \{\alpha_i\}_{i\in I}$
+              \item  $\langle \alpha_j, H_i \rangle :=\alpha_j(H_i) = a_{ij}$
+            \end{itemize}
+        \end{dfn}
+      
+        \begin{prop}　\\
+          ディンキン図形は，基本ルートデータによって一意に決定される．
+        \end{prop}
+      
+        
+        \begin{dfn}[カッツ・ムーディ代数]
+        カッツ・ムーディ代数 (Kac-Moody Lie algebra) は，基本ルートデータ$(\mathfrak{h},\{H_i\}_{i\in I}, \{\alpha_i\}_{i\in I})$に対して定まるリー代数であり，以下の生成元と関係式で定義される．
+        \begin{itemize}
+             \item 生成元: $ \{ E_i, F_i  \}_{n\in I}\cup \mathfrak h$
+              \item 関係式:
+              \begin{enumerate}
+                  \item  $[h,h'] = 0\qquad(\forall h,h'\in \mathfrak h)$
+                  \item  $[h, E_j] = \alpha_j(h) E_j, \qquad [h, F_j] = -\alpha_j(h) F_j$
+                  \item  $[E_i, F_j] = \delta_{ij} H_i$
+                  \item セール関係式（Serre Relations）:
+                  \[
+                  (\mathrm{ad}\, E_i)^{1-a_{ij}}(E_j) = 0 \quad (i \neq j), \quad (\mathrm{ad}\, F_i)^{1-a_{ij}}(F_j) = 0 \quad (i \neq j)
+                  \]
+            \end{enumerate}
+        \end{itemize}
+        \end{dfn}
+        
+      \begin{dfn}[ルート系]
+          $x\in\mathfrak{g}$に対して，$\lambda\in\mathfrak{h}^*\backslash 0$が
+          $\forall h\in \mathfrak{h},[h,x]=\langle \lambda,h \rangle x$を満たすとする．\\
+          $\lambda$をルート，$x$をルートベクトルという．\\
+          また，ルート全体の集合を$\Phi$とし，$\Phi$の部分集合$\Delta$をルート系という．慣習により$0\notin \Delta$である．\\
+          $\alpha_i(i\in I)$を単純ルートと呼ぶ．
+      \end{dfn}
+      ルート系は抽象的にユークリッド空間内の格子の部分集合としても定義される．そこで，内積を導入する．
+      \begin{dfn}[カルタンデータ]　対称化可能なカルタン行列$A$に対して，カルタンデータとは，$\mathsf{E} =\oplus_{i\in I}\mathbb K\alpha_i$と
+          $\mathsf E$上の対称双線形形式$(-,-)$
+          の組$(\mathsf E,(-,-))$であって，次の条件を満たすものである．
+              \begin{itemize}
+                  \item $2(\alpha_i,\alpha_j)/(\alpha_i,\alpha_i)=a_{ij}$
+                  \item $(\alpha_i,\alpha_i)> 0\qquad(i\in I)$
+                  \item (正規化)$d_i:=(\alpha_i,\alpha_i)/2\in \mathbb Z,\min_{i\in I} d_i=1$
+              \end{itemize}
+      \end{dfn}
+          $d_i$はルートベクトルの長さの比を表している．対称化可能ならば$\mathrm{diag}(d_i)$により対称化される．
+          \begin{dfn}[分類]
+              カルタン行列について，上記の$(-,-)$が正定値(resp. 半正定値)のとき，有限型(resp. アフィン型)という．
+          \end{dfn}
+              \begin{prop}[半単純リー代数の分類定理]　\\
+                有限次元単純リー代数の同型類と図\ref{fig:dynkin}に与えたA - G型のディンキン図形は一対一に対応する．
+                
+                カルタン行列が正定値であるとき，その基本ルートデータからつくられるリー代数は半単純リー代数である．
+      
+                有限型の場合，高々，短長2種類の単純ルートが存在する．
+      
+                A,D,E型の場合，すべて$d_i=1$である．B,C,F型の場合，$d_i=1, 2$である．G型は$d_i=1,3$である．
+              \end{prop}
+              A,D,E型の場合，simply-lacedと呼ばれる．
+              % 命題
+
+              
+              \subsubsection{A型の具体例} \label{sec:classicA}
+              
+              $\mathfrak{sl}_{l+1}(\kk)$は$A_l$型のカッツムーディリー代数と同型であることを見る．
+              \begin{dfn}\label{def:a-alg}
+              ディンキン図形のとおり，カルタン行列は次のようになる．
+              \begin{align*}
+                a_{ij}=& 
+                \begin{cases}
+                  2 & (i=j) \\
+                  -1 & (|i-j|=1) \\
+                  0 & (\text{otherwise})
+                \end{cases}
+              \end{align*}
+                  
+                $\epsilon_i\in \mathbb Z^{l+1}$を単位ベクトルとして，単純ルートは
+              $\alpha_i=\epsilon_{i-1}-\epsilon_i~~(i\in I=1:l)$と定める．
+              ルートではないが便宜上，$\alpha_0 =-\epsilon_0$と定める．基本ルートデータは
+              \begin{align*}
+                  H_i=\operatorname{diag}(\alpha_i),\quad\mathfrak{h}=\oplus_{i\in 1:l}\kk H_i,\quad\langle \alpha_i,h_j \rangle=a_{ji}
+              \end{align*}
+              とする．カルタンデータも通常のユークリッド空間の内積$(-,-)$によって定められる．
+              \end{dfn}
+              
+              \begin{prop}
+                上記の$(\mathfrak{h},\{H_i\}_{i\in I}, \{\alpha_i\}_{i\in I})$で定まるカッツムーディリー代数は$\mathfrak{sl}_{l+1}(\kk)$と同型である．
+                具体的には，次の忠実な表現が構成できる．行列単位を$M_{ij}\in M_{l+1}(\kk)$とする．
+                  \begin{align*}
+                      \rho(E_i)=M_{i-1,i}\quad \rho(F_i)=M_{i,i-1}\quad \rho(H_i)=M_{i-1,i-1}-M_{i,i}\quad(i\in 1:l)
+                  \end{align*}
+              \end{prop}
+              \begin{proof} 行列の転置により，$\rho(E_i)\leftrightarrow \rho(F_i)$は入れ替わる．なので示すべき関係式は
+                \begin{align*}
+                  &[\rho(H_i),\rho(H_j)]=0,\quad [\rho(E_i),\rho(F_j)]=\delta_{ij}\rho(H_j),\quad [\rho(H_i),\rho(E_j)]=a_{ij}\rho(E_j),\qquad (i,j\in 1:l)\\
+                  &\mathrm{ad}(\rho(E_i))^2(\rho(E_{i\pm 1}))=0,\quad [\rho(E_i),\rho(E_j)]=0\qquad (j\geq i+2)
+                \end{align*}
+                となる．簡単な計算によりこれは確かめられる．また，それぞれの生成元が行列単位に対応しているので，表現は忠実である．
+              \newcommand{\ad}[0]{\mathrm{ad}}
+              
+                $i<j$に対して次のように生成元が作られることから，全射であることが言える．
+                $$M_{ij}=\ad(\rho(E_i))\ad(\rho(E_{i+1}))\cdots \ad(\rho(E_{j-2}))\rho(E_{j-1})$$
+                $$M_{ii}-M_{jj}=\rho(H_i)+\rho(H_{i+1})+\cdots+\rho(H_{j-1})$$
+              \end{proof}
+ 
+      $\de i=\de{x_i}$とする．
+
+$\mathfrak{sl}_{l+1}(\kk)$の表現を多項式上の表現に拡張する．
+\begin{prop}
+行列表現において，生成元を
+$M_{ij}=x_i\de j$と取り替える．つまり，
+\begin{align*}
+  \rho(E_i)=M_{i-1,i}\quad \rho(F_i)=M_{i,i-1}\quad \rho(H_i)=M_{i-1,i-1}-M_{i,i}\quad(i\in 1:l)
+\end{align*}
+$(V=\kk[x_i]_{i\in 0:l},\rho)$は$\mathfrak g$の微分演算子による表現である．
+\end{prop}
+\begin{proof}
+ワイル代数のフォック表現\ref{def:heisenberg}は忠実な表現なので，ワイル代数は$x_i,\de {x_i}$で生成される代数と同一視できる．
+
+括弧積のライプニッツ則\ref{lem:leibniz}とワイル代数の定義関係式より
+$$[x_a\de b,x_c\de d]=x_a[\de b,x_c]\de d+x_c[x_a,\de d]\de b=\delta_{bc}x_a\de d-\delta_{ab}x_c\de d$$
+のように括弧積に対して行列要素のように振る舞う．
+\end{proof}
+実は，任意の古典的な有限次元半単純リー代数に対して，このような表現が作れる．
+
+このことから，行列表現に対して，行列単位の基底$M_{ij}$を$M_{ij}=x_i\de j$に置き換えることで実現される．
+実はより一般のケースが成立する．なのでA型の具体例\ref{sec:classicA}での行列の交換子計算と同様にして関係式は示される．
+
+
+
+\subsection{多項式上の表現の構成}
+
+
+\begin{prop}[一般の古典型の半単純リー代数の場合]　\\
+標数0のもとで一般の有限次元半単純リー代数についても，微分演算子の表現が存在する．
+\end{prop}
+
+アドの定理から，忠実な$N$次元行列の表現が存在する．
+このことから，適切に行列単位を$M_{ij}=x_i\de j$と置き換えることで，
+多項式$V=\kk[x_i]_{i\in 1:N}$上の微分演算子による表現を構成することができる．
+
+
+\subsection{交換子,ワイル代数の計算公式}
+この章では$f$を$\kk$上解析的な関数，$x,\partial$をワイル代数の生成元，$\partial$を変数$x$についての微分作用素，$\theta=x\partial$とする．証明が容易なものは省略する．
+
+
+まず形式的べき級数環$\kk \langle\langle A,B\rangle\rangle$における交換子${{ [ {A} , {B} ] } } := AB - BA $に関する公式をいくつか紹介する．
+
+
+\begin{lem}[ライプニッツ則 ] \label{lem:leibniz}
+  \begin{equation}
+  [A, BC] = [A, B]C + B[A, C]
+  \end{equation}
+  \begin{equation}
+  [AB, C] = A[B, C] + [A, C]B
+  \end{equation}
+  \end{lem}
+\begin{dfn}[exp]　
+  \begin{equation}
+  e^{A} = \sum_{n=0}^{\infty} \frac{A^n}{n!}
+  \end{equation}
+\end{dfn}
+  % \begin{lem}[ヤコビの恒等式] \label{lem:jacobi_identity}
+  % \begin{equation}
+  % [A, [B, C]] + [B, [C, A]] + [C, [A, B]] = 0
+  % \end{equation}
+  % \end{lem}
+  
+  \begin{lem}[n乗の交換] \label{lem:commutator_power_An}
+  \begin{equation}
+  \begin{aligned}
+  {{ \qty[ {A^n} , {B} ] } }
+      &= A^{n-1}{{ \qty[ {A} , {B} ] } } + A^{n-2}{{ \qty[ {A} , {B} ] } }A + A^{n-3}{{ \qty[ {A} , {B} ] } }A^{2} + \cdots \\ 
+      &= \sum_{k=1}^{n-1} A^{n-k}{{ \qty[ {A} , {B} ] } }A^{k-1}\\
+  {{ \qty[ {A} , {B^n} ] } } 
+      &= B^{n-1}{{ \qty[ {A} , {B} ] } } + B^{n-2}{{ \qty[ {A} , {B} ] } }B + B^{n-3}{{ \qty[ {A} , {B} ] } }B^{2} + \cdots \\ 
+      &= \sum_{k=1}^{n-1} B^{n-k}{{ \qty[ {A} , {B} ] } }B^{k-1}
+  \end{aligned}
+  \end{equation}
+  \end{lem}
+  
+  \begin{lem}[Adjoint作用] \label{lem:adjoint_action}
+    \begin{equation}
+    e^{\lambda A} B e^{ - \lambda A} = B + \lambda [A, B] + \frac{\lambda^2}{2!}[A, [A, B]] + \frac{\lambda^3}{3!}[A, [A, [A, B]]] + \cdots
+    \end{equation}
+    $\text{Ad}(z):x\mapsto z x z^{-1}$ ，$\text{ad}(x):y\mapsto [x,y]$ とすると，
+    \begin{equation}
+    \text{Ad}(e^{\lambda A}) B = e^{\lambda \text{ad}(A)} B
+    \end{equation}
+    とも書ける．このAd作用は環の準同型である．
+    \end{lem}
+    
+  
+  % \begin{lem}[ベーカー・キャンベル・ハウスドルフ (BCH) 公式] \label{lem:bch_formula}
+  % \begin{equation}
+  % e^{A} e^{B} = \exp\left( A + B + \frac{1}{2}[A, B] + \frac{1}{12}([A, [A, B]] + [B, [B, A]]) + \cdots \right)
+  % \end{equation}
+  % \end{lem}
+  
+  % \begin{lem}[正準交換関係] \label{lem:canonical_commutator}
+  %   \begin{equation}
+  %   [p,x] = px-xp = h
+  %   \end{equation}
+  %   \end{lem}
+  \begin{lem}[ワイル代数の交換関係 ] \label{lem:weyl_algebra}
+  \begin{equation}
+  [\partial,f(x)] = f'(x)h
+  \end{equation}
+  \begin{equation}
+  [f(\partial),x] = f'(\partial)h
+  \end{equation}
+  \end{lem}
+  
+  \begin{lem}[n階微分] \label{lem:nth_derivative}
+  \begin{equation}
+  \partial^n \cdot x^m = m(m-1)\cdots(m-n+1)x^{m-n}=\frac{m!}{(m-n)!}x^{m-n}
+  \end{equation}
+  \end{lem}
+  
+  \begin{lem}[シフト演算子,スケール演算子] \label{lem:shift_operator}
+  \begin{equation}
+    e^{\lambda \partial} \cdot f(x)=f(x+\lambda)
+  \end{equation}
+  \begin{equation}
+    \lambda^{\theta_x} \cdot f(x) =f(\lambda x)\qquad (\lambda>0)
+    \end{equation}
+  \end{lem}
+  \begin{proof} 解析的なので，テイラー展開できる．
+$$  e^{\lambda \partial} \cdot f(x)
+  = \sum_{n,m=0}^{\infty} \frac{\lambda^n}{n!} \frac{f^{(m)}(0)}{m!}\frac{m!}{(m-n)!}x^{m-n} 
+  =\sum_{m=0}^{\infty} \frac{f^{(m)}(0)}{m!}(x+\lambda)^{m} 
+  = f(x+\lambda)$$
+$z\mapsto \log x$ において， $\partial_z\mapsto \theta_x$ と変数変換すると， 
+  $$\lambda^{\theta_x} \cdot f(x) =e^{\log(\lambda)\partial_z} \cdot f(e^{z}) =  f(e^{z+\log\lambda })=f(\lambda x)$$
+
+\end{proof}
+  \begin{lem}[オイラー作用素の公式] \label{lem:euler_operator}
+  \begin{equation}
+   \quad f(\theta)x^n = x^n f(\theta+n)
+  \end{equation}
+  $\theta x = x(\theta +1)$ を繰り返し用いる．
+  \end{lem}
+  
+  \begin{lem}[ハイゼンベルグリー群の積の公式] \label{lem:heisenberg_group}
+  \begin{equation}
+  e^{\lambda \partial} e^{\mu x} = \exp\left(  \lambda \partial+\mu x+ \frac{1}{2}\lambda\mu h  \right)
+  \end{equation}
+  \end{lem}
+
+  
+\begin{lem}[二項定理]
+  \begin{equation}\label{eq:binomial_poc}
+    (1-x)^{-z}=\sum_{n=0}^n \frac{x^n}{n!}(z)_n\qquad (|x|<1)
+  \end{equation}
+  が成り立つ．ただし，$(z)_n=z(z+1)\cdots(z+n-1)$はポッホハマー記号(上昇冪)である．
+\end{lem}
+
+
+
+\newcommand{\SNone}[2]{S_I(#1,#2)}
+\newcommand{\SNtwo}[2]{S_{I\hspace{-1.7pt}I}(#1,#2)}
+\begin{dfn}[Stirling数]
+    第1種Stirling数$\SNone{n}{k}$ はポッホハマー記号(上昇冪)の展開係数として
+    \begin{equation*}
+     (x)_n =\sum_{k=0}^n \SNone{n}{k}x^k
+    \end{equation*}
+    と定義される．ただし，$\SNone{n}{k}=0~~(k>n)$である．
+
+
+    第2種Stirling数$\SNtwo{n}{k}$は下降冪$(-x)_k(-1)^k=(x-0)(x-1)\cdots (x-k+1)$による展開係数として
+    \begin{equation*}
+      x^n =\sum_{k=0}^n \SNtwo{n}{k}(-1)^k(-x)_k
+    \end{equation*}
+    と定義される．ただし，$\SNtwo{n}{k}=0~~(k>n)$である．定義より
+    行列$\left(\SNone{n}{m}\right)_{0\leq n,m<N},\left(\SNtwo{n}{m}(-1)^{n+m}\right)_{0\leq n,m<N}$は互いに逆行列である．
+    すなわち，次の式が成立する．
+    $$\sum_{k=0}^n \SNone{n}{k}\SNtwo{k}{m}(-1)^{m+k}=\delta_{n,m}$$
+\end{dfn}
+帰納的に次の公式が成立する．
+\begin{lem}[$\theta$の累乗]
+  \begin{equation}\label{eq:weyl:theta_power}
+    (-1)^n(-\te x)_n=x^n\de x^n
+  \end{equation}
+  \begin{equation}\label{eq:weyl:theta_power2}
+    \theta_x^n=\sum_{k=0}^n \SNtwo{n}{k}x^k\partial_x^k
+  \end{equation}
+\end{lem}
+\begin{lem}
+\begin{equation}\label{eq:weyl:swap_partial_x}
+\partial_x^n x^m=\sum_k\binom{n}{k}\binom{m}{k} k! x^{m-k} \partial_x^{n-k}  
+\end{equation}
+\end{lem}
+% \begin{equation*}
+%   \SNtwo{n}{k}=\frac{1}{k!}\sum_{i=1}^k (-1)^{k-i} \binom{k}{i} i^n
+% \end{equation*}
+
+              
+\subsection{量子的な話題}
+
+明確な定義は無いが，$q$類似とは，パラメータ変数$q$を係数や関係式に追加した概念の一般化であって，
+$q \to 1$の極限で元の概念にもどるようなものを指す．
+一般化の方向性は様々であるので，各概念の流儀に依存する．
+$q = e^{\hbar}$というパラメータ$\hbar$も使われる．
+
+物理学の歴史的経緯により$q$類似は様々な呼称があり，量子化(quantization)，非可換化，
+量子変形(quantum deformation)，$q$-変形($q$-deformation)などがある．
+
+逆に，$q$類似を元の概念に戻す操作を\textbf{古典化} (classicalization, dequantization) という．
+
+\begin{dfn}[$q$類似] 2通りの流儀があるが，基本的な概念の$q$類似をここで導入する． \cite{Kuroki2006}に従っている．
+
+\textbf{\( q \)-括弧}  
+\[
+[z]_q = \frac{q^z - q^{-z}}{q - q^{-1}}
+\]
+
+\textbf{\( q \)-階乗}  
+\[
+[n]_q! = [1]_q [2]_q \cdots [n]_q, \quad [0]_q! = 1
+\]
+
+\textbf{\( q \)-二項係数}  
+\[
+\qbinom{n}{k}_q = \frac{[n]_q!}{[k]_q! [n - k]_q!}
+\]
+
+\textbf{\( q \)-指数関数}  
+\[
+\exp_q[x] = \sum_{n=0}^\infty \frac{q^{\binom{n}{2}}}{[n]_q!} x^n
+\]
+
+\textbf{\( q \)-微分}  
+\[
+\partial_{x,q} f(x) = \frac{f(qx) - f(q^{-1}x)}{(q - q^{-1})x}
+\]
+他の流儀についても見る．以下，$Q = q^{-2}$ とする．
+
+\textbf{\( Q \)-括弧}  
+\[
+(n)_Q = \frac{1 - Q^n}{1 - Q}
+\]
+
+\textbf{\( Q \)-階乗}  
+\[
+(n)_Q! = \prod_{k=1}^n (k)_Q
+\]
+
+\textbf{\( Q \)-ポッホハマー記号}  
+\[
+(a; Q)_n = \prod_{k=0}^{n-1} (1 - a Q^k)
+\]
+
+\textbf{\( Q \)-指数関数}  
+\[
+\exp_Q(x) = \sum_{n=0}^\infty \frac{x^n}{(n)_Q!}
+\]
+\end{dfn}
+
+\begin{lem}[$q$-括弧の1次の恒等式 (加法定理)] \label{lem:q1}
+$a, b$ は可換であるとする．次が成り立つ．
+\begin{equation}
+[a + b]_q = q^{-b}[a]_q + q^a[b]_q = q^b[a]_q + q^{-a}[b]_q 
+\end{equation}
+\end{lem}
+
+\begin{lem}[$q$-括弧の2次の恒等式] \label{lem:q2}
+$a, b, c, d$ は互いに可換で，$a + c = \pm(b + d)$ のとき次が成り立つ．
+\begin{equation}
+[a]_q[b]_q - [c]_q[d]_q = [a + c]_q[\pm a - d]_q = [b \mp c]_q[a + c]_q\\
+\end{equation}
+実際に適用する際は，上の条件のもとで次の式が成立するので$q$-括弧を付け加える：
+$$ab-cd=(a+c)(\pm a -d)=(b\mp c)(a+c)$$
+\end{lem}
+
+\begin{lem}[流儀の変換]
+次の変換が成り立つ：
+\begin{equation} \label{eq:conversion1}
+\exp_Q(x) = \exp_q[x]
+\end{equation}
+\begin{equation} \label{eq:conversion2}
+\binom{n}{k}_Q = q^{-k(n - k)} \qbinom{n}{k}_q
+\end{equation}
+\end{lem}
+
+\begin{lem}[指数関数の等式]
+  $\epsilon = 1 - Q$とする．次の等式が成り立つ．
+\begin{equation} \label{eq:exp-equality1}
+\exp_Q(x) = (\epsilon x; Q)_\infty^{-1}=\exp\left(\sum_{m=1}^\infty \frac{\epsilon^{m-1}}{m(m)_Q}x^m\right)
+\end{equation}
+\begin{equation} \label{eq:exp-equality2}
+\exp_q[x]^{-1} = \exp_{q^{-1}}[-x]
+\end{equation}
+\end{lem}
+
+\begin{lem}[$q$-二項定理]
+$yx = Qxy$ とする．このとき，次の恒等式が成り立つ．
+\begin{equation} \label{eq:q-binomial-theorem}
+(x + y)^n = \sum_{k=0}^n \binom{n}{k}_Q x^k y^{n - k}
+\end{equation}
+\end{lem}
+
+\begin{lem}[指数法則の$q$類似]
+$Q = q^{-2}, \epsilon = 1 - Q, ~~yx = Qxy$ とする．このとき，次の恒等式が成り立つ．
+\begin{equation} \label{eq:q-exp-law}
+\begin{aligned}
+(1) & \quad \exp_Q(x)\exp_Q(y) = \exp_Q(x + y), \\
+(2) & \quad \exp_Q(y)x = x(1 - \epsilon y)\exp_Q(y) = (x - \epsilon xy)\exp_Q(y), \\
+(3) & \quad \exp_Q(y)\exp_Q(x) = \exp_Q(x - \epsilon xy)\exp_Q(y), \\
+(4) & \quad \exp_Q(y)\exp_Q(x) = \exp_Q(x + y - \epsilon xy), \\
+(5) & \quad \exp_Q(y)\exp_Q(x) = \exp_Q(x)\exp_Q(y - \epsilon xy), \\
+(6) & \quad \exp_Q(y)\exp_Q(x) = \exp_Q(x)\exp_Q(-\epsilon xy)\exp_Q(y).
+\end{aligned}
+\end{equation}
+\end{lem}
+
+\begin{dfn}[量子群]\label{def:q-grp}
+  \textbf{神保の量子群}は次の生成元と関係式で定義される．
+  % 注釈をいれるときは
+  % \footnote{本稿ではアフィン型の量子群は定義しないので，簡略化した定義を書く．
+  % また，ドリンフェルトによる$\hbar$による形式的べき級数としての定式化はせず，神保による定義を紹介する．}
+  \begin{itemize}
+      \item  
+      カルタン行列$A=(a_{ij})$に付随する基本ルートデータ$(\mathfrak{h},\{h_i\}_{i\in I}, \{\alpha_i\}_{i\in I})$，$I=1:n$および　\\
+    カルタンデータ$(\mathsf E=\oplus_{i\in I}\mathbb K\alpha_i,(-,-))$\\
+    変数$q$,　$d_i:=(\alpha_{i},\alpha_i)/2,\quad q_i:=q^{d_i}$,　　
+
+      \item 生成元: 単純ルート$\alpha_i$に対応する$E_i, F_i, K_i, K_i^{-1}(i\in 1:n)$ 
+      % \[
+      % U_q(\mathfrak{g}) = \langle E_i, F_i, K_i, K_i^{-1} \mid i = 1, \dots, n \rangle
+      % \]
+      
+      \item 関係式:
+          {\begin{enumerate}
+            \item 
+          % \begin{equation} 
+          $\qquad K_i K_j = K_j K_i$
+          % \end{equation}
+          \item
+          % \begin{equation} \label{eq:K-action}
+          $\qquad K_i E_j K_i^{-1} = q^{(\alpha_i,\alpha_j)} E_j, \quad K_i F_j K_i^{-1} = q^{-(\alpha_i,\alpha_j)} F_j$
+          % \end{equation}
+          \item
+          % \begin{equation} \label{eq:EFH-relation}
+          $$[E_i, F_j] = \delta_{ij} \frac{K_i - K_i^{-1}}{q_i - q_i^{-1}}$$
+          % \end{equation}
+      \item 量子セール関係式
+          \begin{equation} \label{eq:q-Serre}
+          \sum_{k=0}^{1 - a_{ij}} (-1)^k \qbinom{1 - a_{ij}}{k}_{q_i} E_i^k E_j E_i^{1 - a_{ij} - k} = 0 \quad (i \neq j),
+          \end{equation}
+          \begin{equation*} 
+          \sum_{k=0}^{1 - a_{ij}} (-1)^k \qbinom{1 - a_{ij}}{k}_{q_i} F_i^k F_j F_i^{1 - a_{ij} - k} = 0 \quad (i \neq j).
+          \end{equation*}
+        \end{enumerate}}
+  
+      \item ホップ代数の構造:
+          \begin{equation} \label{eq:comultiplication}
+          \Delta(E_i) = 1 \otimes E_i + E_i \otimes K_i,\qquad
+\Delta(F_i) = F_i \otimes 1 + K_i^{-1} \otimes F_i,
+          \end{equation}
+          \begin{equation} \label{eq:comultiplication-K}
+          \Delta(K_i) = K_i \otimes K_i,
+          \end{equation}    
+          \begin{equation} \label{eq:counit}
+          \varepsilon(E_i) = \varepsilon(F_i) = 0, \quad \varepsilon(K_i) = 1,
+          \end{equation}  
+          \begin{equation} \label{eq:antipode}
+          S(E_i) = - E_iK_i^{-1}, \quad S(F_i) = -K_iF_i , \quad S(K_i) = K_i^{-1}.
+          \end{equation}
+  
+  \end{itemize}
+  
+  \end{dfn}
+
+  \subsection{$\hbar$進位相における代数}
+  この節では$\hbar$進位相の定義と位相代数を考え，量子群の別の定義を与える．
+  \cite{Kassel1995}に基づき，証明は省略する．
+  
+    まず射影極限を導入する．これは，集合や環あるいは（適当に固定した環上の）加群，多元環などに対して，
+    いくつかの関連する対象を「貼合せる」ことで普遍的に対象を構成する手続きである．
+    抽象的な導入を行うが，対象を固定した環の加群，射を加群の準同型，直積を直積加群と読み替えてよい．
+    
+    \begin{dfn}[射影系]\label{def:inverse_system}
+     圏Cの射影系とは，Cの対象の族$A=(A_n)_{n\in \mathbb N}$と
+     Cの射の族$p=(p_{n}:A_{n+1}\to A_{n})_{n\in \mathbb N}$からなる組$(A,p)$である．
+  
+     射影系$(A,p),(A',p')$に対して，その間の射を，
+      射影系の射の族$(f_{n}:A_{n}\to A'_{n})_{n\in \mathbb N}$であって，
+      $p'_{n}\circ f_{n+1}=f_{n}\circ p_{n}(\forall n\in \mathbb N)$を満たすものとする．
+    
+    \end{dfn}
+     \begin{dfn}[射影極限] \label{def:proj_limit}
+      射影系$(A,p)$を一つ固定する．射影極限を次のように定める．
+      \begin{equation}
+          \lim_{\leftarrow n} A_n = \qty{\left.\qty(a_n)_{n \in \N} \in \prod_{n \in \N} A_n \right| p_n(a_{n+1}) = a_{n}}
+      \end{equation}
+      直積の要素への射影を制限することで，射影$\pi_n :\displaystyle \lim_{\leftarrow n} A_n \to A_n$が定まる．
+  
+      
+    \end{dfn}
+    \begin{prop}\label{prop:inverse_system:X}
+      Cの対象Xと任意の射の族$(f_{n}:X\to A_{n})_{n\in \mathbb N}$があり，
+      $p_n\circ f_{n+1}=f_{n}$を満たすとする．
+      このとき，射$f:X\to \displaystyle \lim_{\leftarrow n} A_n $が一意に存在して，
+      $f_{n}=\pi_{n}\circ f(n\in \mathbb N)$を満たす．
+  \end{prop}
+      
+      \begin{prop} 射影極限の対応は関手的である．すなわち，
+        定義\ref{def:inverse_system}の射影系$(A,p),(A^\prime,p')$と射の族$(f_n)_{n\in \mathbb N}$に対して，
+        一意的な射$$f=\lim_{\leftarrow n} f_n:\lim_{\leftarrow n} A_n \to \lim_{\leftarrow n} A'_n$$
+        が存在して，$\pi'_n\circ f=f_n\circ \pi_n(\forall n\in \mathbb N)$を満たす．
+        
+        また，合成可能な射の族$(f_n)_{n\in \mathbb N},(g_n)_{n\in \mathbb N}$に対して次が成立する．
+        $$\lim_{\leftarrow n} (g_n\circ f_n)=\lim_{\leftarrow n} g_n\circ \lim_{\leftarrow n} f_n$$
+  \end{prop}
+  
+  射影極限には射影極限位相と呼ばれる自然な位相が入る．これは，各$A_n$に離散位相を入れて$ \prod_{n \in \N} A_n$に入る直積位相から誘導される位相である．
+  
+  この位相について，$\pi_n$は連続である．さらに，終域を$\displaystyle \lim_{\leftarrow n} A_n$とする写像が，
+  この位相について連続であることと，$ \pi_n\circ f(\forall n\in \mathbb N)$が連続であることは同値である．
+  
+  
+    \begin{dfn}[ultrametric]
+      距離空間$R$上の距離$d$に対して，次が成り立つとき，ultrametricであるという．
+        \begin{equation}
+            d(a,c) \leq \max\qty{d(a,b), d(b,c)}\qquad( \forall a,b,c \in R)
+        \end{equation}
+    \end{dfn}
+    \begin{dfn}
+      $\hbar$を形式変数として，$\kk$線形空間$V$上の形式級数環$V[[\hbar]]$を以下のように定義する．
+      \begin{equation}
+          V[[\hbar]] = \qty{\left.\sum_{n=0}^\infty v_n \hbar^n \right| v_n \in V}
+      \end{equation}
+      和や積は多項式環$V[\hbar]$と同様に定義され，$\hbar$の次数ごとに区切れば有限和で書ける．
+    \end{dfn}
+    \begin{prop}
+      $\kk[[\hbar]]$の元$f = \sum_{n=0}^\infty a_n \hbar^n$が逆元を持つための必要十分条件は$a_0 \neq 0$である．
+    \end{prop}
+    この命題により，$\kk$が極大イデアル$(\hbar)$を持つ局所環であると捉えられる．
+    
+    
+      
+        イデアル$\hbar^n$による剰余環$K_n = \kk[\hbar]/(\hbar^n),~K_0=0$を考える．
+        包含関係$(\hbar^n)\supset (\hbar^{n+1})$により，全射な環準同型$p_n : K_{n+1} \to K_n$が定まり，
+        核はイデアル$h^n \kk[[\hbar]]$である．また，次の準同型も定まる．
+        $$\pi_n: \kk[[\hbar]] \to K_n: \sum_{m=0}^\infty a_m \hbar^m \mapsto \sum_{m=0}^{n-1} a_m \hbar^m+\hbar^n \kk[[\hbar]] $$
+        
+        命題\ref{prop:inverse_system:X}により次が成立する．
+      \begin{prop}
+        上記から定まる射影系$(K, p)$に対して射影極限を考える．
+        環同型$\pi : \kk[[\hbar]] \to \displaystyle\lim_{\leftarrow n} K_n$であって，
+        $K_n$への射影との合成が$\pi_n$となるものが一意的に存在する．
+      \end{prop}
+        $\kk[[\hbar]]$に射影極限位相を入れると，これは$\hbar$進位相とよばれるultrametricの入った距離空間となることを見る．
+  
+        \newcommand{\ordh}{\mathrm{ord}_\hbar}
+        \begin{dfn}[オーダー$\ordh(f),$ノルム$|・|,$距離$d$]
+        形式的冪級数$g,f = \sum_{n=0}^\infty a_n \hbar^n\neq 0$に対し次で定義する．
+        \begin{equation}
+          \ordh(0)=+\infty,\quad |0|=0,\qquad \ordh(f) = \min\qty{n | a_n \neq 0},\quad |f| = 2^{-\ordh(f)},\qquad d(f,g) = |f-g|
+        \end{equation}
+      \end{dfn}
+  
+      \begin{prop}
+        dはultrametricであり，$(\kk[[\hbar]],d)$は射影極限位相と同じ位相の入った距離空間となる．
+  
+        また，加算や乗算も連続である．
+      \end{prop}
+      \begin{dfn}
+        $\kk_\hbar=\kk[[\hbar]]$，$M$を$\kk_\hbar$-加群とする．
+        部分加群の族$(h^n M)_{n\in \N}$と標準的な射影$p_n : M_{n+1}  \to M_n $(ただし$M_n = M/h^n M$)により射影系$(M,p)$が定まる．
+  
+      この射影系についての射影極限を$M$の$\hbar$進完備化といい，$\displaystyle\tilde M = \lim_{\leftarrow n} h^n M$と書く．
+  
+      射影$i_n :M \to M_n$により一意的に準同型$i;M \to \tilde M$であって，$i_n = \pi_n \circ i~~(n\in \N)$を満たすものが存在する．
+      \end{dfn}
+      この$i$の核は$\mathrm{Ker}(i) = \bigcap_{n\in \N} h^n M $である．
+      \begin{dfn}
+        $M$を$\kk_\hbar$-加群とする．
+        $M$が\textbf{分離}であるとは，$n > 0$に対して，$h^n M = \qty{0}$であることをいう．
+        $M$が\textbf{完備}であるとは，加群準同型$i : M \to \displaystyle\lim_{\leftarrow} h^n M$が全射であることをいう．
+      \end{dfn}
+    
+      \begin{prop}
+        $M$が分離かつ完備であるとき，$M$と$\tilde M$は$\kk_\hbar$-加群として同型である．
+        また，この同型を通じて$\hbar$進位相が$M$に入る．
+      \end{prop}
+      \begin{dfn}
+        \textbf{位相的自由加群}とは，$\kk$線形空間$V$を係数とする形式級数環$V[[\hbar]]$と書けるものをいう．
+  
+        これは$\kk_\hbar$-加群構造および$\hbar$進位相が入る．また，$\kk_\hbar$自身も位相的自由加群である．
+      \end{dfn}
+      \begin{prop}
+       位相的自由加群は$\kk_\hbar$-加群として分離かつ完備である．
+  
+       また，$V$の基底を$\{e_i\}_{i\in I}$とすると，$\{e_i \}_{i\in I}$で生成される$\kk_\hbar$加群は$V[[\hbar]]$の中で稠密である．
+  
+      任意の分離かつ完備な$\kk_\hbar$-加群$M$に対して，次のように，線形写像の集合に自然な全単射がある．
+      \[
+        \mathrm{Hom}_{\kk_\hbar}(V[[\hbar]],M) \cong \mathrm{Hom}(V,M)
+      \]
+      \end{prop}
+  
+      \begin{prop}
+        $V$を有限次元$\kk$-加群とする．
+        $W$を$\kk$-加群とする．
+        $V[[\hbar]]$と$W[[\hbar]]$が自由加群であるとき，$V[[\hbar]] \otimes W[[\hbar]] = (V \otimes W)[[\hbar]]$である．
+      \end{prop}
+      \begin{prop}
+        $\kk_\hbar$-加群が自由加群であることと，分離かつ完備かつ捩れが無いことは同値である．
+      \end{prop}
+      
+        $V$が有限次元$\kk$-加群であるとき，$V[[\hbar]]\cong V\otimes \kk_\hbar$という同型がある．
+        しかし，無限次元の場合は一般には成り立たない．たとえば$V$の線形独立な無限列$\{e_i\}_{i\in I}$を考えると，
+        $\sum_{i\in I} e_i\hbar^i\in V[[\hbar]]$は$V\otimes \kk_\hbar$に属さない．
+        これを解決するため，テンソル積についても完備化を行う．
+  
+        \begin{dfn}[位相的テンソル積]
+          $M,N$を$\kk_\hbar$-加群とする．
+          $N$を$\kk
+          [[\hbar]]$-加群とする．
+          $M \otimes_{\kk_\hbar} N$を以下のように$\hbar$進完備化により定義する．
+          \begin{equation*}
+              M\tilde \otimes N=(M\otimes_{\kk_\hbar} N)^\sim =\lim_{\leftarrow n} (M\otimes_{\kk_\hbar} N)/\hbar^n(M\otimes_{\kk_\hbar} N)
+          \end{equation*}
+        \end{dfn}
+      
+    
+      \begin{prop}
+        \begin{equation}
+            V[[\hbar]] \tilde\otimes W[[\hbar]] \cong (V \otimes W)[[\hbar]]
+        \end{equation}
+        つまり，$M$と$N$が自由加群であるとき，$M \otimes_{\kk_\hbar} N$も自由加群である．
+      \end{prop}
+      通常のテンソル積を位相的なテンソル積に拡張することで，位相的代数，位相的双代数 etc.を定義できる．
+      
+      \begin{dfn} 位相的代数とは組$(A,\mu,\eta)$であって，$A$が$\kk_\hbar$加群，
+        $\mu:A\tilde\otimes A\to A, \eta:\kk_\hbar\to A$が$\kk_\hbar$線形写像であり，次の
+        単位律および単位律を満たすものである．
+        $$\mu\circ (\eta\tilde\otimes \mathrm{id}_A)=\mathrm{id}_A=\mu\circ (\mathrm{id}_A\tilde\otimes \eta)$$
+        $$\mu\circ (\mu\tilde\otimes \mathrm{id}_A)=\mu\circ (\mathrm{id}_A\tilde\otimes \mu)$$
+        また，位相的代数の射$f:(A,\mu,\eta)\to (A',\mu',\eta')$は$\kk_\hbar$線形写像であって，
+        $$f\circ \mu=\mu'\circ (f\tilde\otimes f),\quad f\circ \eta=\eta'$$
+        を満たすものである．
+
+        $(A,\mu,\eta), (A',\mu',\eta')$の位相的テンソル積
+        $(A\tilde\otimes A',(\mu\tilde\otimes \mu')\circ \tau_{23},\eta\tilde\otimes \eta')$
+        もまた位相的代数となる．ただし，$\tau_{23}$は$A\tilde\otimes A\tilde\otimes A'\tilde\otimes A'$の中間の第2,3成分を入れ替えるものである．
+        \end{dfn}
+            
+        $A$を位相的代数とし，$\kk$係数の形式級数を$f(\hbar) = \sum_{n=0}^\infty c_n \hbar^n$とする．
+        $a \in A$に対して次の式
+        \begin{equation}
+            f(\hbar a) = \sum_{n=0}^\infty c_n a^n\hbar^n
+        \end{equation}
+        は射影極限$\tilde A=\displaystyle \lim_{\leftarrow n} A/\hbar^n A$の中で一意的に定義される．
+        たとえば，$f=\exp$とすると，
+        \begin{equation*}
+            e^{\hbar a} = \sum_{n=0}^\infty \frac{\hbar^n a^n}{n!}\in A^\times
+        \end{equation*}
+        であり，その逆元は$e^{-ha}$である．また，$[a,a']=0$ならば，$e^{\hbar a}e^{\hbar a'}=e^{\hbar (a+a')}$である．
+
+        \begin{dfn}
+          位相的準三角双代数とは組$(A,\Delta,\varepsilon,R)$であって，$A$が位相的代数，
+          $\Delta:A\to A\tilde\otimes A,\\ \varepsilon:A\to \kk_\hbar$が$\kk_\hbar$代数の準同型，
+          $R:\in (A\tilde\otimes A)^\times$で，さらに次の条件を満たすものである．
+          $$\Delta\circ \eta=\mathrm{id}_A=\Delta\circ \varepsilon$$
+          $$\Delta\circ (\Delta\tilde\otimes \mathrm{id}_A)=(\mathrm{id}_A\tilde\otimes \Delta)\circ \Delta$$
+          $$R\Delta R^{-1}=\Delta^\mathrm{op}$$
+          $$(\mathrm{id}_A\tilde \otimes\Delta) (R)=R_{13}R_{12}$$
+          $$(\Delta\tilde \otimes\mathrm{id}_A) (R)=R_{13}R_{23}$$
+        
+          また，位相的双代数の射$f:(A,\Delta,\varepsilon)\to (A',\Delta',\varepsilon')$は$\kk_\hbar$代数の準同型$f:A\to A'$であって，
+          $$f\circ \Delta=(f\tilde\otimes f)\circ \Delta',\quad f\circ \varepsilon=\varepsilon'$$
+          を満たすものである．
+        \end{dfn}
+        % \textcolor{red}{quasi-Hopf代数の定義を書きたせば，QUEの一意性を述べることができる}
+        
+        \begin{eg}\label{eg:clasicalizeQUE}
+          $(A,\mu,\eta,\Delta,\varepsilon,R)$を位相的準三角双代数，$A_0=A/\hbar A$とする．
+          $(A\tilde\otimes A)/\hbar(A\tilde\otimes A)\cong A_0\otimes A_0$より，$\kk_\hbar$線形写像から次の$\kk$線形写像が誘導される．
+          $$\mu_0:A_0\otimes A_0\to A_0,\qquad \eta_0:\kk\to A_0,\qquad \Delta_0:A_0\to A_0\otimes A_0,\qquad \varepsilon_0:A_0\to \kk$$
+          また，$R$の自然な射影により$R_0\in (A_0\otimes A_0)^\times$が定まる．
+          これにより$A_0=(A_0,\mu_0,\eta_0,\Delta_0,\varepsilon_0,R_0)$は準三角双代数となる．
+        \end{eg}
+        
+        $A$を$\kk_\hbar$加群，$\mu:A\tilde\otimes A\to A$を$\kk_\hbar$-双線形写像とする．
+    
+        
+      \begin{dfn}
+        $A$を$\kk_\hbar$-環とする．
+        $B$を$\kk_\hbar$-環とする．
+        $A \otimes_{\kk_\hbar} B$を以下のように定義する．
+        \begin{equation}
+            A \otimes_{\kk_\hbar} B = (A \otimes_{\kk} B)[[\hbar]]
+        \end{equation}
+      \end{dfn}
+    
+      \begin{prop}
+        $A$と$B$が自由加群であるとき，$A \otimes_{\kk_\hbar} B$も自由加群である．
+      \end{prop}
+  \begin{dfn}[位相的に生成される代数]
+    集合$X$から生成される位相的自由代数とは，Xから生成される$\kk$代数$\kk\langle X \rangle$の形式的冪級数環
+    $\kk_\hbar\langle X \rangle=\kk\langle X \rangle[[\hbar]]$である．
+
+    位相的自由代数$\kk_\hbar\langle X \rangle$について，その部分集合$R$を関係式として位相的に生成される代数とは，
+    $\kk_\hbar\langle X \rangle$を$R$で生成される両側イデアルの閉包で割った$\kk_\hbar\langle X \rangle/R$と同型な代数である．
+
+  \end{dfn}
+
+  \begin{prop}
+    集合$X$と分離かつ完備な$\kk_\hbar$代数$A$，写像$f:X\to A$に対して，一意的に連続な$\kk_\hbar$線形写像
+    $\tilde{f}:\kk_\hbar\langle X \rangle\to A$が存在して，$\tilde{f}|_X=f$となる．
+
+    さらに$\kk_\hbar\langle X \rangle/R$と分離かつ完備な$\kk_\hbar$代数$A'$について，
+    ある写像の集合$\{f:X\to A|\quad \tilde f|_R:R\to 0\}$と$\kk_\hbar$線形写像$f:A\to A'$全体の集合の間に自然な全単射がある．
+    
+    
+  \end{prop}
+    \begin{dfn}[ドリンフェルトの量子群]\label{def:Uh_drinfeld}
+      $\mathfrak{g}$を半単純リー代数，カルタンデータ$(\mathsf E, (-,-))$，カルタン行列$A=(a_{ij})$とする．
+      $A$上のドリンフェルトの量子群$U_\hbar(\mathfrak{g})$は以下のように定義される．
+      \begin{itemize}
+          \item 位相的な生成元: $E_i, F_i, H_i \quad (i \in 1:n)$
+          \item 関係式:
+          \begin{enumerate}
+              \item $[H_i, H_j] = 0$
+              \item $[H_i, E_j] = a_{ij} E_j, \quad [H_i, F_j] = -a_{ij} F_j$
+              \item $[E_i, F_j] = \delta_{ij} {\sinh(\hbar d_i H_i)}/{\sinh(\hbar d_i)}$
+              \item 量子セール関係式
+              \begin{equation}
+                  \sum_{k=0}^{1 - a_{ij}} (-1)^k \qbinom{1 - a_{ij}}{k}_{\exp(\hbar d_i)} E_i^k E_j E_i^{1 - a_{ij} - k} = 0 \quad (i \neq j)
+              \end{equation}
+              \begin{equation*}
+                  \sum_{k=0}^{1 - a_{ij}} (-1)^k \qbinom{1 - a_{ij}}{k}_{\exp(\hbar d_i)} F_i^k F_j F_i^{1 - a_{ij} - k} = 0 \quad (i \neq j)
+              \end{equation*}
+          \end{enumerate}
+          \item ホップ代数の構造:
+          \begin{equation}
+              \Delta(E_i) = 1 \otimes E_i + E_i \otimes \exp(\hbar d_i H_i), \quad 
+\Delta(F_i) = F_i \otimes 1 + \exp(-\hbar d_i H_i) \otimes F_i,
+          \end{equation}
+          \begin{equation}
+              \Delta(H_i) = H_i \otimes 1 + 1 \otimes H_i
+          \end{equation}
+          \begin{equation}
+              \varepsilon(E_i) = \varepsilon(F_i) =  \varepsilon(H_i) = 0
+          \end{equation}
+          \begin{equation}
+              S(E_i) = - E_i\exp(-\hbar d_i H_i), \quad S(F_i) = -\exp(\hbar d_i H_i)F_i , \quad S(H_i) = -H_i
+          \end{equation}
+
+        \end{itemize}
+        ただし，$$\sinh(x)=\frac{e^x-e^{-x}}{2}=\sum_{n=0}^\infty \frac{x^{2n+1}}{(2n+1)!}$$
+        である．${\sinh(\hbar d_i)}$は可逆元ではないが，分母分子が $\hbar$で割り切れることから，well-definedであり，
+        ${\sinh(\hbar d_i H_i)}/{\sinh(\hbar d_i)}\equiv H_i \mod~\hbar$である．
+      
+      
+    \end{dfn}
+
+
+
+  
+  \begin{prop} 
+  $q=\exp\hbar$とする．$K_i^{\pm 1}=q_i^{\pm H_i}$により代数の埋め込み$U_q(\mathfrak g)\rightarrow U_\hbar(\mathfrak g)
+  $が存在する．
+  \end{prop}
+  \begin{proof}
+  関係式(3)は，%\ref{def:q-grp}
+  \begin{equation}\label{eq:q-efh}
+      [E_i, F_j] = \delta_{ij} [H_i]_{q_i}
+  \end{equation}
+  と書き直せる．また，関係式(2)は，公式\ref{lem:euler_operator},\ref{lem:adjoint_action}を用いることで
+
+  $$K_iE_jK_i^{-1}=\mathrm{Ad}(q_i^{H_i})(E_j)=q^{d_i \mathrm{ad}(H_i)}(E_j)=q^{d_ia_{ij}}E_j=q^{(\alpha_i,\alpha_j)}E_j,$$
+  $$K_iF_jK_i^{-1}=\mathrm{Ad}(q_i^{H_i})(F_j)=q^{d_i \mathrm{ad}(H_i)}(F_j)=q^{-d_ia_{ij}}F_j=q^{-(\alpha_i,\alpha_j)}F_j$$
+  となる．また，$H_i\otimes 1,1\otimes H_i$は可換なので，
+  $$\Delta(K_i^{\pm 1})=\exp(\pm d_i\hbar (1\otimes H_i +H_i\otimes 1))
+  =\exp(\pm d_i\hbar H_i\otimes 1)\exp(\pm d_i\hbar 1\otimes H_i)=K_i^{\pm 1}\otimes K_i^{\pm 1},$$
+  $$ S( K_i^{\pm 1})=\exp(\pm  d_i S(H_i))=\exp(\mp d_i\hbar H_i)=K_i^{\mp 1 },\qquad \varepsilon(K_i^{\pm 1})=q_i^{\varepsilon(H_i)}=1$$となる．
+
+\end{proof}
+
+  \begin{eg}　$A_1$型のカルタン行列$(a)=2$ に対応する量子群$U_q(\mathfrak{sl}_2)$の代数構造は次のようになる:
+    \begin{itemize}
+        \item 生成元: $E, F, K^{\pm 1}=q^{\pm H}$,
+        \item 関係式: $K K^{-1} = K^{-1} K = 1,\quad K E K^{-1} = q^2 E,\quad K F K^{-1} = q^{-2} F$\\
+         $\qquad\qquad  [H,E]=2E,\quad [H,F]=-2F,\quad [E,F]=\frac{K - K^{-1}}{q - q^{-1}}= [H]_q$
+    \end{itemize}
+    \end{eg}
+
+\begin{prop}\label{prop:Uhg_freemod}
+$U_\hbar(\mathfrak{g})$が位相的自由加群である．すなわち，次が成立する．
+$$U_\hbar(\mathfrak{g})\cong U(\mathfrak{g})[[\hbar]]$$
+\end{prop}
+これはPBW型の基底を構成することにより示される．
+
+\subsection{フィルター} 
+この節は\cite{Fresse2017}の内容を参考にしている．そこを出典としているサイト\cite{MathpediaHopfAlgebra}には，完備フィルター付きホップ代数に関する内容が抽出されていたので，その結果を整理する．
+
+\begin{dfn}[フィルター付きベクトル空間]
+  $\kk$ベクトル空間$V$上のフィルターとは，部分空間の下降列$V=F_0\supset F_1\supset \cdots$である．
+  % $V=\bigcup_{i\in \N}F_iV$を満たすものである．
+  フィルター付きベクトル空間とは，組$V=(V,\{F_i\}_{i\in \N})$である．
+
+  フィルターの射とは，フィルター付きベクトル空間$(V,\{F_i\}_{i\in \N}),(V',\{F'_i\}_{i\in \N})$の間の$\kk$線形写像$\varphi:V\to V'$であって，
+  任意の$i\in \N$に対して$\varphi(F_iV)\subset F'_i$が成り立つものを指す．
+\end{dfn}
+\begin{dfn}[フィルターの位相]
+  フィルター付きベクトル空間$V$において，$0$の基本近傍系を$\{F_iV\}_{i\in \N}$と定めることで$V$は位相空間となる．
+\end{dfn}
+\begin{dfn}[完備フィルター付きベクトル空間]
+  フィルター付きベクトル空間$V$において，射影極限$\widehat V=\lim_{\leftarrow i}V/F_i$を$V$の完備化という．
+
+  また，$V$が完備フィルター付きベクトル空間であるとは，$\widehat V\cong V$であることをいう．
+  完備フィルター付きベクトル空間の射は，フィルター付きベクトル空間としての射を指す．
+\end{dfn}
+\begin{prop}[位相]
+  フィルター付きベクトル空間$V$において，$0$の基本近傍系を$\{F_iV\}_{i\in \N}$と定めることで$V$は位相群となる．
+  また，係数体$\kk$が離散位相を持つ場合，$V$は位相線形空間となる．
+  射影極限から定まる位相とフィルターから定まる位相は一致する．
+\end{prop}
+\begin{dfn}[フィルターのテンソル積]
+  フィルター付きベクトル空間$V,V'$に対して，$V\otimes V'$には\[
+  \sum_{j=0}^iF_j\otimes F_{i-j}'
+  \]
+  という自然なフィルター構造が入る．
+\end{dfn}
+\begin{dfn}[完備テンソル積]
+  完備フィルター付きベクトル空間$V,V'$に対して，上記のフィルターによる$V\otimes V'$の完備化を$V\widehat \otimes V'$と書く．
+\end{dfn}
+\begin{prop}
+  フィルター付きベクトル空間$V$の完備化$\widehat V$において，射影極限の定義\ref{def:proj_limit}における射影$\pi_i:V\to V/F_i$
+  に対して$\widehat F_i=\textrm{ker}(\pi_i)$と置くと，
+  自然な同型$\widehat V/\widehat F_i\cong V/F_i$が成り立つ．
+
+  これにより，$\widehat V$は完備フィルター付きベクトル空間となる．
+\end{prop}
+
+\begin{prop}
+  フィルター付きベクトル空間$V,V'$および射$\varphi:V\to V'$が与えられており，$V'$は完備であるとする．
+
+  このとき，射$\widehat \varphi$が一意に存在して$\widehat \varphi\circ\pi=\varphi$が成立する．
+
+  ここで$\pi:V\to \widehat V$は自然な射である．
+\end{prop}
+\begin{prop}
+  完備フィルター付きベクトル空間$V,V'$の射$\varphi:V\to V'$が与えられているとする．
+
+  このとき，$\varphi$から誘導される次数付きベクトル空間の射$\varphi_0:V/F_n\to V'/F_n'$が同型射であることと，
+  $\varphi$が同型射であることは同値である．
+\end{prop}
+
+\begin{prop}
+  フィルター付きベクトル空間$V,V'$に対して，標準的な射$\iota\colon V\otimes V'\to \widehat V\otimes \widehat V'$から
+  誘導される射$\widehat\iota \colon \widehat{V\otimes V'}\to \widehat V\widehat\otimes \widehat V'$は同型射である．
+\end{prop}
+
+完備フィルター付きベクトル空間の構造が入った完備ホップ代数を定義する．
+\begin{dfn}[完備ホップ代数]
+  $\kk$上の完備フィルター付きベクトル空間$H$が完備ホップ代数であるとは，ホップ代数の定義\ref{def:hopf_alg}において，
+  「ベクトル空間」をすべて「完備フィルター付きベクトル空間」に差し替え，「線形写像」をすべて「フィルター付きベクトル空間の射」に差し替え，
+  さらに$H/F_1\cong \kk$を満たすということである．
+
+  ここで$\kk$は自明なフィルター$\kk\supset 0\supset 0\supset \cdots$を持つ完備フィルター付きベクトル空間とみなす．
+\end{dfn}
+
+以後，$\kk$は離散位相を入れて考える．
+
+\begin{dfn}[双対空間]
+  ベクトル空間$V$に対して，(代数的)双対空間$V^{\vee} $は，$\kk$値線形関数全体のなす集合
+  $$V^\vee =\{f:V\to \kk|f:\textrm{線形}\}$$
+  である．フィルター付きベクトル空間$V$の位相的双対空間$V^*$は，
+  $$V^*=\{\varphi:V\to \kk\mid \varphi \textrm{は連続}\}\subset V^{\vee}$$
+  と定義される．
+\end{dfn}
+
+\begin{prop}
+  完備フィルター付きベクトル空間$V$の位相的双対$V^{*}$は帰納極限$\varprojlim_{n\ge 0}V/F_n$と同型である．
+  
+\end{prop}
+
+\begin{dfn}[線形コンパクト]
+  フィルター付きベクトル空間$V$が線形コンパクトであるとは，$V$が完備であり，かつ各$V/F_nV$が$\kk$線形空間として有限次元であることをいう．
+\end{dfn}
+
+\begin{prop}
+  線形コンパクトなフィルター付きベクトル空間$V,W$に対して，カノニカルな同型\\ 
+  $(V\widehat\otimes W)^*\cong V^*\otimes W^*$が存在する．
+
+  とくに，線形コンパクトな完備ホップ代数$H$に対して，$H^*$には自然にホップ代数の構造が入る．
+\end{prop}
+\begin{prop}
+  $\kk$上のホップ代数$H$の余積を$\varepsilon$とし，$F_n=\textrm{Ker}(\varepsilon)^n~(n\in \N)$を$H$のイデアルとする．
+  このとき，$F$は$H$のフィルターであり，$F$による完備化$\widehat H$は完備ホップ代数となる．
+\end{prop}
+
+
+\begin{dfn}[filtered algebra]
+$A$を$\kk$代数とする．$A$の部分空間の族$\{F_i\}_{i\in \N}$が条件
+\[
+A=\bigcup_{i\in \N}F_i, \quad F_iF_j\subset F_{i+j}, \quad 1\in F_0\subset F_1\subset F_2\subset \cdots \subset A
+\]
+を満たすとき組$(A,\{F_i\}_{i\in \N})$をfiltered algebraという．
+また，$\{F_i\}_{i\in \N}$を$A$のfiltrationという．
+\end{dfn}
+% \begin{dfn}[graded algebra]
+% $N$を添字集合のモノイドとする．graded algebra$R$とは，直和分解
+% \[
+% R=\bigoplus_{n\in \N}R_n
+% \]
+% を持ち，$R_nR_m\subset R_{n+m}(n,m\in \N)$を満たす環$R$である．
+% \end{dfn}
+\begin{eg}[多項式]
+$A=\kk[x]$に対して，$F_i=x^i\kk[x]$とすると，$(A,\{F_i\}_{i\in \N})$はfiltered algebraである．
+\end{eg}
+\begin{eg}[普遍包絡環]
+  $U(\mathfrak{g})$にPBWの定理を用いてfiltrationを定める．
+命題\ref{prop:PBW}において$\lambda=(\lambda_1,\lambda_2,\cdots,\lambda_n)\quad (\lambda_1\leq \lambda_2\leq \cdots \leq \lambda_n)$に対して$|\lambda|=n$と定める．空列であるときは$|\lambda|=0$とする．
+  このとき，$F_i=\bigoplus_{\lambda\in L(\Lambda),|\lambda|\leq i}\kk b_\lambda$とすると，
+  $(U(\mathfrak{g}),\{F_i\}_{i\in \N})$はfiltered algebraである．
+\end{eg}
+\begin{dfn}[ワイル代数]
+  定義\ref{def:heisenberg}のワイル代数$\mathbb W_n=\kk[x_i,\de{x_i}]_{i\in 1:n}$に対して微分の次数に関するfiltrationを次で定める．
+  $$F_i=\bigoplus_{\lambda_1+\cdots+\lambda_n\leq i}
+  \kk[x_i]_{i\in 1:n}\de ~^\lambda.$$
+  $(\mathbb W_n,\{F_i\}_{i\in \N})$はfiltered algebraとなる．
+\end{dfn}
+
+
+% $[a,b]=ab-ba=c$は$a,b$と可換とする．\\
+% 演算子の微分は正規順序$a,b$で実行するとすると\\
+% $\displaystyle b^na^m=\exp(-c\frac{\partial}{\partial a}\frac{\partial}{\partial b})a^mb^n$\\
+% が成立する．例)$[x,p]=i\hbar$の場合，\\
+% $p^2x^2=\left(1-i\hbar \frac{\partial}{\partial x}\frac{\partial}{\partial p}-\frac{\hbar^2}{2}\frac{\partial^2}{\partial x^2}\frac{\partial^2}{\partial p^2}-\cdots\right)x^2p^2$\\
+% $~~~~~~~=x^2p^2-4i\hbar xp-2\hbar^2$\\
+% となる．生成消滅演算子でも同様である．
+
+\section{量子群の微分演算子表現}
+この章では古典的なA型,量子的なA型,D型,C型の順に具体例を説明する．
+最初にカルタン行列,ルート,代数,行列表現を導入する．次節で微分演算子の表現の構成を行い，その後多項式上に非可換な積を導入する．
+\subsection{古典的な場合との比較}
+
+係数体を$\kk=\mathbb R$とし，$\mathfrak{g}$を$\kk$上の有限次元の半単純リー代数とする．
+$G$を，$G$に対応するリー代数が$\mathfrak{g}$となるリー群とする．
+\footnote{$G$の単位元近傍に指数写像$\exp$を用いて$\mathfrak{g}$と整合性のある座標を導入することができるので，任意の$\mathfrak{g}$に対して，連結かつ単連結な$G$が存在する．}
+アドの定理により，ある$N<\infty$が存在し，忠実な表現$\rho:\mathfrak{g}\to \mathrm{End}(\mathbb R^N)$が存在する．
+
+$G$の左不変微分演算子全体を$\mathbb D_L(G)$とする．
+\begin{prop}
+  代数の同型$\mathbb D_L(G)\cong U(\mathfrak{g})$が存在する．
+\end{prop}
+証明は\cite{KobayashiOshima2005}を参照した．
+\begin{cor}\label{prop:classic_dor}
+  代数の埋め込み$U(\mathfrak{g})\hookrightarrow \mathbb W_N$が存在する．
+\end{cor}
+命題\ref{prop:Uhg_freemod}と合わせると代数の同型$U_\hbar(\mathfrak{g})\cong \mathbb D_L(G)[[\hbar]]$が得られる．
+しかし，この同型は一般には非自明な同型である．これを明示的に直接構成することは難しいため，
+埋め込み$U_\hbar(\mathfrak{g})\hookrightarrow \mathbb W_N[[\hbar]]$
+を構成することで，間接的に$U_\hbar(\mathfrak{g})$の構造を調べることができる．
+そして，実際にそれは$A,C,D$型の場合に$q$微分演算子を用いて実現されるのである．
+
+この同型について，つまり$U_\hbar(\mathfrak{g})$が位相的自由$\kk[[\hbar]]$加群であることはPBW型の基底を構成することにより示される．しかし，具体的にその同型を記述することは難しい．
+
+
+\subsection{A型}\label{sec:Arep}
+\begin{dfn}[$U_q(\mathfrak{sl}_{l+1}(\kk))$]　\\
+基本ルートデータは古典A型の表現\ref{def:a-alg}と全く同様である．\\
+量子群の定義\ref{def:q-grp}において
+$q_i=q,K_i=q^{H_i}$とすると$A_l$型の量子群$U_q(\mathfrak{sl}_{l+1}(\kk))$の定義を得る．
+
+$\theta=(\theta_0,\theta_1,\dots,\theta_l),X=(x_0,x_1,\dots,x_l)$とする．
+表現空間を$V=\kk[x_i]_{i\in 0:l}$，$D_j=\frac1{x_i}[\te{x_i}]_q$を$q$-微分演算子とし，
+$D_j$を用いた表現を構築する．
+\begin{prop}
+古典的な場合での行列要素を$q$微分に置き換える，すなわち$M_{ij}=x_iD_j$，
+\begin{align*}
+  \rho(E_i)=M_{i-1,i}\quad \rho(F_i)=M_{i,i-1}\quad \rho(H_i)=M_{i-1,i-1}-M_{i,i}\quad(i\in 1:l)
+\end{align*}
+とすると$(V=\kk[x_i]_{i=0:l},\rho)$は表現である．
+\end{prop}
+\begin{proof}
+% リー代数の準同型$x_i\mapsto
+二次の関係式\ref{lem:q2}が関係式の証明に重要な役割を果たす．
+変数の入れ替え$T:x_i\mapsto x_{l-i}$により代数の準同型が自然に定まる．
+これにより$T:\rho(E_i)=\rho(F_{l+1-i}),\rho(F_i)=\rho(E_{l+1-i}),\rho(H_i)=-\rho(H_{l+1-i})$となる．
+このような対称性から，次の関係式を示せば十分である．
+  \begin{align*}
+    &[\rho(H_i),\rho(H_j)]=0,\quad [\rho(E_i),\rho(F_j)]=\delta_{ij}[\rho(H_i)],\quad [\rho(H_i),\rho(E_j)]=a_{ij}\rho(E_j),\qquad (i,j\in 1:l)\\
+    &\rho(E_i)^2\rho(E_{i\pm 1})-[2]\rho(E_i)\rho(E_{i\pm 1})\rho(E_i)+\rho(E_{i\pm 1})\rho(E_i)^2=0,\quad [\rho(E_i),\rho(E_j)]=0\qquad (j\geq i+2)
+  \end{align*}
+  指数表記を用いると次のような表示が成立する．
+  $$\rho(E_i)=X^{\alpha_i}[\te i],\quad \rho(F_i)=X^{-\alpha_i}[\te {i-1}],\quad \rho(H_i)=\alpha_i\cdot \te ~$$
+  
+  まずオイラー作用素同士は可換であることから次が従う．
+  $$[\rho(H_i),\rho(H_j)]=0,\qquad [\rho(E_i),\rho(F_j)]=0\qquad (j>i)$$
+  $$[\rho(E_i),\rho(E_j)]=0\qquad (j\geq i+2)$$
+  また，配列$u,v\in \mathbb Z^{l+1}$に対して，公式\ref{lem:euler_operator}より$(u\cdot \te \,)X^v=X^v(u\cdot (v+\te\,))$が成立する．よって
+  $$[\rho(H_i),\rho(E_j)]=(\alpha_i,\alpha_j)X^{\alpha_j}[\te j]=a_{ij}\rho(E_j)$$
+  が$i,j\in 1:l$に対して成立する．公式\ref{lem:q2}により
+  \begin{align}\label{eq:prf:ef}
+   [\rho(E_i),\rho(F_i)]=&X^{\alpha_i}[\te i]X^{-\alpha_i}[\te {i-1}]-X^{-\alpha_i}[\te {i-1}]X^{\alpha_i}[\te i]\\ \notag
+   =&[\te i+1][\te {i-1}]-[\te i][\te {i-1}+1] \\ \notag
+  =&[\rho(H_i)]
+  \end{align}
+  となる．また，公式\ref{lem:q2}により，変数$u$に対して，$[u+1]+[u-1]=[u+1][1]-[u-1][-1]=[2][u]$が成立する．
+  よってセール関係式は
+  \begin{align*}
+    &~~~~\rho(E_i)^2\rho(E_{i+1})-[2]\rho(E_i)\rho(E_{i+1})\rho(E_i)+\rho(E_{i+ 1})\rho(E_i)^2\\
+    &=X^{\alpha_i}[\te i]X^{\alpha_i}[\te i]X^{\alpha_{i+1}}[\te {i+1}]-[2]X^{\alpha_i}[\te i]X^{\alpha_{i+1}}[\te {i+1}]X^{\alpha_i}[\te i]+X^{\alpha_{i+1}}[\te {i+1}]X^{\alpha_i}[\te i]X^{\alpha_i}[\te i]\\
+    &=X^{2\alpha_i+\alpha_{i+1}}\left([\te i]-[2][\te i]+[\te i-1]\right)[\te i][\te {i+1}]\\
+    &=0\\
+    &~~~~\rho(E_i)^2\rho(E_{i-1})-[2]\rho(E_i)\rho(E_{i-1})\rho(E_i)+\rho(E_{i- 1})\rho(E_i)^2\\
+    &=X^{\alpha_i}[\te i]X^{\alpha_i}[\te i]X^{\alpha_{i-1}}[\te {i-1}]-[2]X^{\alpha_i}[\te i]X^{\alpha_{i-1}}[\te {i-1}]X^{\alpha_i}[\te i]+X^{\alpha_{i-1}}[\te {i-1}]X^{\alpha_i}[\te i]X^{\alpha_i}[\te i]\\
+    &=X^{2\alpha_i+\alpha_{i-1}}\left([\te {i-1}+2]-[2][\te {i-1}+1]+[\te {i-1}]\right)[\te i][\te {i}-1]\\
+    &=0
+  \end{align*}
+  と証明される．
+\end{proof}
+    
+多項式の次数を$\deg (x^ny^m)=n+m$と定義する．斉次$N$次式の部分集合\\ $V_N=0\cup \{f(x,y)\in V|\deg f=N\}$は$N+1$次元ベクトル空間である．
+$H,E,F$の作用は多項式の次数を保つので，$V_N$はそれぞれの作用に関して不変部分空間である．また，$F$の作用を見れば分かるように，作用の軌道について
+$V_N=\rho(U(\mathfrak{sl}_2(\kk)))\cdot x^N$が成り立つ．
+
+以上より$V_N$は$x^N$を最高ウェイトベクトルとする既約表現であり，$V=\bigoplus_{N\geq 0}V_N$と直和分解される．
+
+表現も行列表現も同様に定まる．
+\end{dfn}
+
+\subsection{D型}
+\begin{dfn}[$U_q(\mathfrak{so}_{2l}(\kk))$]　\\
+  D型のディンキン図形に対応する基本ルートデータを構成する．
+\begin{align*}
+  a_{ij}=& 
+  \begin{cases}
+    2 & (i=j\in 1:l) \\
+    -1 & (|i-j|=1,\quad i,j\in 2: {l}) \\
+    -1 &((i,j)=(1,3),(3,1))\\
+    0 & (\text{otherwise})
+  \end{cases}
+\end{align*}
+\end{dfn}
+第$i$成分が$1$で他が$0$のベクトルを$\epsilon_i\in \mathbb{Z}^{2l}$とする．
+カルタンデータについては，次の抽象ルートの標準的な内積で定める．
+\begin{align*}
+\alpha_1=&\epsilon_{2}+\epsilon_{1}& \alpha_i =& \epsilon_i - \epsilon_{i-1}\qquad(i\in 2:l)
+\end{align*}
+このルートデータとカルタンデータにより，$U_q(\mathfrak{so}_{2l})$が定まる．
+
+次にq微分演算子による表現を構成する．A型の場合と異なり，行列単位を$q$-微分演算子に置き換えるだけでなく，$q$倍のオイラー作用素のひねりを加える必要がある．
+\begin{thm}[D型の表現]　$U_q(\mathfrak{so}_{2l}(\kk))$の表現は次のように構成される．\\
+ただし，行列単位を$M_{ij}=x_iD_jq^{c_{ij}\cdot\theta},~~構造定数をc_{ij}\in \mathbb{Z}^{2l},k_i=q^{h_i}~~(\pm i,\pm j\in 1:l)$とする．
+
+\begin{align*}
+  E_1=&M_{2, -1}-M_{1, -2}& E_i =& M_{i, i-1} - M_{1-i, -i}\\
+  F_1=&M_{-1, 2}-M_{-2, 1}& F_i =& M_{i-1, i} - M_{-i, 1-i} &(i\in 2:l)\\
+  H_1=&\theta_{2}+\theta_{1}-\theta_{-1}-\theta_{-2}& H_i =& \theta_i - \theta_{i-1} + \theta_{1-i} - \theta_{-i}
+  \end{align*}
+    \[
+\begin{pmatrix}
+c_{i, i-1} & c_{2, 1} & c_{2, -1} \\
+c_{1-i, -i} & c_{-1, -2} & c_{1, -2} \\
+c_{i-1, i} & c_{1, 2} & c_{-1, 2} \\
+c_{-i, 1-i} & c_{-2, -1} & c_{-2, 1}
+\end{pmatrix}
+= 
+\begin{pmatrix}
+0 & v_{-1} & v_{1} \\
+v_{i-1} - v_{i} & -v_{2} & -v_{2} \\
+v_{1-i} - v_{-i} & -v_{-2} & -v_{-2} \\
+0 & v_{1} & v_{-1}
+\end{pmatrix} \qquad (i\in 3:l)
+\]
+\end{thm}
+\begin{proof}
+まず，すべての変数$x_i$を$x_{-i}$に変換する線形写像を$\phi$とすると，
+$$\phi(E_i)=-F_i,\quad\phi(F_i)=-E_i,\quad\phi(H_i)=-H_i\qquad(i\in 1:l)$$
+で定まる反自己同型写像である．これを用いると$i\geq j$に対し関係式
+$$R(E_i,E_j)=0,~~[E_i,F_j]=\delta_{ij}[H_i]$$を示せば，$\phi$を作用させると
+$$R(F_i,F_j)=0,~~[E_j,F_i]=\delta_{ij}[H_i]$$
+も示されるので，一般性を失わず$i\geq j$とする．
+$E_i=M_{ab}-M_{cd},F_i=M_{ba}-M_{dc}$とする．
+$M$が交換することから，$(j\in 2:l,i\geq j)$に対しては，$[E_j,F_{i}]=0$であることは容易にわかる．
+また，A型の場合の式\ref{eq:prf:ef}と同様に，
+\begin{align*}
+[E_i,F_i]=&[M_{ab},M_{ba}]+[M_{cd},M_{dc}]-[M_{ab},M_{dc}]-[M_{ba},M_{cd}]\\
+=&([\theta_a][\theta_b+1]-[\theta_a+1][\theta_b])q^{\theta_c-\theta_d}+([\theta_c][\theta_d+1]-[\theta_c+1][\theta_d])q^{-\theta_a+\theta_b}\\
+=&[\theta_a-\theta_b]q^{\theta_c-\theta_d}+[\theta_c-\theta_d]q^{-\theta_a+\theta_b}\\
+=&[\theta_a-\theta_b+\theta_c-\theta_d]\\
+=&[H_i]
+\end{align*}
+となる．
+\begin{align*}
+  [E_1,F_{2}]=&[M_{2,-1},M_{1,2}]-[M_{2,-1},M_{-1,1}]-[M_{1,-2},M_{1,2}]+[M_{1,-2},M_{-1,1}]\\
+  =&[M_{2,-1},M_{1,2}]+[M_{1,-2},M_{-1,1}]\\
+  =&x_{1}D_{-1}(q^{\theta_{1}-\theta_{-2}}(q[\theta_{2}]-[\theta_{2}+1])+q^{\theta_{1}-\theta_{2}}([\theta_{-2}+1]-q[\theta_{-2}]))\\
+  =&x_{1}D_{-1}(-q^{\theta_{1}-\theta_{2}-\theta_{-2}}+q^{\theta_{1}-\theta_{2}-\theta_{-2}})\\
+  =&0
+  \end{align*}
+\begin{align*}
+  [E_1,E_{2}]=&[M_{2,-1},M_{2,1}]-[M_{2,-1},M_{-1,-2}]-[M_{1,-2},M_{2,1}]+[M_{1,-2},M_{-1,-2}]\\
+  =&-[M_{2,-1},M_{-1,-2}]-[M_{1,-2},M_{2,1}]\\
+  =&x_{2}D_{-2}(q^{\theta_{1}-\theta_{2}}(q^{-1}[\theta_{-1}]-[\theta_{-1}+1])+q^{\theta_{-1}-\theta_{2}}([\theta_{1}+1]-q^{-1}[\theta_{1}]))\\
+  =&x_{1}D_{-1}(-q^{\theta_{1}-\theta_{2}+\theta_{-1}}+q^{\theta_{1}-\theta_{2}+\theta_{-1}})\\
+  =&0
+  \end{align*}
+  
+  
+
+今度は$j\in 2:l-1,i=j+1,k\in\{0,1,2\}$に対して
+$$a=M_{i,i-1},\quad b=M_{i-l,i-l-1},\quad c=M_{j,j-1},\quad d=M_{j-l,j-l-1}$$
+とすると
+$$E_i=a-b,~~E_j=c-d$$
+$$a^{2-k}ca^{k}=a^2x_jq^{c_{j,j+1}\cdot\theta}[\theta_i+k]$$
+$$b^{2-k}db^k=b^2x_{2l-j}q^{c_{2l-j,2l+1-j}}[\theta_{2l+1-i}+k]$$
+$$c^{2-k}ac^{k}=cax_jq^{c_{j,j+1}\cdot\theta}[\theta_i+k-1]$$
+$$d^{2-k}bd^k=dbx_{2l-j}q^{c_{2l-j,2l+1-j}}[\theta_{2l+1-i}+k-1]$$
+$$qcb=bc,~~qad=da$$
+なので
+$$E_i^2E_j-[2]E_iE_jE_i+E_jE_i^2=0$$
+$$E_j^2E_i-[2]E_jE_iE_j+E_iE_j^2=0$$
+となる．
+{
+$[E_j,F_{i}]=0(j\in 2:l,i\geq j)$は容易に示すことができる．$E_1^2E_3-[2]E_1E_3E_1+E_3E_1^2=0$も同様に示される．
+}
+
+\end{proof}
+
+
+\subsection{C型}
+\begin{dfn}[$U_q(\mathfrak{so}_{2l}(\kk))$]　\\
+  $U(\mathfrak{so}_{2l}(\kk))$の$q$類似を定義する．
+\begin{align*}
+  a_{ij}=& 
+  \begin{cases}
+    2 & (i=j\in 1:l) \\
+    -1 & (|i-j|=1,\quad i,j\in 2: {l}) \\
+    -1 &((i,j)=(1,3),(3,1))\\
+    0 & (\text{otherwise})
+  \end{cases}
+\end{align*}
+とする．
+
+% \[
+% 	A=\left(
+% 		\begin{array}{ccccccc}
+% 			2 & 0 & -1 & \cdots & & 0&0\\
+% 			0 & 2 & -1 & & & 0&0 \\
+% 			-1 & -1 & 2 & &&0&0\\
+% 			\vdots &&&\ddots\\
+% 			&&&&2&-1&0\\
+% 			0 & 0 & 0 &&-1&2&-1\\
+% 			0 & 0 & 0 &&0&-1&2
+% 		\end{array}
+% 	\right)
+% \]
+\end{dfn}
+
+
+
+A,D型の場合，生成元$E,F$に対応するのは1階の$q$-微分演算子だけであった．
+それに比べ，C型は$E,F$の表現に2階$q$-微分演算子が出現し，より複雑な構造を持つ．
+その項は$\tau=q-q^{-1}$の係数を持つため，$q=1$の古典的な場合には消えて潜んでいた項が出現したと考えられる．
+また，ルート系もA,D型とは異なり，短長の異なるルートがあることに由来して，セール関係式もやや複雑となり，$q$-bracketにも$q^2$の因子が現れる．
+
+
+以下，$[z]=[z]_q,[z]_2=[z]_{q^2},\quad \tau=q-q^{-1},\quad D_i=\frac 1{x_i}[\te {x_i}],\quad D_{i,q^2}=\frac1{x_i}[\te i]_2$と略記する．
+
+
+
+\begin{thm}
+$C_l$ 型の量子群の表現$V=\kk [x_{\pm i}]_{i\in 1:l}$は，以下のように構成される．
+$$
+\begin{aligned}
+ E_1&=x_{-1}D_{1,q^2}+\frac{\tau}{[2]}\sum_{j=2}^l x_{-j} x_j D_1^2 q^{\sum_{k=1}^{j-1}\theta_k+\theta_{-k}} \\
+ F_1&=x_{1}D_{-1,q^2}+\frac{\tau}{[2]}\sum_{j=2}^l x_{j} x_{-j} D_{-1}^2 q^{\sum_{k=1}^{j-1}\theta_{k}+\theta_{-k}} \\
+ H_1&=-\te 1+\te {-1},\quad K_1=q^{2H_1} \\
+ E_i&=x_{-i}D_{1-i}q^{\te {i-1}-\te {i}}-x_{i-1}D_i\\
+F_i&=x_{1-i}D_{-i}-x_{i}D_{i-1}q^{\te {-i+1}-\te {-i}} \\
+H_i&=\te {-i}-\te {1-i}+\te{i-1}-\te {i},\quad K_i=q^{H_i}
+\end{aligned}
+$$
+\end{thm}
+
+
+
+\begin{proof}
+   $[z]_2=[2z]/[2]$に注意する． 
+   $$\left[\sum_{j=2}^l x_{-j} x_j D_1^2 q^{\sum_{k=1}^{j-1}\theta_k+\theta_{-k}} ,\sum_{j=2}^l x_{-j} x_j D_{-1}^2 q^{\sum_{k=1}^{j-1}\theta_k+\theta_{-k}} \right]=0$$
+   である．公式\ref{eq:conversion1},\ref{eq:conversion2}を使いながら変形する．
+$$
+\begin{aligned}
+ \left[E_1, F_1\right]&=\left[\theta_{-1}\right]_2\left[\theta_{1}+1\right]_2
+-\left[\theta_{1}+1\right]_2\left[\theta_{-1}\right]_2
+ +\frac{\tau}{[2]} \sum_{j=2}^l \frac{x_{-j} x_j}{x_{-1}x_1} q^{\sum_{k=1}^{j-1}\theta_k+\theta_{-k}}  \\
+&\qquad \times ( {\left[\theta_1\right]_2\left[\theta_1-1\right]\left[\theta_{-1}\right]} 
+-\left[\theta_1\right]_2\left[\theta_{-1}+1\right]\left[\theta_{-1}\right] 
+-\left[\theta_{-1}\right]_2\left[\theta_1-1\right]\left[\theta_1\right] 
++\left[\theta_{-1}\right]_2\left[\theta_1+1\right]\left[\theta_1\right]
+)  \\
+& =\left[-\theta_1+\theta_{-1}\right]_2+\frac{\tau}{[2]^2} \sum_{j=2}^l \frac{x_{-j} x_j}{x_{-1}x_1} q^{\sum_{k=1}^{j-1}\theta_k+\theta_{-k}}
+\left(-\left[2 \theta_1\right]\left[2 \theta_{-1}\right]+\left[2 \theta_1\right]\left[2 \theta_{-1}\right]\right) \\
+&=[H_1]_2\\
+{\left[E_{i+1}, F_{i+1}\right] }&=\left(-q^{-2}+q^{-2}\right) x_{-i-1} x_{i+1} D_{-i} D_i q^{ \theta_i-\theta_{i+1}+\theta_{-i}-\theta_{-i-1}} \\ 
+&\qquad +\left(\left[\theta_{-i}+1\right]\left[\theta_{-i-1}\right]-\left[\theta_{-i}\right]\left[\theta_{-i-1}+1\right]\right) q^{\theta_i-\theta_{i+1}} \\ 
+&\qquad+\left(\left[\theta_{i+1}+1\right]\left[\theta_i\right]-\left[\theta_{i+1}\right]\left[\theta_i+1\right]\right) q^{\theta_{-i}-\theta_{-i-1}} \\ 
+&= {\left[\theta_{-i-1}-\theta_{-i}\right] q^{\theta_i-\theta_{i+1}}+\left[\theta_i-\theta_{i+1}\right] q^{\theta_{-i}-\theta_{-i-1}}} \\ 
+&= {\left[\theta_i-\theta_{i+1}-\theta_{-i}+\theta_{-i-1}\right] } \\ 
+& =\left[H_{i+1}\right] \\ 
+\left[E_1, F_2\right]& ={ \frac{\tau}{[2]} \frac{x_{-2} x_2 x_{-1}}{x_1^2 x_{-2}}\left(q\left[\theta_{-2}\right]-\left[\theta_{-2}+1\right]\right)\left[\theta_1\right]\left[\theta_1-1\right] q^{\theta_1+\theta_{-1}}} \\
+& \qquad+\frac{1}{[2]} \frac{x_2 x_{-1}}{x_1^2}\left(\left[2 \theta_1-2\right]\left[\theta_1\right]-q\left[2 \theta_1\right]\left[\theta_1-1\right]\right) q^{\theta_{-1}-\theta_{-2}} \\
+& =\frac{1}{[2]} \frac{x_{-1} x_2}{x_1^2}\left( 
+\tau q^{\theta_1}\left[\theta_1\right]\left[\theta_1-1\right]
++\left[2 \theta_1-2\right]\left[\theta_1\right]
+-q\left[2 \theta_1\right]\left[\theta_1-1\right]\right) q^{\theta_{-1}-\theta_{-2}}\\
+& =\frac{1}{[2]} \frac{x_{-1} x_2}{x_1^2}\left( 
+(q-q^{-1}) q^{\theta_1}\left[\theta_1-1\right]+\left[2 \theta_1-2\right]
+-(q^{1+\te 1}+q^{1-\te 1})\left[\theta_1-1\right]\right) \left[\theta_1\right]q^{\theta_{-1}-\theta_{-2}}\\ 
+& =\frac{1}{[2]} \frac{x_{-1} x_2}{x_1^2}\left( \left[2 \theta_1-2\right]
+-(q^{-1+\te 1}+q^{1-\te 1})\left[\theta_1-1\right]\right) \left[\theta_1\right]q^{\theta_{-1}-\theta_{-2}}\\ 
+&=0
+\end{aligned}
+$$
+
+
+$[E_i,F_{i}]=[H_i]\quad(i\in 2:l)$や
+$[E_i,F_j]=0~(i\in 2:l,~ j\in 3:l)$もD型と同様に計算される．
+
+% $[E_1,F_2]$も足りない項がある
+% serre関係式足りない
+
+\end{proof}
+
+\section{量子群の表現のmodule algebra構造}
+\subsection{module algebraの定義と導入の背景}
+
+半単純リー代数の普遍包絡代数というホップ代数は，命題\ref{prop:classic_dor}
+により，リー代数の生成元に対して左不変微分演算子を対応させる表現で忠実に実現できる．
+このとき表現空間は関数空間である．関数の積と微分演算子の作用はライプニッツ則(積の微分法則)によって結びついていた．
+たとえば，$\mathfrak{sl}_2$の表現\ref{def:sl2}では，多項式の積${\mu}:V\otimes V\rightarrow V$と$\rho(E)=x\de y$の多項式$f,g$への作用について，
+$$\rho(E)\cdot(fg)=x\de y\cdot(fg)=(x\de y\cdot f)g+f(x\de y\cdot g)=(\rho(E)\cdot f)(1\cdot g)+(1\cdot f)(\rho(E)\cdot g)$$
+$${\mu}\circ (\rho \otimes \rho)(\Delta(E))=\rho(E)\circ {\mu}$$
+が成立する．$F,H$の作用についても同様である．そこで，ワイル代数のライプニッツ則がホップ代数の余積と加群の積をつなぐと考えた．
+その関係を模式的に表すと次のようになる．
+\[\begin{tikzcd}
+	{\begin{array}{c}リー代数の普遍包絡代数\\ U(\mathfrak{sl}_2)=\mathbb K[E,F,H]\end{array}} && 
+  {\begin{array}{c}ワイル代数\\ (\mathbb K [x,y,\de x,\de y],\rho)\end{array}} && {  多項式環 \mathbb K [x,y]} \\
+	\begin{array}{c} 余積\Delta(u)=1\otimes u+u\otimes 1\\ u=E,F,H \end{array} &&
+   {\begin{array}{c}ライプニッツ則\\ {\mu}\circ (\rho\otimes \rho)\Delta(u)=\rho(u)\circ {\mu}\end{array}} &&
+    {積{\mu}:f\otimes g\mapsto fg}
+	\arrow["代数の埋め込み",from=1-1, to=1-3]
+	\arrow["微分作用",from=1-3, to=1-5]
+	\arrow[squiggly,, from=2-1, to=2-3]
+	\arrow[squiggly,, from=2-5, to=2-3]
+\end{tikzcd}\]
+$U(\mathfrak{sl}_2)$の余積は$u=E,F,H$に対して$\Delta(u)=1\otimes u+u\otimes 1$であるから，
+多項式の積${\mu}$を用いるとライプニッツ則は次のように言い換えられる:
+$$\rho(u)\circ {\mu}={\mu}\circ (\rho\otimes\rho)(\Delta(u))$$
+上記の式は生成元全てに対して成立し，双代数ゆえに$\Delta$は代数の準同型であるから，
+上記の式は任意の$u\in U(\mathfrak{sl}_2)$に対して成立する(つまり${\mu}$は表現$\rho\otimes \rho$から$\rho$へのIntertwinerである)．
+この発想をもとに，加群の作用を介して余積と表現空間の代数の間の整合性を公理としてmodule algebraの概念を得る．
+
+% \subsubsection{定義}
+\begin{dfn}[module algebra]　\\
+$(U,\mu_U,\eta_U,\Delta,\varepsilon)$を$\kk$上の双代数，$V$を左$U$加群とする．
+$(V,{\mu}_*:V\otimes V\rightarrow V,\eta:\kk\rightarrow V)$がmodule algebraであるとは，
+積$({\mu}_*,\eta_*)$について$V$は結合的かつ単位的な環であり，${\mu}_*,\eta_*$が$U$加群の準同型になっていることを言う．
+
+本稿では${\mu}_*:f\otimes g\mapsto f*g$と表記し，これを$*$積と呼ぶ．また，$V$が関数環であるとき，$\eta_*(1)=1_V$と固定する．
+
+条件を式で書くと以下のようになる:$\forall f_1,f_2,f_3\in V,\forall u\in U$
+$$f_1\ast f_2\ast f_3=(f_1\ast f_2 )\ast f_3=f_1\ast (f_2 \ast f_3)$$
+$$1_V*f_1=f_1=f_1*1_V$$
+\begin{equation}\label{Leibniz_rule}
+u\cdot (f_1\ast f_2)=(u_{(1)}\cdot f_1) \ast (u_{(2)} \cdot f_2)
+\end{equation}
+\begin{equation}\label{Leibniz_unit}
+u\cdot 1_V=\varepsilon(u)1_V
+\end{equation}
+特に式\ref{Leibniz_rule}をライプニッツ則と呼ぶ．
+\end{dfn}
+
+\begin{rem}　\\
+すべての生成元$u\in U$に対してライプニッツ則\ref{Leibniz_rule}および式\ref{Leibniz_unit}が成立することが示されれば，一般の$u\in U$に対しても成立する．
+これは$U$が双代数であるので$\Delta,\varepsilon$が代数の準同型となることから従う．
+\end{rem}
+この発想を量子群に拡張することを考えた:
+\[\begin{tikzcd}
+	{量子群} && {ワイル代数} && { 多項式} \\
+	非余可換な余積 && {q\text{-}ライプニッツ則？} && {非可換積？}
+	\arrow["埋め込み",from=1-1, to=1-3]
+	\arrow["作用",from=1-3, to=1-5]
+	\arrow[squiggly,, from=2-1, to=2-3]
+	\arrow[squiggly,, from=2-5, to=2-3]
+\end{tikzcd}\]
+量子群には非可換な余積があるが，通常の多項式の積を考えている限りはライプニッツ則を満たしていない．
+そこで，非可換な積を導入することでmodule algebraとすることができるかどうかが気になった．
+結論としては，A型の量子群に対しては$y*x=qxy$となるような積$*$を導入することで，
+ライプニッツ則を満たすmodule algebraを構成することができた．
+\[\begin{tikzcd}
+	{U_q(\mathfrak{sl}_2)=\mathbb K_q[E,F,K^{\pm 1}]} && {\begin{array}{c}\mathbb K_q [x,y,q^{\pm\te x},q^{\pm\te y}]\\
+    \text{q\text{-}derivative operator}\end{array}} && {   \mathbb K_q [x,y]} \\
+	\begin{array}{c} \Delta(E)=1\otimes E+E\otimes K\\ (...) \end{array} && {\begin{array}{c}{q\text{-Leibniz則}}\\
+    {E\cdot (f*g)=f*(E\cdot g)+(E\cdot f)*(K\cdot g)}
+    \end{array}} && {{\mu}_*:f\otimes g\mapsto f*g}
+	\arrow["埋め込み",from=1-1, to=1-3]
+	\arrow["作用",from=1-3, to=1-5]
+	\arrow[squiggly,, from=2-1, to=2-3]
+	\arrow[squiggly,, from=2-5, to=2-3]
+\end{tikzcd}\]
+この場合の余積$\Delta(E)=1\otimes E+E\otimes K$は，
+差分演算子$D_h\cdot f(z)=\frac{f(z+h)-f(z)}{h}$に対して，
+$$D_h\cdot (f*g)=f*(D_h\cdot g)+(D_h\cdot f)*g(z+h)$$
+という差分化されたライプニッツ則を反映していると解釈できる．
+
+
+C,D型は$q$-expを用いたより複雑な積を導入することで同様の結果が得られた．
+すべての半単純リー代数の多項式表現を微分演算子として書けるので，
+同様に全ての有限型の量子群をワイル代数で表現され，そのような積が存在すると期待される．
+
+なお，先行研究\cite{Fiore1994},\cite{ZhangHu2017},\cite{KlimykSchmudgen1997}では本稿とは別の定式化として
+module algebraをそもそも非可換な変数の環として構成している．
+このため，量子群の表現も非可換な変数に関する微分演算子として定義されている．
+微分作用素同士も非可換$[\de i,\de j]\neq 0$であり，
+古典的なワイル代数の$q$類似である$q$-ワイル代数が$q$-微分演算子の代数である．
+\[\begin{tikzcd}
+	{量子群} && {(q\text{-}ワイル代数)} && {非可換多項式} 
+	\arrow["代数の埋め込み",from=1-1, to=1-3]
+	\arrow["作用",from=1-3, to=1-5]
+\end{tikzcd}\]
+この定式化では変数の非可換性に伴って関係式が増えてしまい，具体的な計算がしづらくなる．
+また，代数を変えると$q$-ワイルもそれに伴って変化する．
+一方で，本稿では積を明示的に通常の微分演算子の$\hbar$進完備化で定式化することで，演算規則の統一を図っている．
+
+\subsection{古典の場合}
+古典的なリー代数に対しては，前節で構成した多項式上の表現$(V,\rho )$がそのままmodule algebraとなっている．
+$U(\mathfrak{g})$の余積は生成元$u\in \mathfrak{g}$に対して$\Delta(u)=1\otimes u+u\otimes 1$となるが，
+$\rho ( \mathfrak{g})$は1階の演算子であるから，
+module algebraの条件はライプニッツ則そのものである．
+また，定数を微分すると$0$になることから，$u\in \mathfrak g$に対して，式\ref{Leibniz_unit}が従う．
+
+% \ref{def:B}の\mathcal{B}は自明$\mathcal{B}=1\otimes 1$である．
+\subsection{A型}\label{subsec:Amodalg}
+
+A型の表現\ref{sec:Arep}を考えると，量子化されたmodule algebraの積はq倍のひねりによって非可換となる．以後，表現の記号$\rho$は省略する．
+% \subsection{一意性について}
+\begin{lem}
+  A型の表現\ref{sec:Arep}について，$x_0^n\ast x_0^m=x_0^{n+m}$であると定める．このとき，一意的にmodule algebra構造$(V,*)$が定まる．
+  \end{lem}
+  \begin{proof}
+  次数作用素$\Omega=\sum_{i=0}^n\theta_i$は単項式の次数を固有値とする作用素である．
+  $\Omega$はUのどの元とも交換可能であることに注意する．
+  $n+1$個の作用素$q^\Omega,K_1,\ldots,K_n$に対する作用から，独立なn+1次元の線形方程式が得られる．\\
+  これにより$X^\beta \ast X^\gamma=Const.(\beta,\gamma,q)X^{\beta+\gamma}$
+  
+  $\Lambda$をインデックス列とし，$F_\Lambda=F_{\Lambda_1}\cdots F_{\Lambda_n}$とする．
+  表現$V_n$は$x_0^n$最高ウェイトとする表現なので，$(F_{\Lambda }x_0^n)\ast(F_{\Lambda'}x_0^m) $
+  について考えればよい．
+  $$(F_i\cdot v_1)\ast (K_i^{-1}\cdot v_2)=F_i\cdot(v_1\ast v_2)-v_1\ast (F_i\cdot v_2)$$
+  を再帰的に用いて，$x_0^n\ast(F_{\Lambda''}x_0^m) $  という形に帰着できる．
+  結合律およびmodule algebraのrelationから
+  $$x_0{\mu}_\ast^{(m)}\Delta^{(m-1)}(F_{\Lambda_2})(x_0^{\otimes m}) $$
+  という形に帰着できる．よって$x_0\ast x_i$さえ決めれば一意的に積構造が定まる．そしてこれについては$i\in 1:n$について，
+  $x_0\ast x_i=c_ix_0x_i$と定めて，$E_1E_2\cdots E_{i}$を作用させる．すると$qx_0*x_0=c_ix_0^2$となるから，$c_i=q$となる．
+  \end{proof}
+  
+  
+  \begin{thm}
+    
+双線形写像$ b:\mathbb Z^{n+1}\times \mathbb Z^{n+1}\rightarrow \mathbb Z$を
+$$b(\beta,\gamma)=\sum_{i= 1}^n\beta_{i-1}(\gamma_i+\cdots+\gamma_{n})$$
+と定める．
+多項式表現Vに$*$積$\ast:V\times V\rightarrow V$を，
+$$x^\beta \ast x^\gamma=q^{b(\beta,\gamma)}x^{\beta+\gamma}$$
+を双線形に拡張して定義する．このとき，  $(V,*)$はmodule algebraとなる．
+\end{thm}
+
+\begin{proof}
+$$
+	b(\alpha_i,\alpha_j)=\left\{
+		\begin{array}{l}
+			-1 \ \ \ (j=i\neq 0) \\
+			1\ \ \ \ (j=i+1)\\
+			0\ \ \ \ (else)
+		\end{array}
+	\right.
+$$
+が成立する．$b$の双線形性より
+$$x(\beta,\gamma)+x(\beta,\delta)+b(\gamma,\delta)=b(\beta,\gamma)+b(\beta+\gamma,\delta)=b(\beta,\gamma+\delta)+b(\gamma,\delta)$$
+となるから基底に対して
+$$x^\beta\ast x^\gamma \ast x^\delta=(x^\beta\ast x^\gamma )\ast x^\delta=x^\beta\ast (x^\gamma \ast x^\delta)$$
+であり結合性が成立する．余積との可換性は基底$x^\beta$に対する$E_i,F_i,K_i$の作用について成立する事を示せば十分である．
+$$K_i\cdot x^\beta=q^{(\alpha_i,\beta)}x^\beta,~~E_i\cdot x^\beta=[\beta_{i}]x^{\beta+\alpha_i},~~F_i\cdot x^\beta=[\beta_{i-1}]x^{\beta-\alpha_i}$$
+であるから，
+$$K_i\cdot (x^\beta\ast x^\gamma)=q^{b(\beta,\gamma)+(\alpha_i,\beta+\gamma)}x^{\beta+\gamma}=q^{b(\beta,\gamma)}\qty(q^{(\alpha_i,\beta)}x^{\beta})\qty(q^{(\alpha_i,\gamma)}x^\gamma)=(K_i\cdot x^\beta)\ast(K_i\cdot x^\gamma)$$
+となる．また，公式\ref{eq:conversion1},\ref{eq:conversion2}を用いることで$E,F$も示せる：
+\begin{align*}
+E_i\cdot (x^\beta\ast x^\gamma)=&E_i\cdot q^{b(\beta,\gamma)}x^{\beta+\gamma}\\
+=&q^{b(\beta,\gamma)}[\beta_{i}+\gamma_{i}]x^{\beta+\gamma+\alpha_i}\\
+=&q^{b(\beta,\gamma)}(q^{\beta_{i}}[\gamma_{i}]+q^{-\gamma_{i}} [\beta_{i}])x^{\beta+\gamma+\alpha_i}\\
+=&(q^{b(\beta,\gamma+\alpha_i)}[\gamma_{i}]+q^{b(\beta+\alpha_i,\gamma)+\gamma_{i-1}-\gamma_i}[\beta_{i}])x^{\beta+\gamma+\alpha_i}\\
+=&(1\cdot x^\beta)\ast (E_i\cdot x^\gamma)+(E_i\cdot x^\beta)\ast (K_i\cdot x^\gamma)
+\end{align*}
+\begin{align*}
+F_i\cdot (x^\beta\ast x^\gamma)=&F_i\cdot q^{b(\beta,\gamma)}x^{\beta+\gamma}\\
+=&q^{b(\beta,\gamma)}[\beta_{i-1}+\gamma_{i-1}]x^{\beta+\gamma-\alpha_i}\\
+=&q^{b(\beta,\gamma)}(q^{-\beta_{i-1}}[\gamma_{i-1}]+q^{\gamma_{i-1}} [\beta_{i-1}])x^{\beta+\gamma-\alpha_i}\\
+=&(q^{b(\beta,\gamma-\alpha_i)-\beta_{i-1}+\beta_i}[\gamma_{i-1}]+q^{b(\beta-\alpha_i,\gamma)}[\beta_{i-1}])x^{\beta+\gamma-\alpha_i}\\
+=& (K_i^{-1}\cdot x^\beta)\ast (F_i\cdot x^\gamma)+(F_i\cdot x^\beta)\ast (1\cdot x^\gamma)
+\end{align*}
+また，定数を微分すると0になるので，
+$$E_i\cdot 1=0,\quad F_i\cdot 1=0,\quad K_i\cdot 1=1,\quad(i\in 1:l)$$
+より式\ref{Leibniz_unit}が従う．
+\end{proof}
+
+
+積の構造をより具体的に理解するための演算子を導入する．
+\begin{dfn}[積構造の演算子]\label{def:B} $\tilde {\mu}:f\otimes g\mapsto fg$を通常の積とする．\\
+線形写像$\mathcal{B}:V\otimes V\rightarrow V\otimes V$を${\mu}_*=\tilde {\mu}\circ \mathcal{B}$を満たすものとする．
+\end{dfn}
+実はこの$\mathcal{B}$は微分演算子を用いて表すことができ，C,D型ではR行列と似たような形の微分演算子として書ける．
+上三角成分がすべて1，他は0となる$b\in M_{l+1}(\kk)$を用いて，$$\mathcal{B}=q^{\sum_{i,j=0}^l b_{ij} \te i\otimes \te j}$$
+と書ける．これは，オイラー作用素が$\te i x^\beta=\beta_i x^\beta$という固有関数を持つことから導かれる．この演算子と，ワイル代数の関係式から，
+module algebraであることの証明は次のようにも示すことができる:
+\begin{align*}
+  E_k\tilde {\mu} \mathcal{B}=&x^{\alpha_k}[\te k]\tilde {\mu}\mathcal{B}\\
+  =&\tilde {\mu}(q^{-\te{k}}\otimes x^{\alpha_k}[\te{k}]+ x^{\alpha_k}[\te{k}] \otimes q^{\te{k}})q^{\sum_{i<j}  \te i\otimes \te j}\\
+  =&\tilde {\mu}\left(q^{\sum_{i<j}  \te i\otimes (\te j-(\alpha_k)_j)}(q^{-\te{k}}\otimes x^{\alpha_k}[\te{k}])+q^{\sum_{i<j}  (\te i-(\alpha_k)_i)\otimes \te j}( x^{\alpha_k}[\te{k}] \otimes q^{\te{k}})\right)\\
+  =&\tilde {\mu}q^{\sum_{i<j} \te i\otimes \te j}\left(q^{\te{k-1}-\te{k}}\otimes E_k+ E_k \otimes q^{\te{k}-\te k}\right)\\
+  =&\tilde {\mu}\mathcal{B}\Delta(E_k)
+  \end{align*}
+
+\subsection{D型}
+
+添字集合を$I^+=1:l,I=(-l:-1)\cup(1:l)$とする．$\tau=q-q^{-1}$とする．
+
+\begin{thm}[D型のmodule algebraの積の明示公式]　\\
+$U_q(\mathfrak{so}_{2l})$の加群$\mathbb{C}[x_{i};i\in I]$上のmodule algebraの積${\mu}$\\
+$i,j\in I,\quad b\in \mathbb{Z}^{I^2},~c\in\mathbb{Z}^{I^3},~M_{ij}=\frac{x_i}{x_j}[\theta_j]q^{\sum_{k\in I} c_{ijk}\theta_k}$
+
+% $$[z]=\frac{q^z-q^{-z}}{q-q^{-1}},~~[n]!=\prod_{k=1}^n[k],~~\exp_q[z]=\sum_{n=0}^{\infty}\frac{q^{n(n-1)/2}}{[n]!}z^n$$
+
+$$\mathcal{B}=q^{\sum_{ij} b_{ij}\theta_i\otimes\theta_j}\prod_{i=2}^{~~n~\leftarrow} \exp_q\left[-\tau\sum_{j=1}^{i-1}q^{1-j} M_{i-j,i}\otimes M_{j-i,-i}\right]$$
+\end{thm}
+ただし$\prod^\leftarrow$は$i=n-1,\cdots,2,1$の順番にオペランドを並べるものとし，構造定数は次で定める．\\
+$$
+b_{ij} = 
+\begin{cases} 
+1 & ( i < j \text{ and } (i,j) \neq (1,2))\text{~~or~~}((i,j) = (k,k+1) \text{ for } k \in 1:l-1) \\
+0 & \text{otherwise}.
+\end{cases}
+$$
+\[
+c_{\pm 1,\pm j} = -\sum_{k=2}^{j-1} \epsilon_{\pm k} - \epsilon_{\mp j},\quad
+c_{\pm i,\pm j} = -\sum_{k=i+1}^{j-1} \epsilon_{\pm k} - \epsilon_{\mp j},\qquad
+(i,j\in 2:l)
+\]
+
+\begin{proof}
+  まず定理の証明の指針となる補題を示す．
+\begin{lem}\label{lem:modalg:proof}
+  関数$f,g\in V$と生成元$x_n\in V~(n\in I), 生成元u\in U$を任意にとる．関係式
+  \begin{equation}
+    (f*x_n)*g=f*(x_n*g),\qquad u\cdot(f*x_n)=(u_{(1)}\cdot f)*(u_{(2)}\cdot x_n)\label{eq:modalg:proof}
+  \end{equation}
+  が成立すれば十分である．
+\end{lem}
+\begin{proof}
+  まず任意の元は生成元$x$の$*$積の線形結合で表される．
+  すなわち，任意の基底に対して$I$の有限な広義増大列$\{\beta_i\}_{i\in 1:N}$が存在して，
+  $\prod_k x_{\beta_k}=(\cdots (x_{\beta_{1}}* x_{\beta_{2}})*\cdots )*x_{\beta_N}$と書ける．
+  よって生成元$x$の$*$積に分解して，括弧を適切に付け替えることで，結合律が示される．再帰的に関係式を適用することで，
+  $$u\cdot \prod_k x_{\beta_k}=(\cdots ((u_{(1)}\cdot x_{\beta_{1}})* (u_{(2)}\cdot x_{\beta_{2}}))*\cdots )*(u_{(N)}\cdot x_{\beta_N})$$となる．
+  となる．module algebraの条件については任意の$I$の有限な広義増大列$\{\beta_i\}_{i\in 1:N},\{\gamma_i\}_{i\in 1:M}$に対して，
+  $u\cdot \left(\left(\prod_k x_{\beta_k}\right)*\left( \prod_k x_{\gamma_k}\right)\right)=\left(u_{(1)}\cdot \prod_k x_{\beta_k}\right)*\left(u_{(2)}\cdot \prod_k x_{\gamma_k}\right)$
+  が成立することを示せばよい．これは関係式と結合律を繰り返し用いて，両辺が，
+   $$(\cdots ((u_{(1)}\cdot x_{\beta_{1}})* (u_{(2)}\cdot x_{\beta_{2}}))*\cdots )*(u_{(N)}\cdot x_{\beta_N}))*(u_{(N+1)}\cdot x_{\gamma_1})*\cdots )*(u_{(N+M)}\cdot x_{\gamma_M})$$
+   と等しいことから従う．
+\end{proof}
+関係式\ref{eq:modalg:proof}の確認を行う．
+結合律は\ref{subsec:Cmodalg}の結合性の場合と同様なので省略する．
+{
+  $$E\cdot(f*x_n)=(E_{(1)}\cdot f)*(E_{(2)}\cdot x_n),$$
+  $$F\cdot(f*x_n)=(F_{(1)}\cdot f)*(F_{(2)}\cdot x_n),$$
+  $$K\cdot(f*x_n)=(K_{(1)}\cdot f)*(K_{(2)}\cdot x_n)$$
+は容易に示すことができる．
+}
+\end{proof}
+
+\begin{eg}[$l=2$の場合]
+$${\mu}=\tilde {\mu}q^{G^{ij}\theta_i\otimes\theta_j}\exp_q[-q\varepsilon M_{12}\otimes M_{-1,-2}]$$
+
+
+% \begin{figure}[tbh]
+% \centering
+% \includegraphics[width=10cm]{D2subprod.png}
+% \caption{$x_i*x_j$の乗算表}
+% \label{fig:D2subprod}
+% \end{figure}
+
+このことから次の関係式を持つ代数と同型であることがわかる．
+\begin{gather*}
+  x_{-1}\ast x_{-2}= qx_{-2}\ast x_{-1},\qquad x_2\ast x_{-1}= qx_{-1}\ast x_{2},\\
+  x_1\ast x_{-2}= qx_{-2}\ast x_{1},\qquad x_2\ast x_{1}= qx_1\ast x_{2},\\
+  x_1\ast x_{-1}= x_{-1}\ast x_{1},\quad x_{2}\ast x_{-2}- x_{-2}\ast x_{2}=(q^{-1}-q)x_1\ast x_{-1},
+\end{gather*}
+
+\begin{rem}
+  この積は，$M_q(2)$と同型になる．
+\end{rem}
+$M_q(2)$は$M_2$の量子化で，生成元\( (A, B, C, D)  \) と次の関係式を満たす代数である．
+\begin{gather*}
+  AB=qBA, \quad BD=qDB, \\
+  AC=qCA, \quad CD=qDC, \\
+  BC = CB, \quad AD - DA = (q^{-1} - q) BC.
+\end{gather*}
+
+実際，次のような同型写像が作れる．
+$$
+	\left(
+		\begin{array}{cc}
+			A & -B \\
+			C & D
+		\end{array}
+	\right)\mapsto 
+\left(
+		\begin{array}{cc}
+			x_{-2} & x_{-1} \\
+			x_{1} & x_2
+		\end{array}
+	\right)
+$$
+
+  \end{eg}
+% $M_q(2)$
+% この同型は偶然で，$\mathfrak{sl}(4)\equiv \mathfrak{sl}(2)\oplus \mathfrak{sl}(2)$という同型が由来だと考えている．
+% 余積との整合性を示す計算はやや面倒であるが，難しくはない．(ノート参照)
+% 恐らく$n=3,4$の場合も同様の方法で証明できるが，計算が大変すぎて手に負えないので，何らかの工夫を行う必要がある．
+
+% $$\theta_i=x_i\pdv{ x_i},~\tilde {\mu}:f\otimes g\mapsto fg,~G\in \mathbb{R}^{4n^2},~C\in\mathbb{R}^{8n^3},~M_{ij}=\frac{x_i}{x_j}[\theta_j]q^{\sum_kC^{k}_{ij}\theta_k},~\varepsilon=1-q^{-2}$$
+
+  \subsection{C型}\label{subsec:Cmodalg}
+
+  C型の場合，module algebraの積構造はD型と似た形になる．これはquantum symplectic spaceとも呼ばれている．\cite{ZhangHu2017}ではこの空間における微分演算子を用いた表現および後述するmodule algebraを明示していた．なので，まず先にmodule algebraを変形量子化の形に書き直すことで，量子群の表現が得られた．
+  \begin{thm}[C型のmodule algebraの積の明示公式]\label{thm:dorCmodalg}　\\
+  添字集合を$I^+=1:l,I=(-l:-1)\cup(1:l)$とする．
+    $U_q(\mathfrak{sp}_{2l})$の加群$\mathbb{C}[x_{i};i\in I]$上のmodule algebraの積${\mu}_*$は次の演算子$\mathcal B$により構成される：
+    $i,j\in I,~~b\in \mathbb{Z}^{I^2},~c\in\mathbb{Z}^{I^3},~M_{ij}=\frac{x_i}{x_j}[\theta_j]q^{\sum_{k\in I} c_{ijk}\theta_k}$であり
+    
+    % $$\mathcal{B}=\prod_{i=1}^{~~l-1~\leftarrow} \exp_{q^{-1}}\left[\tau\sum_{j=1}^{i}q^{j-1} M_{l+1-j,l-i}\otimes M_{j-l-1,i-l}\right]q^{\sum_{i,j\in I} b_{ij}\theta_i\otimes\theta_j}$$
+    $$\mathcal{B}=\prod_{i=1}^{~~l-1~\rightarrow} \exp_{q^{-1}}\left[\tau\sum_{j=i+1}^{l}q^{l-j} M_{j,i}\otimes M_{-j,-i}\right]q^{\sum_{i,j\in I} b_{ij}\theta_i\otimes\theta_j}$$
+    \end{thm}
+    ただし$\prod$は$i=1,2,\cdots, l-1$の順番にオペランドを並べるものとし，構造定数は次で書ける．\\
+    $$
+    b_{ij} = 
+    \begin{cases} 
+      2& ( (i,j) = (k,-k) \text{ for } k \in 1:l) \\
+    1 & ( i < j \text{ and } i\neq -j)\\
+    0 & \text{otherwise}.
+    \end{cases}
+    $$
+    % \[
+    % c_{\pm(j-l-1),\pm(i-l)} = \sum_{k=l-i}^{l-j} \epsilon_{\pm k} + \sum_{k=j-l}^{i-l-1}\epsilon_{\pm k}
+    % \qquad (i\in 1:l-1,~j\in 1:i)
+    % \]
+    \[
+      c_{\pm j,\pm i} = \sum_{k=i}^{j-1} (\epsilon_{\mp k} +\epsilon_{\pm k})-\epsilon_{\pm i}
+      \qquad (i\in 1:l-1,~j\in i+1:l)
+      \]
+
+    \begin{proof}
+      D型の場合と同様に，補題\ref{lem:modalg:proof}に従って関係式\ref{eq:modalg:proof}の確認する．
+
+{
+  $$E\cdot(f*x_n)=(E_{(1)}\cdot f)*(E_{(2)}\cdot x_n)$$
+  $$F\cdot(f*x_n)=(F_{(1)}\cdot f)*(F_{(2)}\cdot x_n)$$
+  $$K\cdot(f*x_n)=(K_{(1)}\cdot f)*(K_{(2)}\cdot x_n)$$
+は容易に示すことができる．
+}
+以下，結合性の証明を行う．
+
+通常の積$\tilde {\mu}$のライプニッツ則に対応する余積に似た演算$\tilde \Delta$を考える．
+つまり$\te x,x_iD_jq^{\beta\cdot \te ~}~(i,j\in I,\beta\in \Z^I)$から生成される部分代数$W$に対して，準同型$\tilde \Delta:W\otimes W\to W$であって，
+$$\tilde \Delta(\te x)=\te x\otimes 1+1\otimes \te x,\quad \tilde\Delta(x_iD_jq^{\beta\cdot \te ~})=x_iD_jq^{\beta\cdot \te ~}\otimes q^{-\te j+\beta\cdot \te ~}+q^{\te j+\beta\cdot \te ~}\otimes x_iD_jq^{\beta\cdot \te ~}$$
+とすると，$u\in W$に対して，通常のライプニッツ則が$\forall u\in W,~u\tilde {\mu}=\tilde {\mu} \tilde \Delta(u)$のように書ける．
+
+$(M_{ij}\otimes q^{-\te j})(q^{\te j}\otimes M_{ij})=q^{-2}(q^{\te j}\otimes M_{ij})(M_{ij}\otimes q^{-\te j})$を満たすので，
+公式\ref{eq:q-exp-law}を適用することで，
+\begin{align}
+  \exp_q[\tilde \Delta(M_{ij})]=\exp_q[M_{ij}\otimes q^{-\te j}]\exp_q[q^{\te j}\otimes M_{ij}]\\
+  \exp_{q^{-1}}[\tilde \Delta(M_{ij})]=\exp_{q^{-1}}[q^{\te j}\otimes M_{ij}]\exp_{q^{-1}}[M_{ij}\otimes q^{-\te j}]
+\end{align}
+となる．以後，$i,j,k$は$I$にわたって動いて和をとるとする．任意の$m,n\in I,~n>0,~m>n$に対して，
+$$\sum_{i}\left(-b_{i, m}-b_{i,-m}+b_{i,-n}+b_{i, n}\right) \theta_i= \theta_n-c_{m,n}\cdot \te ~$$
+が成立するので，つぎのように計算できる．ただし\ref{def:verttens}にあるように，テンソル積の各成分を縦に並べている．
+$$
+\begin{aligned}
+  &~~\tilde{\mu}\left[\begin{array}{l}
+    \tilde{\mu} \\
+    1
+  \end{array}\right]
+  \exp_{q^{-1}}\left[\begin{array}{c}
+    \tilde \Delta(M_{m, n}) \\
+    \tau M_{-m,-n}
+  \end{array}\right] 
+  q^{\wedge}\left[\begin{array}{c}
+    \sum_{i,j}b_{i,j} \tilde \Delta(\theta_i) \\
+    \theta_j
+  \end{array}\right] 
+  \cdot\left[\begin{array}{c}
+    x_n \\
+    q^{\sum_{i}b_{i,n} \theta_i} \cdot f \\
+    g
+  \end{array}\right] \\
+  &=\tilde{\mu}\left[\begin{array}{l}
+    \tilde{\mu} \\
+    1
+  \end{array}\right]
+  \exp_{q^{-1}}\left[\begin{array}{c}
+    q^{\te n+c_{m, n}\cdot \te ~}  \\
+    M_{m, n} \\
+    \tau M_{-m,-n}
+  \end{array}\right]
+  \exp_{q^{-1}}\left[\begin{array}{c}
+    M_{m,n} \\
+    q^{-\te n+c_{m,n}\cdot\te ~} \\
+    \tau M_{-m,-n}
+  \end{array}\right] 
+  q^{\wedge}\left[\begin{array}{c}
+    \sum_{i,j}b_{i,j} \\
+    \theta_i \\
+    \theta_j
+  \end{array}\right] 
+  q^{\wedge}\left[\begin{array}{c}
+    \sum_{i,j} \theta_i \\
+    b_{i,j} \\
+    \theta_j
+  \end{array}\right] 
+  \cdot\left[\begin{array}{c}
+    x_n \\
+    q^{\sum_{i}b_{i,n} \theta_i} \cdot f \\
+    g
+  \end{array}\right] \\
+  & =\tilde{\mu}\left[\begin{array}{l}
+    \tilde{\mu} \\
+    1
+  \end{array}\right]
+  \exp_{q^{-1}}\left[\begin{array}{c}
+    q^{\te n+c_{m, n}\cdot\te ~}  \\
+    M_{m, n} \\
+    \tau M_{-m,-n}
+  \end{array}\right]
+  \left(\left[\begin{array}{c}
+    x_n \\
+    1 \\
+    1
+  \end{array}\right]+
+  \left[\begin{array}{c}
+    x_m\\
+    q^{-\theta_n+c_{m,n} \cdot \theta} \\
+    \tau M_{-m, n}
+  \end{array}\right]\right)
+  q^{\wedge}\left[\begin{array}{c}
+    \sum_{i,j}b_{i,j} \\
+    \theta_i \\
+    \theta_j
+  \end{array}\right] 
+  q^{\wedge}\left[\begin{array}{c}
+    \sum_{i,j} \theta_i \\
+    b_{i ,j} \\
+    \theta_j
+  \end{array}\right] 
+  \cdot\left[\begin{array}{c}
+    1 \\
+    q^{\sum_{i}b_{i,n} \theta_i} \cdot f \\
+    q^{\sum_{j}b_{n,j} \theta_j} \cdot g
+  \end{array}\right] \\
+  & =\tilde{\mu} \exp_{q^{-1}}\left[\begin{array}{c}
+    M_{m,n} \\
+    \tau M_{-m,-n}
+  \end{array}\right]\left(\left[\begin{array}{c}
+    1 \\
+    x_n
+  \end{array}\right]+\left[\begin{array}{l}
+    q^{-\theta_n+c_{m,n}\cdot \theta} \\
+    \tau x_m M_{-m,-n}
+  \end{array}\right]\right)
+  q^\wedge\left[\begin{array}{c}
+    \sum_{i}b_{i,j} \theta_i \\
+    \theta_j
+  \end{array}\right] \cdot\left[\begin{array}{c}
+    q^{\sum_{i}b_{i,n} \theta_i} \cdot f \\
+    q^{\sum_{j}b_{n,j} \theta_j} \cdot g
+  \end{array}\right] \\
+  & =\tilde{\mu} \exp_{q^{-1}}\left[\begin{array}{c}
+    M_{m,n} \\
+    \tau M_{-m,-n}
+  \end{array}\right] q^\wedge\left[\begin{array}{c}
+    \sum_{i,j}b_{i, j} \theta_i \\
+    \theta_j
+  \end{array}\right]\left(\left[\begin{array}{c}
+    f \\
+    x_n q^{\sum_{j}b_{n, j} \theta_j} \cdot g
+  \end{array}\right]+\left[\begin{array}{l}
+    q^{-\theta_n+c_{m,n}\cdot \theta+\left(-b_{i, m}-b_{i,-m}+b_{i, n}+b_{i, n}\right) \theta_i }\cdot f \\
+    \tau x_m M_{-m,-n} q^{\sum_{j}b_{n, j} \theta_j} \cdot g
+  \end{array}\right]\right)\\
+  & =\tilde{\mu} \exp_{q^{-1}}\left[\begin{array}{c}
+    M_{m,n} \\
+    \tau M_{-m,-n}
+  \end{array}\right] q^\wedge\left[\begin{array}{c}
+    \sum_{i,j}b_{i, j} \theta_i \\
+    \theta_j
+  \end{array}\right]\left(\left[\begin{array}{c}
+    f \\
+    x_n q^{\sum_{j}b_{n, j} \theta_j} \cdot g
+  \end{array}\right]+\left[\begin{array}{l}
+    f \\
+    \tau x_m M_{-m,-n} q^{\sum_{j}b_{n, j} \theta_j} \cdot g
+  \end{array}\right]\right).
+\end{aligned}
+$$
+これを用いることで，結合律を示すことができる．
+% nのスコープをどこまで広げるべきか？いちいち言及すべきか？
+$$
+\begin{aligned}
+  (f*x_n)*g&=(x_nq^{b_{i,n} \theta_i} \cdot f)*g \\
+  &=\tilde{\mu}(\tilde{\mu} \otimes 1)
+  (\tilde{\Delta}\otimes 1)(\mathcal{B})\cdot (x_n\otimes q^{b_{i,n} \theta_i} \cdot f\otimes g)\\
+  & =\tilde{\mu} \mathcal{B} \cdot\left(
+    f \otimes x_n q^{\sum_{i}b_{i,n} \theta_i} \cdot g
+    +\sum_{m=n+1}^{l}f\otimes \tau x_m M_{-m,-n} q^{\sum_{i}b_{n,i} \theta_i} \cdot g\right) \\
+  & =\tilde{\mu} \mathcal{B} \cdot f\otimes \left(\tilde\mu \mathcal{B}\cdot x_n\otimes g\right) \\
+  & =f *\left(x_n * g\right).
+\end{aligned}
+$$
+また，等式
+$$\sum_{i}\left(-b_{i, m}-b_{i,-m}+b_{i,-n}+b_{i, n}\right) \theta_i= \theta_{-n}-c_{-m,-n}\cdot \te ~$$
+が成立するので，$x_{-n}$の場合も同様に示される．
+$$(f*x_{-n})*g=f*(x_{-n}*g).$$
+
+    \end{proof}
+
+\subsection{変形量子化}
+
+今回得られたmodule algebraの積は，変形量子化の明示式の一例と見ることができる．
+\begin{dfn}[ポアソン括弧]  \label{dfn:ポアソン_bracket}
+多様体\( M \)に対して，\( C^\infty(M) \)上の\textit{ポアソン}括弧とは，\( C^\infty(M) \)上の双線形写像
+\[
+\{ \cdot, \cdot \} : C^\infty(M) \times C^\infty(M) \to C^\infty(M)
+\]
+であり，次の性質を満たすものである：
+\[
+\{f, g\} = -\{g, f\}
+\]
+\[
+\{ f, \{ g, h \} \} + \{ g, \{ h, f \} \} + \{ h, \{ f, g \} \} = 0
+\]
+\[
+\{ fg, h \} = f \{ g, h \} + \{ f, h \} g
+\]
+\end{dfn}
+
+\begin{dfn}[ポアソン環の変形量子化]
+\( A \) をポアソン環，$\tilde\mu$をその積とする．ポアソン環\( A \)の変形量子化とは$\kk[[\hbar]]$上の結合代数\( (A[[\hbar]], *) \)で次の性質を満たすものをいう：
+
+ある微分演算子の族 \( \mathcal B_n\in \textrm{End}(A \otimes A)~~(n\in \N) \) が存在し，積$\mu_*:A\otimes A\to A$が
+\[
+\mu_*=\tilde\mu\sum_{n=0}^\infty \mathcal \hbar^n \mathcal B_n,\qquad \mathcal B_0=1\otimes 1,\qquad \tilde \mu\circ \mathcal B_1=\frac12 \{\cdot,\cdot\}
+\]
+と表される．すなわち\( f,g \in A \) に対して
+   \[
+   f * g = fg + \frac{1}{2} \{ f, g \} \hbar +\dots+\hbar^n\tilde \mu \mathcal B_n\cdot(f\otimes g)  + \dots 
+   \]
+   と表される．
+\end{dfn}
+\begin{prop}
+    逆に，結合代数\( (A[[\hbar]], *) \)が与えられたとき，
+    \[
+      \{ f, g \} =\lim_{\hbar\rightarrow 0} \frac{1}{\hbar} (f * g - g * f)
+    \]
+    と定めることで，\( A \)はポアソン環となる．
+\end{prop}
+これは容易に示すことができる．今回得られたA,C,D型の量子群のmodule algebraは実際に変形量子化を与えていることがわかる．
+
+
+
+
+
+\newpage
+
+% \section{今後}
+% \begin{figure}[tbh]
+% \centering
+% \includegraphics[width=18cm]{ModAlgProgress.png}
+% \caption{Module Algebraの考察の進捗}
+% \label{fig:Progress}
+% \end{figure}
+
+
+\section{ハイゼンベルグダブル}
+
+\subsection{一般論}
+\begin{dfn}[ペアリング]
+   $\kk$線形空間$A,B$に対して，双線形写像$\langle -,-\rangle:A\times B\rightarrow \kk$をペアリングという．
+    $A,B$が双代数であるとき，$\langle -,-\rangle$が\emph{dual pairing}であるとは，任意の$a,a'\in A,~ b,b'\in B$に対して
+    \begin{itemize}
+      \item $\langle aa',b\rangle=\langle a,b_{(1)}\rangle\langle a',b_{(2)}\rangle,\qquad \langle 1,b\rangle=\varepsilon(b)$
+      \item $\langle a,bb'\rangle=\langle a_{(1)},b\rangle\langle a_{(2)},b'\rangle,\qquad \langle a,1\rangle=\varepsilon(a)$
+    \end{itemize}
+    が成立することをいう．$A,B$がantipode $S$を持つホップ代数であるとき，dual pairing$\langle -,-\rangle$がhopf pairingであるとは，追加で次を満たすことをいう．
+       $$\langle S(a),b\rangle=\langle a,S(b)\rangle$$
+    また，pairingが非退化であるとは，次が成立することをいう．
+    $$\forall a\in A,~\langle a,-\rangle=0\Rightarrow a=0,\qquad \forall b\in B,~\langle -,b\rangle=0\Rightarrow b=0$$
+    
+
+\end{dfn}
+\begin{dfn}[正則作用]
+  $A,B$が双代数でdual pairngを持つとする．$A$の$B$への左正則作用$\rightharpoonup:A\curvearrowright  B$を
+  $$a\rightharpoonup b=b_{(1)}\langle a,b_{(2)}\rangle\quad(a\in A,~ b\in B) $$
+  と定める．
+\end{dfn}
+\begin{dfn}[スマッシュ積]pairingから代数を作る操作である．\\
+$(A,B,\langle -,-\rangle)$:dual paringに対して，$\kk$代数$A\#B=(A\otimes B,\cdot,1_{A\# B})$を次で定義する．
+\begin{itemize}
+    % \item \textbf{底空間}: $A\otimes B$
+    \item \textbf{積}: $a,a'\in A,~b,b' \in B,\qquad
+(a \# b) \cdot (a' \# b') = a(b_{(1)} \rightharpoonup a') \# (b_{(2)} b')$
+    \item \textbf{単位元}: $1_{A\# B}=1_A \# 1_B$
+\end{itemize}
+ 特に，積は結合的である．$a\in A,b\in B$について，$a\# b=(a\#1)(1\#b)$であるから，
+$a\#1\leftrightarrow a,1\#b\leftrightarrow b$という同一視により
+$A\# B$は$A,B$から生成された代数に適切な関係式を入れたものとして考えられる．
+よって，以後$a\# b=ab$として$\#$を省略することがある．
+また，線形写像$\#:A\otimes B\to A\# B:a\otimes b\mapsto a\# b$に同じ記号$\#$を使う．
+\end{dfn}
+
+\begin{dfn}[ハイゼンベルグダブル]
+$A$をホップ代数とする．$A$が無限次元ならば線形コンパクトな完備フィルター構造が入っているとする．
+このとき，位相的双対$L=A^*$には完備ホップ代数構造が定まり，$A,L$の間に非退化なpairing $\langle -,-\rangle$が与えられる．
+
+$B=\mathcal H(A):=A\#L$を$A$のハイゼンベルグダブルという．
+
+
+
+% $L$が有限次元の場合は$A\cong L^*$となり，代数として同型$\mathcal H(A,L)\cong L^*\# L$となる．
+\end{dfn}
+\begin{dfn}[構造定数] \label{dfn:structure_coeff}
+積の構造を明示するために構造定数を導入する．
+
+$L$の基底$\{e_\alpha\}_{\alpha\in I}$に対し，双対基底とは$A$の基底$\{e^\alpha\}_{\alpha\in I}$で，
+$\langle e_\alpha,e^\beta\rangle=\delta^\beta_\alpha~(\forall \alpha,\beta\in I)$
+を満たすものである．
+$L$が有限次元の場合は常に双対基底が存在する．双対基底が存在すると仮定して，
+$L$の積と余積の構造定数をそれぞれ$m_{\alpha\beta}^\gamma,\mu^{\alpha\beta}_\gamma$とすると，
+$\mathcal H(A)$の積は次のようになる:
+$$
+\begin{aligned}
+   e_\alpha e_\beta&=m_{\alpha \beta}^\gamma e_\gamma\\
+   e^\alpha e^\beta&=\mu^{\alpha \beta}_\gamma e^\gamma\\
+e_\alpha e^\beta&=m^\beta_{\rho\gamma}\mu^{\gamma\sigma}_\alpha e^\rho e_\sigma
+\end{aligned}
+$$
+\end{dfn}
+
+\begin{dfn}
+  適切な完備化があれば，ハイゼンベルグダブルはカノニカルな可逆元$\mathcal S\in \mathcal H\otimes \mathcal H$を持ち，次の五角関係式を満たす:
+  \begin{equation}
+  \mathcal S_{23}\mathcal S_{12}=\mathcal S_{12} \mathcal S_{13} \mathcal S_{23} \label{eq:5angle}
+  \end{equation}
+さらに，定義\ref{dfn:structure_coeff}のような双対基底が存在するならば，$\mathcal S$は次のように書ける．
+\begin{equation}
+\mathcal{S}=e_i\otimes e^i
+\end{equation}
+\end{dfn}
+\begin{dfn}
+逆向きの5角関係式を満たすようなチルダ付きのハイゼンベルグダブル$ \tilde{\mathcal H}(A)$は，
+定義\ref{dfn:structure_coeff}の構造定数を用いて次のように書ける．
+$$
+\begin{aligned}
+   \tilde e_\alpha \tilde e_\beta&=m_{\alpha \beta}^\gamma \tilde e_\gamma,\\
+   \tilde e^\alpha \tilde e^\beta&=\mu^{\alpha \beta}_\gamma \tilde e^\gamma,\\
+\tilde e_\alpha\tilde e^\beta&=\mu^{\sigma\gamma}_\alpha m^\beta_{\gamma\rho} \tilde e_\sigma\tilde e^\rho.
+\end{aligned}
+$$
+\end{dfn}
+
+生成元について$\overline{e}$は積についてoppositeである代数の元を表す．また，Antipode$S$の逆写像を$\overline{S}$と表す．\\
+直接的にはチルダの生成元は次のように構成される:\\
+$$\tilde e_\alpha =\overline{S(e_\alpha)},\quad \tilde e^\alpha =\overline{\overline{S}(e^\alpha)}$$
+$\sim$の$L,A$への制限は準同型となる．\\
+カノニカルな元$\tilde {\mathcal S}=\tilde e_\alpha\otimes \tilde e^\alpha\in \tilde {\mathcal H}(L)\otimes \tilde {\mathcal H}(L)$は逆向きの五角関係式を満たす:
+$$ \tilde {\mathcal S}_{23} \tilde {\mathcal S}_{12}= \tilde {\mathcal S}_{12}  \tilde {\mathcal S}_{13}  \tilde {\mathcal S}_{23} $$
+
+
+\begin{dfn}[フォック空間]
+ハイゼンベルグダブル$\mathcal H(A))$にはカノニカルな表現$(A,\rho:\mathcal H(A)\rightarrow \operatorname{End}(A))$が次のようにして定まる:
+$$\rho(f\# u)(g):=f\cdot (u\rightharpoonup g),\quad f\#u\in H(A),~g\in A$$
+これをフォック空間表現と呼ぶ．
+\end{dfn}
+
+\newcommand{\lact}{\rightharpoonup }
+\newcommand{\rcoact}{\Delta_A }
+\subsection{Yetter--Drinfeld module algebras, bialgebroids} 
+\begin{dfn}[comodule algebra]
+$L$を双代数，$(A,\rcoact:A\rightarrow A\otimes L)$ を右 $L$-余加群とする．
+Sweedler記法と同様に，$\rcoact(a)=a_{[0]} \otimes a_{[1]}$と表記する．$A$が$L$のcomodule algebraであるとは，
+ \begin{equation}\label{eq:ma}
+      (ab)_{[0]} \otimes (ab)_{[1]} = a_{[0]} b_{[0]} \otimes a_{[1]}b_{[1]} , \quad \rcoact(1_A) = 1_A \otimes 1_L, \quad \forall a,b \in L,
+      \end{equation} 
+      を満たすことをいう．module algebraの公理と同様である．
+\end{dfn}
+
+\begin{dfn}\label{lrydma} 
+  $L$を$\kk$上の双代数とする．$L$ 上の \emph{left-right Yetter--Drinfeld module algebra}(YD-modalg) とは，
+  次の条件を満たす三つ組 $(A,\lact ,\rcoact)$ である:
+  \begin{enumerate} 
+    \item $A$ は $\kk$-代数である \label{a1}
+    \item $(A,\lact:L\otimes A\rightarrow A)$ は左 $L$-加群である  \label{a2}
+    \item $(A,\rcoact:A\rightarrow A\otimes L \colon a\mapsto a_{[0]} \otimes a_{[1]})$ は右 $L$-余加群である \label{a3}
+    \item 作用と余作用は \emph{left-right Yetter--Drinfeld 条件} を満たす: \label{a4}
+      \begin{equation} \label{eq:YD1}
+      (u_{(1)} \lact a_{[0]}) \otimes (u_{(2)} a_{[1]}) = (u_{(2)} \lact a)_{[0]} \otimes  (u_{(2)} \lact a)_{[1]} u_{(1)}, \quad \forall u \in L, a\in A
+      \end{equation}	
+    \item 作用 $\lact$ は \emph{module algebra}をなす: \label{a5}
+      \begin{equation}
+      u \lact (ab) = (u_{(1)} \lact a)(u_{(2)} \lact b), \quad u \lact 1_L = \epsilon(u) 1_L, \quad \forall u \in L, a,b \in A
+      \end{equation}
+    \item 余作用 $\rcoact$ は$L^{\mathrm{op}}$上の\emph{comodule algebra}をなす: \label{a6}
+      \begin{equation}\label{eq:ma}
+      (ab)_{[0]} \otimes (ab)_{[1]} = a_{[0]} b_{[0]} \otimes b_{[1]} a_{[1]}, \quad \rcoact(1_A) = 1_A \otimes 1_L, \quad \forall a,b \in L,
+      \end{equation} 
+   
+  \end{enumerate}
+  
+  $A$ が \emph{braided commutative} であるとは，次を満たすときを言う．
+  \begin{equation} \label{eq:bc}
+    x_{[0]}(x_{[1]}\lact a) = a x, \quad \forall a,x\in L.
+  \end{equation}
+\end{dfn}
+
+\newcommand{\biact}[1]{%
+    \ifthenelse{\equal{#1}{bl}}{\ensuremath{\blacktriangleleft}}{%
+    \ifthenelse{\equal{#1}{wl}}{\ensuremath{\vartriangleleft}}{%
+    \ifthenelse{\equal{#1}{br}}{\ensuremath{\blacktriangleright}}{%
+    \ifthenelse{\equal{#1}{wr}}{\ensuremath{\vartriangleright}}{%
+    \textbf{Invalid input!}}}}}%
+  }
+  \newcommand{\lrtrig}[1]{\biact{wl}{#1}\biact{wr}}
+\begin{dfn}[記号の導入]
+  $\kk$線形写像 $s:A\to B$,$t:A^{\mathrm{op}}\to B$が次の条件を満たすとする．
+    \begin{equation}
+        s(r) t(r') = t(r') s(r), \quad( \forall r, r' \in A)
+    \end{equation}
+    
+    2通りの両側加群の作用$\biact{br},\biact{wr}$を次により定める．
+    上式は加両側作用が左右の順番によらないことを表す．
+    \begin{equation}
+        r \biact{wr} b \biact{wl} r' = s(r)t(r') b , \qquad r \biact{br} b \biact{bl} r' = b t(r) s(r'), \quad \text{for } r, r' \in A, b \in B.
+    \end{equation}
+    $B$に$ \biact{wr},\biact{wl} $(resp. $ \biact{br},\biact{bl} $)で左右の作用を定めた両側$A$加群を
+    $ {}_{\biact{wr}}B_{\biact{wl}}$(resp. $ {}_{\biact{br}}B_{\biact{bl}}$)と書く．また，環上のテンソル積と，作用が移り合う適切な部分集合を次のように定義する．
+    $$
+    \begin{aligned}
+        B \otimes_A B &:=(B \otimes_\kk B) /\operatorname{span}_\kk \{(a\biact{wl} r)\otimes_\kk b-a\otimes_\kk (r\biact{wr} b)|\forall r \in A,\forall a,b\in B\}, \,  .\\
+        B \otimes_{\lrtrig{A}} B&:={}_{\biact{wr}}B_{\biact{wl}}\otimes_{A~\biact{wr}}B_{\biact{wl}},\qquad B \otimes_{\biact{bl} A\biact{br}} B:={}_{\biact{br}}B_{\biact{bl}}\otimes_{A~\biact{br}}B_{\biact{bl}} \\
+      B {~}_A\!\times B &:= \left\{ \sum_i a_i \otimes_A a_i' \in B \otimes_A B  \middle| \sum_i (r \biact{br} a_i) \otimes a_i' = \sum_i a_i \otimes (a_i' \biact{bl} r), \, \forall r \in A \right\}.\\
+      B \times_A B &:= \left\{ \sum_i a_i \otimes_A a_i' \in B \otimes_A B  \middle| \sum_i (a_i \biact{wr} r) \otimes a_i' = \sum_i a_i \otimes (a_i' \biact{wl} r), \, \forall r \in A \right\}.
+    \end{aligned}
+    $$
+  
+
+  \end{dfn}
+  
+  \begin{dfn}[$A$-bialgebroid]
+   \( B,A \) を \( \kk \)代数，$(B, \mu_B, \eta_B)$:両側$A$加群，$(B, \Delta_B, \epsilon_B)$:$A$余加群とする．
+  $\kk$線形写像 $s=\eta_B(-\otimes 1_A):A\to B$,$~t=\eta_B(1_A\otimes 
+ -):A^{\mathrm{op}}\to B$が次の条件を満たすとする．
+   \begin{equation}
+      s(r) t(r') = t(r') s(r), \quad( \forall r, r' \in A)
+   \end{equation}
+  $(B, \mu_B, \eta_B, \Delta_B, \epsilon_B)$が$A$-bialgebroidであるとは，次の条件を満たすことである:
+  \begin{enumerate}
+      \item[(i)] $(B, \Delta_B, \epsilon_B)$は\(B\)は
+      ${}_{\biact{wr}}B_{\biact{wl}}$により両側\(A\)加群となる．
+      \item[(ii)] 成分ごとの積について$\Delta_B:B\rightarrow B\otimes_A B$は$\kk$代数の準同型で，$\Delta_B(B)\subset B~_A\!\times B$となる．
+      \item[(iii)]   任意の\(r, r' \in A\)と\(b, b' \in B\)に対して，
+      \[
+      \varepsilon(r\biact{wr} b \biact{wl} r') = r \epsilon(b) r', \quad 
+      \varepsilon(bb') = \varepsilon(b \biact{bl} \varepsilon(b')) = \varepsilon(\varepsilon(b') \biact{br} b), \quad 
+      \varepsilon(1_B) = 1_A.
+      \]
+  \end{enumerate}
+  $s$をsource map, $t$をtarget mapと呼ぶ．
+  \end{dfn}
+
+\begin{dfn} [bialgebroidの準同型]
+  $ \kk $代数準同型\(f: A \to A'\)，$A$-bialgebroid\((B, A, s, t, \Delta, \varepsilon)\)，\\
+  $ A' $-bialgebroid\((B', A', s', t', \Delta', \varepsilon')\)および，
+  $ \kk$代数準同型\(F: B \to B'\)が与えられているとする．
+  以下の図式を可換にするとき，$(f, F)$をbialgebroidの準同型とする． 
+\[
+  \begin{tikzcd}
+  B \arrow[r, "F"] \arrow[d, "\Delta"] & B' \arrow[d, "\Delta'"] \\
+  B \otimes_A B \arrow[r, "F \otimes_A F"] & B' \otimes_{A'} B'
+  \end{tikzcd}
+  \quad
+  \begin{tikzcd}
+  B \arrow[r, "F"] \arrow[d, "\varepsilon"] & B' \arrow[d, "\varepsilon'"] \\
+  A \arrow[r, "f"] & A'
+  \end{tikzcd}
+  \quad
+  \begin{tikzcd}
+  A \arrow[r, "f"] \arrow[d, "s"] & A' \arrow[d, "s'"] \\
+  B \arrow[r, "F"] & B'
+  \end{tikzcd}
+  \quad
+  \begin{tikzcd}
+  A \arrow[r, "f"] \arrow[d, "t"] & A' \arrow[d, "t'"] \\
+  B \arrow[r, "F"] & B'
+  \end{tikzcd}
+  \]
+  
+  \end{dfn}
+  
+\begin{thm}[Brzezinski,Militaru]\label{thm:BM}
+\( L \) をホップ代数， \( (A,\lact) \)を左\( L \)-module algebra，\((A,\Delta_C)\)を右\( L^{op} \)-comodule algebraとする．
+
+$(A, \lact, \Delta_C) $
+がbraided commutative Yetter-Drinfeld module algebraであることと，
+
+\( A \# L \)が以下の構造 \( (A \# L, \mu_A, S_A, t_A, \Delta_A, \varepsilon_A) \)により\( A \)-bialgebroidとなることは同値である．
+\begin{gather*}
+    \mu_A : (A \# L)^{\otimes 2}  \rightarrow  (A \# L) : (\xi \# a) \otimes (\zeta \# b) \mapsto (\xi \# a)(\zeta \# b)=\xi *(\zeta \rightharpoonup a_1) \# (a_2 b),\\
+    s_A : A \rightarrow  A \# L: \xi \mapsto \xi \# 1_L ,
+    \qquad t_A : A \rightarrow  A \# L :\zeta \mapsto \# \Delta_C(\zeta) ,\\
+    \Delta_A : A \# L \to (A\# L)^{\otimes 2}: \xi \# a \mapsto \xi \# a_1 \otimes_A 1\#a_2,\qquad \varepsilon_A : A \# L \to A: \xi \# a \mapsto \varepsilon(a) \xi \\
+    l \biact{wr} (\xi \# a) \biact{wl} l' = s_A(l) t_A(l') (\xi \# a),\qquad
+    l \biact{br} (\xi \# a) \biact{bl} l' = (\xi \# a)t_A(l)s_A(l'). 
+\end{gather*}
+\end{thm}
+
+
+\begin{dfn}[Lie-Rinehart代数]
+
+  \( A \)を \( \kk \) 上の可換代数， 
+  \( L \) を \( \kk \) 上のリー代数かつ左\( A \)加群，  
+  \( \rho: L \to \text{Der}_{\mathbb{R}}(A) \) をリー代数の準同型かつ \( A \)-加群の準同型とする．
+  次の条件を満たすとき，$(A, L, \rho)$ をLie-Rinehart代数という．
+  \[
+  \forall a \in A, \forall X,Y \in L, \quad [X, aY] = \rho(X)(a) Y + a [X,Y]
+  \]
+  
+  \((A, L_1, \rho_1), (A, L_2, \rho_2)\)がLie-Rinehart代数であり，$\kk$線形写像$f: L_1 \to L_2$が$\rho_1=\rho_2 \circ f:L_1\to \text{Der}_{\mathbb{R}}(A)$
+  を満たすとき，\( f \)はLie-Rinehart代数の準同型であるとする．
+  
+    \end{dfn}
+  \begin{eg}
+  \( L \)をリー代数
+  \( A = \mathbb{K}, \quad L\)をリー代数，\(\rho = 0: L \to \text{Der}(\mathbb{K})=0 \)とする．
+  
+  $(\mathbb{K},L, 0)$ は Lie-Rinehart代数である．つまり，Lie-Rinehart代数はリー代数の一般化である．
+  \end{eg}
+  
+  \begin{eg}
+  \( A \)を可換代数, \( L = \text{Der}(A) \),  
+  \( \rho = \text{id}_{\text{Der}_A}\)とすると，  
+  $(A, \text{Der}(A), \text{id})$ はLie-Rinehart代数である．
+  \end{eg}
+  \begin{eg}
+  \( M \)を\( C^\infty \)級多様体，
+  \( A = C^\infty(M) \)を関数環，
+  \( L = \mathfrak{X}(M) = \text{Der}(C^\infty(M)) \)をベクトル場とする．
+  \( \rho = \text{id}_{\mathfrak{X}(M)} \)  
+  $(C^\infty(M), \mathfrak{X}(M), \text{id})$ はLie-Rinehart代数である．
+  \end{eg}
+  
+  \begin{dfn}  \label{def:univenv_LR}
+  $L=(A, L, \omega)$ をLie-Rinehart 代数とする．$L$の普遍包絡代数とは，$\kk$代数
+  \[
+  U(L) := T_\kk^+(A \oplus L) / I
+  \]
+  である. ただし，$T_\kk^+(A \oplus L)$ は $A \oplus L$ 上のテンソル$\kk$代数の正の次数の部分(すなわち$\kk$の直和成分をのぞいた部分)であり，
+  $I$は以下の元によって生成される$T_k^+(A \oplus L)$の両側イデアルである：
+  \[
+  a \otimes b - ab, \quad a \otimes \xi - a \xi, \quad \xi \otimes \eta - \eta \otimes \xi - [\xi, \eta], \quad \xi \otimes a - a \otimes \xi - \omega(\xi)(a)\qquad (a, b \in A,~\xi, \eta \in L).
+  \]
+  \end{dfn}
+  
+  本節では「quantum groupoid」の概念を導入する．
+  これは特別な「quantum bialgebroid」であり，(位相的な) bialgebroid で，$U(L)$，$U^r(L)$
+  \begin{dfn}[]  \label{def-QUEAd}
+    quantum universal enveloping algebroidとは，位相的な $\kk[[\hbar]]$-代数 $A_\hbar$ 上の位相的な bialgebroid 
+    \[
+    (L_\hbar, A_\hbar, s_\hbar, t_\hbar, m_\hbar, \Delta_\hbar, \varepsilon_\hbar)
+    \]
+    であり，以下の性質を満たすものをいう．
+    
+    \begin{enumerate}
+        \item[(i)] $A_\hbar$ はある$\kk$-代数$A$が存在して位相的$\kk[[\hbar]]$-加群として同型$A[[\hbar]]\cong A_\hbar$であり，この同型は代数同型
+        \[
+        A_\hbar / \hbar A_\hbar \cong A[[\hbar]] / \hbar A[[\hbar]] \cong A
+        \]
+        を誘導する．
+    
+        \item[(ii)] $L_\hbar$はあるLie-Rinehart 代数$L=(A,L,\omega)$が存在して，位相的$\kk[[\hbar]]$-加群として同型$U(L)[[\hbar]]\cong L_\hbar$であり，
+        ここで$U(L)$は定義\ref{def:univenv_LR}にある$L$の普遍包絡代数である．
+    
+        \item[(iii)] $A_\hbar / \hbar A_\hbar \cong A[[\hbar]] / \hbar A[[\hbar]] \cong A$ による同型を介して，$A$-bialgebroidとして次の同型が成立する．
+        \[
+        L_\hbar / \hbar L_\hbar \cong U(L)[[\hbar]] / \hbar U(L)[[\hbar]] \cong U(L).
+        \] 
+    
+        \item[(iv)] $L_\hbar \widehat{\otimes}_{\lrtrig{A_\hbar}} L_\hbar$ を，$L_\hbar \otimes_{A_\hbar} L_\hbar$ の $\hbar$-進位相に関する完備化として定義し，($\hbar$-進完備な) Takeuchi 積 を
+        \[
+        L_\hbar \widehat{\times}_{\lrtrig{A_\hbar}}L_\hbar := 
+        \left\{ \sum_i u_i \otimes u'_i \in L_\hbar \widehat{\otimes}_{\lrtrig{A_\hbar}} L_\hbar
+        \mid \sum_i (a \biact{br} u_i) \otimes u'_i = \sum_i u_i \otimes (u'_i \biact{bl} a) \right\}.
+        \]
+        で定義する．このとき，$L_\hbar$ の余積 $\Delta_\hbar$ は $\Delta_\hbar(L_\hbar)\subset L_\hbar \widehat{\otimes}_{\lrtrig{A_\hbar}} L_\hbar$ となる．
+    \end{enumerate}
+    この設定のもとで，$L_\hbar$を$U(L)$の量子化といい，$U(L)_\hbar := L_\hbar$と表記する．
+    \end{dfn}
+    
+    これまでの内容を演算子的な観点から捉え直す．図\ref{tbl:sl2bialgoid}に示したような
+    $\mathfrak{sl}_2^+$の具体例と上記の概念との対応が成立する．
+
+    \begin{table}[h]\label{tbl:sl2bialgoid}
+      % \centering
+      \begin{tabular}{|c|c||c|c|}
+          \hline
+          概念 & $\mathfrak{sl}_2^+$ & 概念 & $\mathfrak{sl}_2^+$ \\
+          \hline
+          正則作用 & 微分作用 & フォック空間表現 & 微分作用の表現 \\
+          $A$ & $*$積に関する関数環 & $L$ & 特定の$q$微分演算子 \\
+          module algebra & $*$積のライプニッツ則 & Yetter-Drinfeld条件 & $*$積の右乗算のライプニッツ則 \\
+          $A\#L$ & $q$微分演算子全体 & A$\#L$というbialgebroidの余積 & 関数倍も含めたライプニッツ則 \\
+          $\mathcal S$ & $A$の余積をつくる演算子 &braided commutativity & $*$積の右乗算作用 \\
+          target map & $*$積の右乗算演算子 &  source map & $*$積の左乗算演算子 \\
+          \hline
+      \end{tabular}
+      \caption{概念と$\mathfrak{sl}_2^+$の具体例の対応}
+  \end{table}
+  
+
+    フォック空間表現の作用素として捉えることで，一般のホップ代数でも同様の解釈を行うことができる．
+
+    $A\# L$をホップ代数のスマッシュ積とし，$A$-bialgebroidと仮定する．
+    まず，スマッシュ積の積$\mu$はフォック空間表現における演算子の積である．
+
+    なぜなら$f,g,h\in A, u,v\in L$に対して，
+    \begin{align*}
+        (f\# u)\cdot((g\# v)\cdot h)&=fu\lact (gv\lact h)\\
+        &=f(u_{(1)}\lact g)(u_{(2)}v\lact h)\\
+        &=f(u_{(1)}\lact g)\#(u_{(2)}v)\cdot h\\
+        &=(f\# u)(g\# v)\cdot h
+    \end{align*}
+    となるからである．bialgebroidの余積$\Delta_B$も，フォック空間における拡張されたライプニッツ則と解釈できる．
+    すなわち，$f\#u\in A\#L,~g,h\in A,~v\in L$に対して，次が成立する．
+$$
+\begin{aligned}
+    \rho(f\# u)(gh)(v)=&f(v_{(1)})(u\rightharpoonup gh)(v_{(2)})\\
+    =& f(v_{(1)})(gh)(v_{(2)}u)\\
+    =& f(v_{(1)})g(v_{(2)}u_{(1)})h(v_{(3)}u_{(2)})\\
+    =& f(v_{(1)})(u_{(1)}\rightharpoonup g)(v_{(2)})(u_{(2)}\rightharpoonup h)(v_{(3)})\\
+    =& (\rho((f\#u)_{(1)})g)(v_{(1)})(\rho((f\#u)_{(2)})h)(v_{(2)})\\
+    =& ((\rho((f\#u)_{(1)})g)\cdot((\rho((f\#u)_{(2)})h)))(v)\\
+    =& {\mu}_{A}((\rho\otimes\rho)(\Delta(f\#u))(g\otimes h))(v)\\
+\end{aligned}
+$$
+\subsection{具体例}
+\subsection*{有限群の群環 \( \mathbb{K}[G] \) の例}
+$G$を有限群とする．$L=\kk[G]$の基底を$\{e_g\}_{g\in G}$とし，
+$A=\kk[G]^*$の双対基底を$\{e^g\}_{g\in G}$とする．
+任意の元
+\(\ \alpha,\beta,\gamma \in G \) に対して次の演算規則を定めることで群環はホップ代数となる．
+  \begin{itemize}
+      \item  積: $m_{\alpha \beta}^\gamma=\delta_{\alpha\beta,\gamma},\qquad e_\alpha e_\beta=e_{\alpha \beta}$
+      \item 余積: $\mu^{\alpha \beta}_\gamma=\delta_{\alpha,\gamma}\delta_{\beta,\gamma},\qquad  \Delta(e_\alpha) = e_\alpha \otimes e_\alpha $
+      \item 余単位:  \( \varepsilon(e_\alpha) = 1 \)
+      \item Antipode: \( S(e_\alpha) = e_{\alpha^{-1}} \)
+  \end{itemize}
+
+  ここで \( \delta_{g, h} \) はクロネッカーのデルタである．
+ハイゼンベルグダブル$\mathcal H(L)$の積は次のようになる．
+\begin{gather}
+e_\alpha e_\beta=e_{\alpha \beta},\qquad e^\alpha e^\beta=\delta_{\alpha,\beta}e^\alpha,\\
+e_\alpha e^\beta=\sum_{\rho,\sigma\in G}\delta_{\beta,\rho\alpha}\delta_{\alpha,\sigma}e^\rho e_\sigma.
+\end{gather}
+$\mathcal S=\sum_{g\in G}e_g\otimes e^g$は5角関係式を満たす:
+$$ 
+\begin{aligned}
+    \mathcal S_{12} \mathcal S_{13} \mathcal S_{23} 
+    =&\sum_{\alpha,\beta,\gamma\in G} e_{\alpha\beta}\otimes e^\alpha  e_\gamma\otimes \delta_{\beta,\gamma}e^\gamma\\
+    =&\sum_{\alpha,\beta\in G} e_{\alpha\beta}\otimes e_\beta  e^{\alpha\beta}\otimes e^\beta\\
+    =&\sum_{\alpha,\beta\in G} e_{\alpha}\otimes e_\beta  e^{\alpha}\otimes e^\beta\\
+    =&\mathcal S_{23}\mathcal S_{12}
+\end{aligned} 
+$$
+\subsubsection{$\mathbb R_+$}
+\newcommand{\BS}[0]{\mathbb R_+}
+正の実数$\BS$という1次元のリー群上の形式冪級数環$A=\mathbb R[[t]]$を考える．
+ \( \BS \) はこのようにパラメータ付けされる:
+$$
+z = \exp({t}) \quad (t \in \mathbb{R}).
+$$
+% $z=1$における接空間は曲線に沿った微小変換から生成される．
+$\BS$に対応するリー代数は$\de t=\theta_z$という$A$の左不変ベクトルから生成される．
+% \textbf{代数の定義}:\\
+\begin{itemize}
+    \item $A$の生成元: $t=\log z$
+    \item $A$の余積: $\Delta(t)=1\otimes t+t\otimes 1$
+    \item $A$のantipode: $S:t\rightarrow -t$
+    \item $L$の生成元: $\de t=\theta_z$
+    \item Lの余積 $\Delta(\de t)=1\otimes \de t+\de t\otimes1$  
+    \item Lのantipode: $S:\theta_z\rightarrow \theta_z$
+\end{itemize}
+% ストーン・ワイエルシュトラスの定理により$A$は$B^+$上の連続関数の集合の中で，一様ノルムの誘導する距離に関して稠密となる．このことから，ペアリングはリー群上の関数環とリー群に対応するリー代数の生成子(微分演算子)との間に構築されているものと考えられる．
+% さらに$\log z$などを連続関数として考えるために普遍被覆$\widetilde{\mathbb C_1}$の上の解析関数の環へと延長する:$$A=C^\omega(\widetilde{\mathbb C_1})$$
+% $t=-i\log z,~\de t=-i\te z,~A=\mathbb C[t],L=\mathbb C[\de t]$と捉え直し(この正当性は?話や定義を大きくしすぎたことの弊害か？)，$L,A$の間にペアリングが定まることを見る．\\
+% このとき，$\Delta(t)=1\otimes t+t\otimes1$となることに注意する．(これってつまり，$A$の余積を$\Delta(f)=f\otimes f$と定義しているとマズいのでは？)\\
+% (中略)\\
+ $m\in \mathbb N_0$
+\begin{itemize}
+    \item 基底:~~~~~~$e_m=\de t^m/m!$
+    \item 双対基底:~$e^m=t^m$
+\end{itemize}
+カノニカル元$\mathcal S$は次のように書ける:
+$$\mathcal S=\sum_{m=0}^\infty e_m\otimes e^m=e^{\de t\otimes t}$$
+ワイル代数に関する公式により，
+$$e^{\alpha\de t}e^{\beta t}=e^{\beta t}e^{\alpha \beta}e^{\alpha\de t}$$
+が成立するので，五角関係式が成立することを確かめられる:
+$$
+\begin{aligned}
+    \mathcal S_{23}\mathcal S_{12}=&\exp (1 \otimes \de t \otimes t) \exp \left(\de t \otimes t \otimes 1\right)\\
+=& \exp(\de t\otimes t\otimes 1)\exp(\de t \otimes 1\otimes t)\exp(1\otimes \de t\otimes t) \\
+=& \mathcal S_{12} \mathcal S_{13} \mathcal S_{23} 
+\end{aligned}
+$$
+また，次が成立する．
+$$
+\begin{aligned}
+    \sum_{n=0}^\infty e^n e_n
+    &= \sum_{n=0}^\infty \frac 1{n!}t^n \de t^n\\
+    &= \sum_{n=0}^\infty \frac{(-\te t+0)\cdots (-\te t+n-1)}{n!}(-1)^n\\
+    &= 2^{\te t}
+\end{aligned}
+$$
+これは変数tを2倍をする作用素である．
+
+見やすさのために，縦の連結でテンソル積を表す表記法とする．たとえば5角関係式は次のように表す．
+$$
+\begin{aligned}
+& \exp \left(\begin{array}{l}
+1 \\
+\de t \\
+t
+\end{array}\right) \exp \left(\begin{array}{l}
+\de t \\
+t \\
+1
+\end{array}\right)=\exp \left(\begin{array}{l}
+\de t \\
+t \\
+1
+\end{array}\right) \exp \left(\begin{array}{l}
+\de t \\
+1 \\
+t
+\end{array}\right) \exp \left(\begin{array}{l}
+1 \\
+\de t \\
+t
+\end{array}\right) \\
+\end{aligned}
+$$
+R行列については以下の形となる:
+$$
+\begin{aligned}
+R=& \exp \left(\begin{array}{c}
+\de t \\
+1 \\
+1 \\
+-\bar{t}
+\end{array}\right) \exp \left(\begin{array}{l}
+\de t \\
+1 \\
+t \\
+1
+\end{array}\right) \exp \left(\begin{array}{c}
+1 \\
+\bar{\de t} \\
+1 \\
+\bar{t}
+\end{array}\right) \exp \left(\begin{array}{c}
+1\\
+-\bar{\de t} \\
+t \\
+1
+\end{array}\right)=\exp \left(\begin{array}{l}
+\dbinom{{\de t}}{1}-\dbinom{1}{\bar{\de t}}  \\
+\dbinom{t}{1}-\dbinom{1}{\bar{t}} 
+\end{array}\right) 
+\end{aligned}
+$$
+$t\mapsto t,~\de t\mapsto -\de t$によって定まるワイル代数の反準同型は，opと一致することに注意すると，
+$$D=1\otimes \de t+\de t \otimes1,~T=t \otimes1-1 \otimes t $$
+を用いて$R=\exp(D\otimes T)$と書き直せる．$[T, D]=0$なので，自明にR行列の6角関係式を満たす．
+$$
+\begin{aligned}
+& \\
+& R=\exp (T \otimes D),\quad  \\
+& R_{12,34}=S_{14}^{\prime \prime} S_{13} \tilde{S}_{24} S_{23}^{\prime} \\
+& S^{\prime}=\tilde{e}_\alpha \otimes e^\alpha, \quad S^{\prime \prime}=e_\alpha \otimes \tilde{e}^\alpha
+\end{aligned}
+$$
+
+
+
+% \subsection{具体例:$\mathcal{H}(U(\mathfrak{sl}_2^+)^*)$}
+% (一旦コメントアウト)
+% $SL_2(R)$のborel部分群を$B^+$，対応するリー代数を$b^+$とする．\\
+% $B^+$上の関数環として$A=\kq[x,x^{-1},y]$を考える．
+% \subsubsection{ワイル代数の定義}
+% 本章ではワイル代数を次のように定める:
+% $$\mathbb W:=\operatorname{span}_{\kq}\{x^ny^m\de x^\alpha \de y^\beta \mid m,\alpha,\beta\in \mathbb N_0,n~\in\mathbb  Z\}$$
+% \subsubsection{代数の定義}
+% \begin{itemize}
+%     \item $F:=\mathcal F(B^+)=\kk[a,b,d]$
+%     \item $F$の積:$da=ad=1$,生成元同士は可換
+%     \item $F$の余積:\\
+
+% % 他の書き方のメモ:
+% $$
+% \Delta\left(
+% \begin{pmatrix} 
+% a & b \\ 
+% 0 & d 
+% \end{pmatrix} 
+% \right)=
+% \begin{pmatrix} 
+% a & b \\ 
+% 0 & d 
+% \end{pmatrix} 
+% \otimes 
+% \begin{pmatrix} 
+% a & b \\ 
+% 0 & d 
+% \end{pmatrix} 
+% = 
+% \begin{pmatrix} 
+% a \otimes a  & a \otimes b + b \otimes d \\ 
+% 0 &  d \otimes d 
+% \end{pmatrix}.
+% $$
+
+%     \item $F$のantipode: \\
+% $$
+% S^{\pm 1}\left( 
+% \begin{pmatrix} 
+% a & b \\ 
+% 0 & d 
+% \end{pmatrix} 
+% \right) 
+% = 
+% \begin{pmatrix} 
+% d & -qb \\ 
+% 0 & a 
+% \end{pmatrix}.
+% $$
+
+%     \item $L:=U(b^+)=\kk[E,H]$
+%     \item Lの積: $[H,E]=2E$
+%     \item Lの余積:\\
+%     $\Delta(E)=1\otimes E+E\otimes1$\\
+%     $\Delta(H)=H\otimes 1+1\otimes H$
+%     \item Lのantipode: \\
+%     $S^{\pm1}(E)=-E$\\
+%     $S^{\pm1}(H)=-H$ 
+% \end{itemize}
+% \subsubsection{hopf paring}
+% (antipodeはまだ考察してない)
+% %\left\langle ,\right\rangle
+% $$\left\langle E,a\right\rangle=\left\langle E,d\right\rangle=0,~\left\langle E,b\right\rangle=1$$
+% $$\left\langle H,a\right\rangle=1,~\left\langle H,d\right\rangle=-1,~\left\langle H,b\right\rangle=0$$
+% これにより，$A=\mathcal H(F,L)=F\#L$を考えることができる．
+% \subsubsection{積の定義}
+% スマッシュ積により$L,F$が混ざった元の間に積を定められる．それによる交換子を計算すると以下のようになる:
+% $$
+% \begin{aligned}\\
+% & {[H_+, a]=(\varepsilon \# H_+) \cdot(a \# 1)-a \# H_+=a \# H_++a \# 1-a \# H_+=a} \\
+% & {[H_+, b]=(\varepsilon \# H_+) \cdot(b \# 1)-b \# H_+=b \# H_+-b \# 1-b \# H_+=-b} \\
+% & {[H_+, d]=(\varepsilon \# H_+) \cdot(d \# 1)-d \# H_+=d \# H_+-d \# 1-d \# H_+=-d} \\
+% & {[E, a]=(\varepsilon \# E) \cdot(a \# 1)-a \# E=a \# E-a \# E=0} \\
+% & [E, b]=(\varepsilon \# E) \cdot(b \# 1)-b \# E=a \# +b \# E-b \# E=a \# 1  \\
+% & {[E, d]=(\varepsilon \# E) \cdot(d \# I)-d \# E=d \# E-d \# E=0} \\
+% \end{aligned}
+% $$
+
+
+% \subsubsection{余積}
+% quantum groupoid structureが入るが，準備が足りないので省略
+
+% \subsubsection{双対基底}
+% 双対基底を構成し，Kashaevの論文との関連性を見るために，$F$の別の生成元$H_-,F$を定義する．
+% $${H_-}:=\log a,~F:=db$$
+% これを使うとhopf pairngについての双対基底が構成できる:
+% $$e_{m,n}=\frac{1}{m!n!}H_+^mE^n$$
+% $$e^{m,n}={H_-}^m F^n$$
+
+% \subsubsection{ワイル代数$\mathbb W$への埋込の構成}
+% $A$がAのAへの右乗算作用，$L$がAへの微分作用となるような作用素の表現を考えることでハイゼンベルグダブルの作用素による表現を構築できる．
+
+% \begin{itemize}
+%     \item $L,A$の表現$\rho:L,A\rightarrow \mathbb W$:\\
+%     $\rho(E)=x\de y$\\
+%     $\rho(H_+)=\te x-\te y,\quad \rho(H)=\theta_x-\theta_y$\\
+%     $\rho(a)=x,\quad \rho(b)=y,\quad \rho(d)=x^{-1}$\\
+%     $\rho({H_-})=\log x$\\
+%     $\rho(F)=\frac{y}{x}q^{\te x}$\\
+%     これにより$\rho:A\rightarrow \mathbb W$が作られる．
+%     \item Aの左L module-algebra構造:\\
+%     $\Delta(E)=1\otimes E+E\otimes 1$なので
+% これとは別に，ワイル代数の関係式のみで証明することも可能である:
+    
+% \end{itemize}
+% \subsubsection{計算の確認}
+
+% $$ S=e^{{H_+} \otimes {H_-}} \exp (E \otimes F) 
+% =(1\otimes x)^{(\te x-\te y)\otimes 1}\exp\left(x\de y\otimes \frac yx \right) $$
+
+% % $$
+% % \begin{aligned}
+% % & {\left[S_{12} S_{13} S_{23} \stackrel{?}{=} S_{23} S_{12}\right)} \\
+% % & {\left[\theta_x, \hat{x}\right)=a x^a} \\
+% % & \theta_x x^a=x^a\left(\theta_x+a\right) \\ 
+% % \end{aligned}
+% % $$
+% 具体的な関数への作用は公式\ref{lem:shift_operator}により，次のようになる．
+% $$S\cdot (f(x)\otimes 1)=(1\otimes x)^{(\te x-\te y)\otimes 1}\cdot(f(x)\otimes 1)=f(x\otimes x)=f(\Delta(x))$$
+% $$S\cdot (f(y)\otimes 1)=(1\otimes x)^{(\te x-\te y)\otimes 1}\cdot(f(y\otimes 1+x\otimes (y/x)))=f(y\otimes x^{-1}+x\otimes y)=f(\Delta(y))$$
+% よって，$S=(\Delta\otimes 1)(1\otimes \mu):f\otimes g\mapsto f_{(1)}\otimes f_{(2)} g$となる．
+% 五角関係式を確認する．
+% \begin{lem}
+%     $$
+% \begin{aligned}
+%     & \exp (E \otimes F \otimes 1) \exp \left( E \otimes 1 \otimes F\right) {\exp} (1 \otimes E \otimes F ) \\
+%  =&\exp (1 \otimes E \otimes F ) \exp (E \otimes F \otimes 1) 
+% \end{aligned}
+% $$
+% a
+% \begin{proof}
+% $$[F,E]=1$$
+
+% であるから，ワイル代数の公式を使うことができる．証明は$C_1$の具体例のときと同様である．
+% \end{proof}
+% \end{lem}
+
+% 補題を用いることで，五角関係式は示される．
+% $$
+% \begin{aligned}
+%  S_{12} S_{13} S_{23}& =e^{{H_+} \otimes {H_-} \otimes 1}
+% \exp (E \otimes F \otimes 1)
+% e^{{H_+} \otimes 1 \otimes {H_-}} \exp \left[E \otimes 1\otimes F\right) 
+% e^{1 \otimes {H_+} \otimes {H_-}} {\exp }[1 \otimes E \otimes F)\\
+% & =e^{{H_+} \otimes {H_-} \otimes 1} \exp  (E \otimes F \otimes 1)
+% e^{({H_+} \otimes 1 \otimes +1 \otimes {H_+} )\otimes {H_-}} 
+% \exp  \left(E \otimes q^{H_+}\otimes F\right){\exp }(1 \otimes E \otimes F)\\
+% & =e^{{H_+} \otimes {H_-} \otimes 1} e^{{H_+} \otimes 1 \otimes {H_-}} 
+% e^{1 \otimes {H_+} \otimes {H_-}}\exp  (E \otimes F \otimes 1)
+% \exp  \left(E \otimes q^{H_+}\otimes F\right){\exp }(1 \otimes E \otimes F)\\
+% & =e^{1\otimes {H_+} \otimes {H_-}} e^{{H_+} \otimes {H_-} \otimes 1} 
+%  \exp  (1 \otimes E \otimes F) \exp_ q(E \otimes F \otimes 1) \\
+%  & =e^{1\otimes {H_+} \otimes {H_-}}  \exp  (1 \otimes E \otimes F) 
+%  e^{{H_+} \otimes {H_-} \otimes 1} \exp_ q(E \otimes F \otimes 1) \\
+% & =S_{23} S_{12}
+% \end{aligned}
+% $$
+
+% さらに，ここから作られるR行列に関する計算は以下のようになる:
+% $$
+% \begin{aligned} R=& e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ 1 \\ -\bar{H}_{-}\end{array}\right)\exp  \left(\begin{array}{c}E \\ 1 \\ 1 \\ -\bar{F} e^{2 \bar{H}_{-}}\end{array}\right) e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ H_{-} \\ 1\end{array}\right) \exp  \left(\begin{array}{c}E \\ 1 \\ F \\ 1\end{array}\right) \\ 
+% &\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ 1 \\ \bar{H}_{-}\end{array}\right) \exp  \left(\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ 1 \\ \bar{F} e^{2 \bar{H}_{-}}\end{array}\right) e^{\wedge}\left(\begin{array}{c}1 \\ -\bar{H}_{+} \\ H_{-} \\ 1\end{array}\right)\exp  \left(\begin{array}{c}1 \\ -q^{-\bar{H}_{+} }\bar{E} \\ F \\ 1\end{array}\right)\\
+% =& e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ 1 \\ -\bar{H}_{-}\end{array}\right)e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ H_{-} \\ 1\end{array}\right) \exp  \left(\begin{array}{c}E \\ 1 \\ e^{-2H_-} \\ -\bar{F} e^{2 \bar{H}_{-}}\end{array} \right) \exp  \left(\begin{array}{c}E \\ 1 \\ F \\ 1\end{array}\right) \\ 
+% &\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ 1 \\ \bar{H}_{-}\end{array}\right) e^{\wedge}\left(\begin{array}{c}1 \\ -\bar{H}_{+} \\ H_{-} \\ 1\end{array}\right)\exp  \left(\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ e^{-2H_-} \\ \bar{F} e^{2 \bar{H}_{-}}\end{array}\right)  \exp  \left(\begin{array}{c}1 \\ -q^{-\bar{H}_{+} }\bar{E} \\ F \\ 1\end{array}\right)\\
+% =& e^{\wedge}\left(\begin{array}{c} -{H}_{+}\\1 \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right)  \exp  \left(\begin{array}{c}E \\ 1 \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right)\\
+% &\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) \exp  \left(\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ \dbinom{e^{-2H_-} }{ \bar{F} e^{2 \bar{H}_{-}}}-\dbinom{F}{1}\end{array}\right)  \\
+% =& e^{\wedge}\left(\begin{array}{c} -{H}_{+}\\1 \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right)\\
+% &\times  \exp  \left(\begin{array}{c}E \\ q^{-\bar{H}_+} \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right) \exp  \left(\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ \dbinom{e^{-2H_-} }{ \bar{F} e^{2 \bar{H}_{-}}}-\dbinom{F}{1}\end{array}\right) \\
+% =& e^{\wedge}\left(\begin{array}{c} \dbinom{1}{\bar{H}_{+}}-\dbinom{{H}_{+}}{1} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) \exp  \left(\begin{array}{c}-\dbinom{1}{q^{-\bar{H}_+}\bar{E}}+\dbinom{E}{q^{-\bar{H}_+}} \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right) 
+% \end{aligned}
+% $$
+
+
+\subsection{具体例:$\mathcal{H}(U_\hbar(\mathfrak{sl}_2^+)^*)$}
+$q=e^\hbar,~\kk_\hbar=\kk[[\hbar]]$とする．$SL_2(\mathbb{\kk})$のBorel部分群$B^+$と対応するリー代数$b^+$を
+$$
+B^+ = \left\{ \begin{pmatrix} a & b \\ 0 & a^{-1} \end{pmatrix} \mid a \in {\kk}^\times, b \in \kk \right\},\quad
+b^+ = \left\{ \begin{pmatrix} \alpha & \beta \\ 0 & -\alpha \end{pmatrix} \mid \alpha, \beta \in \kk \right\}
+$$
+と定める．\\
+$B^+$上の関数環として$\mathbb A=\kk_\hbar[x,x^{-1},y]$を考え，節\ref{subsec:Amodalg}で導入した$*$積を
+${\mu}_*=\Tilde{{\mu}}\circ q^{\theta_y\otimes\theta_x}$とする．つまり，
+$$x^{n_1}y^{m_1}*x^{n_2}y^{m_2}=q^{m_1n_2}x^{n_1+n_2}y^{m_1+m_2} \qquad (n_1,n_2\in \mathbb Z, m_1,m_2 \in\mathbb N)$$
+を双線形に拡張したものを考え，$A=(\mathbb A,*)$とする．
+% \footnote{余積がcopになっていることに伴い，積がopになっている}
+本節ではワイル代数を次のように定める．
+$$\mathbb W:={\kk}[x,x^{-1},y,\de x,\de y][[\hbar]]$$
+通常の関数環を考える場合，作用素として左乗算と右乗算は区別されないが，$*$積を考えるにあたって左右の乗算作用素$\mathcal L_*,\mathcal R_*$が必要である．
+$*$に関する乗算作用素は$\mathbb W$を用いて次のように書ける．
+$$\mathcal L_*:\mathbb A\rightarrow \mathbb W=\operatorname{End} (\mathbb A):f\mapsto (g\mapsto f*g),\qquad \mathcal R_*:\mathbb A\rightarrow \mathbb W=\operatorname{End} (\mathbb A):f\mapsto (g\mapsto g*f)$$
+$$\mathcal L_*(x)=x,\quad\mathcal L_*(y)=yq^{\te x},\quad\mathcal R_*(x)=xq^{\te y},\quad\mathcal R_*(y)=y$$
+実際，$\mathbb A$の生成元$\{x^ny^m\mid n\in \mathbb Z,~m\in\mathbb N_0\}$に対し，作用が一致する:
+$$\mathcal L_*(x)・x^ny^m=x*x^my^m=x^{n+1}y^m=x・x^ny^m$$
+$$\mathcal L_*(y)・x^ny^m=y*x^ny^m=q^nx^{n}y^{m+1}=yq^{\te x}・x^ny^m$$
+\subsubsection{代数の定義}
+$A:=\mathcal F_{\hbar}(B^+)$の生成元を$a,b,d$とし，関係式とホップ代数構造を以下のように定める．
+\begin{gather*}
+ab=q^{-1}ba,~da=ad=1,~bd=q^{-1}db,\\
+\Delta\left(
+\begin{pmatrix} 
+a & b \\ 
+0 & d 
+\end{pmatrix} 
+\right)=
+\begin{pmatrix} 
+a & b \\ 
+0 & d 
+\end{pmatrix} 
+\otimes 
+\begin{pmatrix} 
+a & b \\ 
+0 & d 
+\end{pmatrix} 
+= 
+\begin{pmatrix} 
+a \otimes a  & a \otimes b + b \otimes d \\ 
+0 &  d \otimes d 
+\end{pmatrix}, \\
+\varepsilon\left(
+\begin{pmatrix}
+a & b \\
+0 & d
+\end{pmatrix}
+\right)=\begin{pmatrix}
+  1 & 0 \\
+  0 & 1
+\end{pmatrix},\qquad S^{\pm 1}\left( 
+\begin{pmatrix} 
+a & b \\ 
+0 & d 
+\end{pmatrix} 
+\right) 
+= 
+\begin{pmatrix} 
+d & -q^{\pm 1}b \\ 
+0 & a 
+\end{pmatrix}
+\end{gather*}
+$L:=U_{q}(b^+)$の生成元を$E,K,K^{-1}$とし，
+埋め込み$U_q(b^+)\hookrightarrow U_q(\mathfrak{sl}_2)$により，
+ホップ代数構造を定める．すなわち，
+\begin{gather*}
+[H,E]=2E,\qquad KEK^{-1}=q^2E,\qquad KK^{-1}=K^{-1}K=1,\\
+\Delta(E)=1\otimes E+E\otimes K,\qquad
+\Delta(K^{\pm 1})=K^{\pm 1}\otimes K^{\pm 1},\\
+\varepsilon(E)=0,\qquad \varepsilon(K)=1,\\
+S^{-1}(E)=-K^{-1}E,\qquad S(E)=-EK^{-1},\qquad S^{\pm 1}(K)=K^{- 1}
+\end{gather*}
+% \qquad \Delta(H)=H\otimes 1+1\otimes H,\\,\qquad S^{\pm 1}(H)=-H,
+$A,L$の間の非退化なhopf pairingを次のように定める:
+%\left\langle ,\right\rangle
+$$\left\langle E,a\right\rangle=\left\langle E,d\right\rangle=0,~\left\langle E,b\right\rangle=1$$
+$$\left\langle H,a\right\rangle=1,~\left\langle H,d\right\rangle=-1,~\left\langle H,b\right\rangle=0$$
+dual pairingであることを用いて生成元から再帰的に計算することで，
+\begin{align}
+    \langle K^mE^n,a^{m'} (db)^{n'}\rangle =\delta_{n,n'}q^{mm'-\frac12n(n-1)}[n]_q!\quad (m,m'\in \mathbb Z,~n,n'\in \mathbb N)  \\
+    \langle K^mE^n,a^{m'} b^{n'}\rangle =\delta_{n,n'}q^{m(m'-n)}[n]_q!\quad (m,m'\in \mathbb Z,~n,n'\in \mathbb N)  
+\end{align}
+
+これにより，$B=\mathcal H(L,A)=A\#L$を考えることができる．
+
+\subsubsection{双対基底}
+双対基底を構成し，\cite{Kashaev1995}との関連性を見るために，形式的な別の生成元を導入する．
+
+定義\ref{def:Uh_drinfeld}のとおり，
+$L$の位相的な生成元を$E,H_+$とし，次を満たすとする．
+\begin{gather*}
+    [H_+,E]=2E,\qquad K^{\pm 1}=q^{\pm H_+},\qquad \varepsilon(H_+)=0\\
+    \Delta(H_+)=H_+\otimes 1+1\otimes H_+,\qquad S^{\pm 1}(H_+)=-H_+
+\end{gather*}
+そして，$A$の位相的な生成元を${H_-}:=\log a,~F:=db$とし，さらに次を満たすとする．
+\begin{gather*}
+    [H_-,F]=-\hbar F,\qquad [H_-,a]=[H_-,d]=0,\qquad \varepsilon(H_-)=0\\
+    \Delta(H_-)=H_-\otimes 1+1\otimes H_-,\qquad S^{\pm 1}(H_-)=-H_-
+\end{gather*}
+これを使うとhopf pairngについての双対基底が構成できる:
+$$e_{m,n}=\frac{1}{m![n]_q!}q^{\frac12n(n-1)}H_+^mE^n$$
+$$e^{m,n}={H_-}^m F^n$$
+また，次の式が成立する．
+\begin{gather*}
+    \Delta(F)=1\otimes F+F\otimes e^{-2H_-},\qquad \varepsilon(F)=0,\qquad S^{\pm 1}(F)=-q^{1\pm 1}e^{2H_-}F
+\end{gather*}
+\subsubsection{積の確認}
+スマッシュ積により$L,A$が混ざった元の間に積を定められる．それによる交換子を計算すると以下のようになる:
+
+% & \Delta_{\hbar}(E)=E \otimes e^{\hbar H}+\left|\otimes E, \Delta_{\hbar}(H_+)=|\otimes H_++H_+ \otimes|\right. \\
+% & \Delta_{\hbar}(a)=a \otimes a, \quad \Delta_{\hbar}(b)=a \otimes b+b \otimes d, \Delta_\pi(d)=d \otimes d \quad(\xi \# x) \cdot(A \# Y)=\left\langle A_2, x_1\right\rangle \xi * A_1 \# x_2 Y \text { f., } 
+$$
+\begin{aligned}\\
+& {[H_+, a]=(\varepsilon \# H_+) \cdot(a \# 1)-a \# H_+=a \# H_++a \# 1-a \# H_+=a} \\
+& {[H_+, b]=(\varepsilon \# H_+) \cdot(b \# 1)-b \# H_+=b \# H_+-b \# 1-b \# H_+=-b} \\
+& {[H_+, d]=(\varepsilon \# H_+) \cdot(d \# 1)-d \# H_+=d \# H_+-d \# 1-d \# H_+=-d} \\
+& {[E, a]=(\varepsilon \# E) \cdot(a \# 1)-a \# E=a \# E-a \# E=0} \\
+& {[E, b]=(\varepsilon \# E) \cdot(b \# 1)-b \# E=a \# q^{ H_+}+b \# E-b \# E=a \# e^{\hbar H_+} \xrightarrow{\hbar \rightarrow 0} a} \\
+& {[E, d]=(\varepsilon \# E) \cdot(d \# I)-d \# E=d \# E-d \# E=0} \\
+% & \hbar \rightarrow 0 \quad a \text { とき }[H_+, a]=a,[H_+, b]=-b,[H_+, d]=-d,[E, a]=0,[E, b]=a,[E, d]=0
+\end{aligned}
+$$
+
+
+% \subsubsection{余積}
+% quantum groupoid structureが入るが，準備が足りないので省略
+
+
+\subsubsection{ワイル代数$\mathbb W$への埋込の構成}
+$A$が$\mathbb A$への左乗算作用，$L$が$\mathbb A$への$q$微分作用となるような作用素の表現を考えることでハイゼンベルグダブルの作用素による表現を構築できる．
+
+\begin{itemize}
+    \item $L,A$の表現$\rho:L,A\rightarrow \mathbb W$:\\
+    $\rho(E)=\frac{x}{y}[\te y],\qquad \rho(H_+)=\te x-\te y,\qquad \rho(K)=q^{\theta_x-\theta_y}$\\
+    $\rho(a)=\mathcal R_*(x)=x,\qquad \rho(b)=\mathcal R_*(y)=yq^{\te x},\qquad  \rho(d)=\mathcal R_*\left(x^{-1}\right)=x^{-1}$\\
+    $\rho({H_-})=\log x,\qquad \rho(F)=\frac{y}{x}q^{\te x}$
+    これにより$\rho:B\rightarrow \mathbb W$が作られる．
+    
+    % (これは埋め込みであり，古典的な場合は同型を与えるが，量子の場合も同型を与えるかどうかは要検証)
+
+    この表現と$B$のフォック空間表現は一致する．
+
+    そして，$\Delta_B$はライプニッツ則の拡張だと思うことができる．
+
+
+    
+    \item Aの左L module-algebra構造:\\
+    A型のmodule algebraの積と一致することから，左L-module algebraとなる．
+%     $\Delta(E)=1\otimes E+E\otimes K$なので関数の基底を取って次のように示すことができる:
+%     \begin{align*}
+% &~~~\left( 1 \cdot x^{n_1} y^{m_1} \right) * \left( E \cdot x^{n_2} y^{m_2} \right) 
+% + \left( E \cdot x^{n_1} y^{m_1} \right) * \left( K\cdot x^{n_2} y^{m_2} \right) \\
+% &= \left(  x^{n_1} y^{m_1} \right) * [m_2] \, x^{n_2 + 1} y^{m_2 - 1} 
+%  + [m_1] \, x^{n_1 + 1} y^{m_1 - 1} * q^{n_2-m_2}x^{n_2} y^{m_2} \\
+% &= [m_2] \, q^{m_1 (n_2 + 1)} \, x^{n_1 + n_2 + 1} y^{m_1 + m_2 - 1} 
+% + [m_1] \, q^{(m_1 -1)n_2 + n_2 - m_2} \, x^{n_1 + n_2 + 1} y^{m_1 + m_2 - 1} \\
+% &= \left( [m_2] \, q^{m_1 n_2 + m_1} + [m_1] \, q^{n_1 m_2-m_2} \right) 
+% x^{n_1 + n_2 + 1} y^{m_1 + m_2 - 1} \\
+% &= [m_1 + m_2] \, q^{m_1 n_2} \, x^{n_1 + n_2 + 1} y^{m_1 + m_2 - 1}\\
+% &= [m_1 + m_2] \, q^{m_1 n_2} \, x^{n_1 + n_2 + 1} y^{m_1 + m_2 - 1} \\
+% &= E \cdot \left( q^{m_1 n_2} x^{n_1 + n_2} y^{m_1 + m_2} \right) \\
+% &=E \cdot \left( x^{n_1} y^{m_1} * x^{n_2} y^{m_2} \right) 
+% \end{align*}
+% これとは別に，ワイル代数の関係式のみで証明することも可能である:
+% \begin{align*}
+% &{\mu}_*\circ \Delta(E)\\
+% =& \Tilde{{\mu}}\circ  q^{\te y\otimes \te x} \left(1\otimes\frac xy[\te y]+\frac xy[\te y]\otimes q^{\te x-\te y} \right)  \\
+% =& \Tilde{{\mu}}\circ   \left(1\otimes\frac xy[\te y]\right)q^{\te y\otimes (\te x+1)}+\left(\frac xy[\te y]\otimes q^{\te x-\te y} \right)q^{(\te y-1)\otimes \te x}  \\
+% =& \Tilde{{\mu}}\circ   \left(q^{\te y}\otimes\frac xy[\te y]+\frac xy[\te y]\otimes q^{-\te y} \right)q^{\te y\otimes \te x}  \\
+% =&\frac xy[\te y]\Tilde{{\mu}}\circ   q^{\te y\otimes \te x}  \\
+% =& E{\mu}_*
+% \end{align*}
+% 他についても同様である:\\
+% ${\mu}_*\circ\Delta(H_+)=\Tilde{{\mu}}\circ  (H_+\otimes 1+1\otimes H_+)q^{\te x\otimes \te y}=H_+{\mu}_*$
+%     \item Lのantipode: \\
+% S(E)
+    
+\end{itemize}
+\subsubsection{計算の確認}
+
+
+$$
+\begin{aligned}
+{[\rho( E),\rho(  a)] \cdot x^n y^m } & =\rho( E)\rho( a) \cdot\left(x^a y^m\right)-\rho( a)\rho(  E) \cdot\left(x^n y^m\right)\\
+&=\rho( E) \cdot\left(x^n y^m x\right)-\rho( a) \cdot\left([m] x^{n+1} y^{m-1}\right)\\
+& =[m] x^{n+2} y^{m-1}-[m] x^{n+2} y^{m-1}\\
+&=0
+\end{aligned}
+$$
+$$
+\begin{aligned}
+ [\rho(E),\rho( b)]) \cdot x^n y^m=&\rho(E)\rho(  b) \cdot\left(x^n y^m\right)-\rho(b)\rho(  {E}) \cdot\left(x^n y^m\right)\\
+ =&\rho(E) \cdot\left(x^n y^m * y\right)-\rho(b) \cdot[m] x^{n+1} y^{m-1} \\
+ =&q^n[m+1]-q^{n+1}[m] x^{n+1} y^m \\
+=&q^{n-m} x^{n+1} y^m \\
+=&\left(q^{n-m}x^n y^m\right) * x \\
+=&\rho(a) \cdot\left(q^{\te x-\te y} \cdot x^n y^m\right)\\
+=& \rho\left(a q^{H_+}\right) \cdot x^n y^m\\
+\end{aligned}
+$$
+なので，$[\rho(E), \rho(b)]=\rho\left(a q^{H_+}\right),~[\rho( E),\rho(  a)]=0$といえる．
+quantum groupoidの構造もあるが，省略
+
+$$ \mathcal S=e^{{H_+} \otimes {H_-}} \exp _q[E \otimes F] =(1\otimes x)^{(\te x-\te y)\otimes 1}\exp_q\left[\frac xy [\te y]_q\otimes \frac yx q^{\te x}\right] $$
+
+五角関係式を確認する．
+\begin{lem}
+    $$
+\begin{aligned}
+    & \exp_q[E \otimes F \otimes 1] \exp _q\left[E \otimes q^{H_+} \otimes F\right] {\exp_q}[1 \otimes E \otimes F] \\
+ =&\exp_q[1 \otimes E \otimes F] \exp_q[E \otimes F \otimes 1] 
+\end{aligned}
+$$
+\begin{proof}
+$$
+\begin{aligned}
+[F,E^n]=&\sum_{k=0}^{n-1}E^{n-1-k}[F,E]E^k\\
+=&\sum_{k=0}^{n-1}-E^{n-1-k}q^{{H_+}}E^k\\
+=&\sum_{k=0}^{n-1}-E^{n-1}q^{{H_+}+2k}\\
+=&-E^{n-1}[n]q^{n-1+{H_+}}
+\end{aligned}
+$$
+なので，$\alpha$を生成元と可換な元として，
+$$
+\begin{aligned}
+[F,\exp_q[\alpha E]]=&\sum_{n=0}^{\infty}-\frac{q^{n(n-1)/2}}{[n]_q!}\alpha^n E^{n-1}[n]q^{n-1+{H_+}}\\
+=&\sum_{n=0}^{\infty}-\alpha\frac{q^{n(n-1)/2}}{[n]_q!}\alpha^n E^{n}q^{2n+{H_+}}\\
+=&q^{{H_+}}\sum_{n=0}^{\infty}-\alpha\frac{q^{n(n-1)/2}}{[n]_q!}\alpha^n E^{n}\\
+=&-\alpha q^{{H_+}}\exp_q[\alpha E]
+\end{aligned}
+$$
+となる．また，$q^2q^{{H_+}}F=Fq^{{H_+}}$なので，補題より，
+$$
+   \exp_q\left[ F+q^{H_+} \right] = \exp_q[ F] \exp _q\left[ q^{H_+} \right]  
+$$
+となる．これらを使うと
+
+ $$
+\begin{aligned}
+    &\exp_q[1 \otimes E \otimes F] \exp_q[E \otimes F \otimes 1] \left(\exp_q[1 \otimes E \otimes F]\right)^{-1}\\
+  =&\exp_q\left[\exp_q[1 \otimes E \otimes F] (E \otimes F \otimes 1)\left(\exp_q[1 \otimes E \otimes F]\right)^{-1}\right] \\
+  =&\exp_q\left[E \otimes (F\otimes 1+q^{H_+}\otimes F) )\right] \\
+  =& \exp_q[E \otimes F \otimes 1] \exp _q\left[E \otimes q^{H_+} \otimes F\right]  
+\end{aligned}
+$$
+のようになり，式は導かれる．
+\end{proof}
+\end{lem}
+
+補題を用いることで，五角関係式は示される．
+$$
+\begin{aligned}
+  \mathcal S_{12} \mathcal S_{13} \mathcal S_{23}& =e^{{H_+} \otimes {H_-} \otimes 1} \exp _q[E \otimes F \otimes 1]
+e^{{H_+} \otimes 1 \otimes {H_-}} \exp_q \left[E \otimes 1\otimes F\right] 
+e^{1 \otimes {H_+} \otimes {H_-}} {\exp_q}[1 \otimes E \otimes F]\\
+& =e^{{H_+} \otimes {H_-} \otimes 1} \exp _q[E \otimes F \otimes 1]
+e^{({H_+} \otimes 1 \otimes +1 \otimes {H_+} )\otimes {H_-}} 
+\exp_q \left[E \otimes q^{H_+}\otimes F\right]{\exp_q}[1 \otimes E \otimes F]\\
+& =e^{{H_+} \otimes {H_-} \otimes 1} e^{{H_+} \otimes 1 \otimes {H_-}} 
+e^{1 \otimes {H_+} \otimes {H_-}}\exp _q[E \otimes F \otimes 1]
+\exp_q \left[E \otimes q^{H_+}\otimes F\right]{\exp_q}[1 \otimes E \otimes F]\\
+& =e^{1\otimes {H_+} \otimes {H_-}} e^{{H_+} \otimes {H_-} \otimes 1} 
+ \exp_q [1 \otimes E \otimes F] \exp_ q[E \otimes F \otimes 1] \\
+ & =e^{1\otimes {H_+} \otimes {H_-}}  \exp_q [1 \otimes E \otimes F] 
+ e^{{H_+} \otimes {H_-} \otimes 1} \exp_ q[E \otimes F \otimes 1] \\
+& =\mathcal S_{23} \mathcal S_{12}
+\end{aligned}
+$$
+
+
+さらに，ここから作られるR行列に関する計算は以下のようになる:
+$$\begin{aligned} R=& e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ 1 \\ -\bar{H}_{-}\end{array}\right)\exp_q \left[\begin{array}{c}E \\ 1 \\ 1 \\ -\bar{F} e^{2 \bar{H}_{-}}\end{array}\right] e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ H_{-} \\ 1\end{array}\right) \exp_q \left[\begin{array}{c}E \\ 1 \\ F \\ 1\end{array}\right] \\ 
+&\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ 1 \\ \bar{H}_{-}\end{array}\right) \exp _q\left[\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ 1 \\ \bar{F} e^{2 \bar{H}_{-}}\end{array}\right] e^{\wedge}\left(\begin{array}{c}1 \\ -\bar{H}_{+} \\ H_{-} \\ 1\end{array}\right)\exp _q\left[\begin{array}{c}1 \\ -q^{-\bar{H}_{+} }\bar{E} \\ F \\ 1\end{array}\right]\\
+=& e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ 1 \\ -\bar{H}_{-}\end{array}\right)e^{\wedge}\left(\begin{array}{c}H_{+} \\ 1 \\ H_{-} \\ 1\end{array}\right) \exp_q \left[\begin{array}{c}E \\ 1 \\ e^{-2H_-} \\ -\bar{F} e^{2 \bar{H}_{-}}\end{array} \right] \exp_q \left[\begin{array}{c}E \\ 1 \\ F \\ 1\end{array}\right] \\ 
+&\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ 1 \\ \bar{H}_{-}\end{array}\right) e^{\wedge}\left(\begin{array}{c}1 \\ -\bar{H}_{+} \\ H_{-} \\ 1\end{array}\right)\exp _q\left[\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ e^{-2H_-} \\ \bar{F} e^{2 \bar{H}_{-}}\end{array}\right]  \exp _q\left[\begin{array}{c}1 \\ -q^{-\bar{H}_{+} }\bar{E} \\ F \\ 1\end{array}\right]\\
+=& e^{\wedge}\left(\begin{array}{c} -{H}_{+}\\1 \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right)  \exp_q \left[\begin{array}{c}E \\ 1 \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right]\\
+&\times e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) \exp _q\left[\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ \dbinom{e^{-2H_-} }{ \bar{F} e^{2 \bar{H}_{-}}}-\dbinom{F}{1}\end{array}\right]  \\
+=& e^{\wedge}\left(\begin{array}{c} -{H}_{+}\\1 \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) e^{\wedge}\left(\begin{array}{c}1 \\ \bar{H}_{+} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right)\\
+&\times  \exp_q \left[\begin{array}{c}E \\ q^{-\bar{H}_+} \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right] \exp _q\left[\begin{array}{c}1 \\ q^{-\bar{H}_+}\bar{E} \\ \dbinom{e^{-2H_-} }{ \bar{F} e^{2 \bar{H}_{-}}}-\dbinom{F}{1}\end{array}\right] \\
+=& e^{\wedge}\left(\begin{array}{c} \dbinom{1}{\bar{H}_{+}}-\dbinom{{H}_{+}}{1} \\ \dbinom{1}{\bar{H}_{-}} -\dbinom{H_{-}}{1} \end{array}\right) \exp_q \left[\begin{array}{c}-\dbinom{1}{q^{-\bar{H}_+}\bar{E}}+\dbinom{E}{q^{-\bar{H}_+}} \\ -\dbinom{e^{-2H_-}}{ \bar{F} e^{2 \bar{H}_{-}}}+\dbinom{F}{1}\end{array} \right] 
+\end{aligned}$$
+
+
+target写像に関する計算をする．まずいくつかの補題の証明を行う．以後，$\sum$は制約を満たす非負整数全体に渡る和とする．二項定理より次が成立する．
+\begin{equation}\label{eqH:binomH}
+(( \Delta\otimes 1)\Delta(H_+))^n=\sum_{a+b+c=n}\frac{n!}{a!b!c!}H_+^a\otimes H_+^b\otimes H_+^c
+\end{equation}
+\begin{equation}\label{eqH:delta}
+\sum_{a+c=m}\frac{1}{a!c!}(-1)^c=\delta_{m,0}
+\end{equation}
+$q^{-2}(E\otimes K)(1\otimes E)=(1\otimes E)(E\otimes K)$なので$q$-二項定理を2回使うと次を得る．
+\begin{equation*}
+\Delta(E)^n=\sum_{a+b=n}\frac{[n]!}{[a]![b]!}q^{ab}(1\otimes E)^a(E\otimes K)^b
+\end{equation*}
+\begin{equation}\label{eqH:binomE}
+(( \Delta\otimes 1)\Delta(E))^n=\sum_{a+b+c=n}\frac{[n]!}{[a]![b]![c]!}q^{ab+(a+b)c}
+(1\otimes 1\otimes E)^a(1\otimes E\otimes K)^b(E\otimes K\otimes K)^c
+\end{equation}
+
+$n\in\N$に対して，次の等式が成り立つ．
+\begin{equation}\label{eq:target_right_der}
+n= \sum_{m=1}^{\infty} \frac{1}{1 - q^m} (q^n; q^{-1})_m
+\end{equation}
+\begin{proof} 次の等式\ref{eq:exp-equality1}を \( x \) について対数微分して \( x \) を掛ける．
+\[
+\sum_{n=0}^{\infty} \frac{1}{(q; q)_n} x^n = \frac{1}{(x; q)_\infty}
+\]
+\begin{align*}
+\left( \sum_{n=0}^{\infty} \frac{n}{(q; q)_n} x^n \right) 
+\Big/ \left( \sum_{n=0}^{\infty} \frac{1}{(q; q)_n} x^n \right)
+&= \sum_{n=0}^{\infty} \frac{x q^n}{1 - x q^n}\\
+&= \sum_{n=0}^{\infty} \sum_{m=1}^{\infty} (x q^n)^m\\
+&= \sum_{m=1}^{\infty} \frac{1}{1 - q^m} x^m
+\end{align*}
+\begin{align*}
+\sum_{n=0}^{\infty} \frac{n}{(q; q)_n} x^n
+&= \left( \sum_{n=1}^{\infty} \frac{1}{1 - q^n} x^n \right) 
+\left( \sum_{n=0}^{\infty} \frac{1}{(q; q)_n} x^n \right)\\
+&= \sum_{n=1}^{\infty} \left( \sum_{m=1}^{n} \frac{1}{1 - q^m} \frac{1}{(q; q)_{n-m}} \right) x^n
+\end{align*}
+
+つまり
+
+\[
+n = \sum_{m=1}^{n} \frac{1}{1 - q^m} \frac{(q; q)_n}{(q; q)_{n-m}}=\sum_{m=1}^{\infty} \frac{1}{1 - q^m} (q^n; q^{-1})_m
+\]
+
+を得る．
+\end{proof}
+
+$L^{op}$の元を上付きの$\bar~$で表す．$\check{\mathcal S}_{21}={\mathcal S_{2}\otimes \overline{S^{-1}(\mathcal S_{1})}}\in A\otimes L^{op}$と定める．
+$$
+\begin{aligned}
+&~~~~\Delta_C(H_-^MF^N)\\
+&=\sum_{n,m}e^{n,m}\otimes \langle H_-^MF^N,e_{n,m(2)}\rangle 
+S^{-1}(e_{n,m(3)})e_{n,m(1)}\\
+&= \sum_{n,m}\sum_{\substack{a+b+c=n \\ a^{\prime}+b^{\prime}+c^{\prime}=m }}
+\frac{ m!}{a^{\prime} ! b^{\prime} ! c^{\prime} !} \frac{[n] !}{[a] ! [b] ! [c] !}
+ \frac{H_-^{m} F^{n}}{m ! [n] !} q^{\binom n2+a b+b c+ c a} \\
+ &\qquad\otimes \langle H_-^MF^N, H_+^{b^{\prime}}E^{b}K^c\rangle 
+K^{-b-c}(-K^{-1}E)^a(-H_+)^{c^{\prime}}H_+^{a'}E^c                 &{(\ref{eqH:binomE}),(\ref{eqH:binomH})}\\
+&=\sum_{n,m}\sum_{\substack{a+c=n-N \\a^{\prime}+b^{\prime}+c^{\prime}=m}}
+ \frac{1}{a^{\prime} ! b^{\prime} ! c^{\prime} !} \frac{1}{[a] ! [N] ! [c] !} H_-^{m} F^{n}
+  q^{\binom n2+a N+N c+ c a-2Nc}(-1)^{c'} \\
+  &\qquad \otimes  \frac{(\hbar c)^{M-b^{\prime}}}{\left(M-b^{\prime}\right)!}
+  [N]!M!q^{-\binom N2}K^{-N-c}(-EK^{-1})^aH_+^{m-b'}E^c\\
+  &=\sum_{n,m}\sum_{\substack{a+c=n-N }} 
+   \frac{1}{[a] ! [c] !}q^{\binom{n}{2}+(a-c) N+c a-\binom{N}{2}}
+   H_{-}^m F^n\otimes  \frac{(\hbar c)^{M-m}M!}{m!\left(M-m\right)!}K^{-N-c}(-K^{-1}E)^aE^{c}&{(\ref{eqH:delta})}\\
+  &=\sum_{n}\sum_{\substack{a+c=n}}  \frac{1}{[a] ! [c] !}q^{\binom{n}{2}+(a-c) N+c a+nN}
+   (H_-+\hbar c)^MF^{N+n}\otimes  q^{-2ac-2aN}(-K^{-1}E)^aK^{-N-c}E^c       &{(n\mapsto n+N)}\\
+  &=\sum_{a,c} \frac{1}{[a] ! [c] !}q^{\binom{a}{2}+\binom c2}
+   (H_-+\hbar c)^MF^{N+a+c}\otimes  q^{-2\binom c2}(-K^{-1}E)^aK^{-N}(K^{-1}E)^c&{(n\mapsto a+c)}\\
+  &=\sum_{a,c} \frac{1}{[a] ! [c] !}q^{\binom{a}{2}-\binom c2}
+   F^cH_-^MF^{N+a}\otimes  \overline{(K^{-1}E)}^c\overline{K}^{-N}\overline{(-K^{-1}E)}^a\\
+  &=\exp_{q^{-1}}[F\otimes \overline{K^{-1}E}]\left( H_-^MF^N\otimes \overline{K}^{-N}\right)\exp_{q}[-F\otimes \overline{K^{-1}E}]\\
+  &=\exp_{q^{-1}}[F\otimes \overline{K^{-1}E}]\exp\left( H_-\otimes \overline{H_+}\right)
+  \left( H_-^MF^N\otimes\bar 1\right)\exp\left( -H_-\otimes \overline{H_+}\right)\exp_{q}[-F\otimes \overline{K^{-1}E}]\\
+  &=\check{\mathcal S}_{21}^{-1} \left(H_-^MF^N\otimes \bar1\right)\check{\mathcal S}_{21}
+\end{aligned}
+$$
+よって，$t(\xi)=\check{\mathcal S}_2^{-1} (\xi\#1) \check{\mathcal S}_2 \check{\mathcal S}_1^{-1}\check{\mathcal S}_1$となる．
+$(1\otimes \Delta)(\mathcal S)=\mathcal S_{13}\mathcal S_{12}$より$\Delta_C$がcomodule作用であることは確かめられる．
+% $$U_q(\mathfrak{sl}_2)\cong D(U_q(B^+))/(\overline{H}-\hbar H)$$
+途中の式と，式\ref{eq:exp-equality1}により，具体的な作用が計算できる．$Q=q^{-2}$として
+$$
+\begin{aligned}
+\Delta_C(F)&=\exp_{q^{-1}}[F\otimes \overline{K^{-1}E}]\left( F\otimes \bar K^{-1}\right)\exp_{q}[-F\otimes \overline{K^{-1}E}]\\
+&=(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty\left( F\otimes \bar K^{-1}\right)(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty^{-1}\\
+&=\left( F\otimes \bar K^{-1}\right)(-(1-Q)QF\otimes \overline{K^{-1}E};Q)_\infty(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty^{-1}\\
+&=\left( F\otimes \bar K^{-1}\right)\left(1+(1-Q) F\otimes \overline{K^{-1}E}\right)^{-1}\\
+\end{aligned}
+$$
+となる．$1+(1-Q) F\otimes \overline{K^{-1}E}\equiv 1\quad(\text{mod}~\hbar)$より，可逆元となるから，$\Delta_C(F)\in A$となる．同様に
+$$
+\begin{aligned}
+  \Delta_C(d^2)&=(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty\left( d^2\otimes 1\right)(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty^{-1}\\
+&=\left( d^2\otimes 1\right)(-(1-Q)QF\otimes \overline{K^{-1}E};Q)_\infty(-(1-Q)F\otimes \overline{K^{-1}E};Q)_\infty^{-1}\\
+&=\left( d^2\otimes 1\right)\left(1+(1-Q) F\otimes \overline{K^{-1}E}\right)^{-1}\\
+\end{aligned}
+$$
+となる．
+また，
+$\textrm{Li}_{n;Q}(x)=\sum_{m=1}^\infty \frac{x^m}{m ^{n-1}(m)_Q}$とおく．
+等式\ref{eq:exp-equality2}より
+\begin{gather*}
+  \exp_Q(x) = ((1-Q) x; Q)_\infty^{-1}=\exp\left((1-Q)^{-1} \textrm{Li}_{2;Q}((1-Q) x)\right)\\
+  x\frac{d}{dx}\cdot\log\exp_Q(x) = ((1-Q) x; Q)_\infty^{-1}=(1-Q)^{-1} \textrm{Li}_{1;Q}((1-Q) x)
+\end{gather*}
+が成立する．また，交換子の公式より$n\in \N$に対して$[H_-,F^n]=-\hbar nF^n$なので解析的な関数$f$について\\
+  $$[H_-,f(F)]=-\hbar F\frac{d}{dF} f(F)$$
+  である．$f(F)=\exp_Q(-F\otimes K^{-1}E)$とおくと，
+  $$\Delta_C(H_-)=H_-\otimes1-\hbar (1-Q)^{-1}\textrm{Li}_{1;Q}(-(1-Q) F\otimes K^{-1}E)$$を得る．
+
+  次にtarget mapの表現を具体的に計算する．
+  $$\rho(-(1-Q)FK^{-1}E)=-(1-Q)\frac yxq^{\te y}\frac xy[\te y]_q=Q(1-Q^{-\te y})$$
+  であるから，帰納的に次が成立する．
+  \begin{equation}\label{eq:rho_EKF}
+    \rho((1-Q)^mF^m(-K^{-1}E)^m)=Q^m(Q^{-\te y};Q)_m
+  \end{equation}
+  これを用いると表現の計算ができる．
+  \begin{align*}
+    \rho(t(F))&=\sum_{m=0}^\infty \rho(F(1-Q)^mF^m(-K^{-1}E)^mK^{-1})\\
+    &=\rho(F)\sum_{m=0}^\infty Q^m(Q^{-\te y};Q)_m\rho(K^{-1})\\
+    &=\frac yxq^{\te x}Q^{\te y}q^{-\te x+\te y}\\
+    &=\frac yxq^{-\te y}\\
+    &=\mathcal R_*(y/x)
+    \end{align*}   
+    式\ref{eq:target_right_der}を用いると次のように計算できる．
+    \begin{align*}
+      \rho(t(H_-))&=\rho(H_-)-\hbar (1-Q)^{-1}\rho\left(\# \textrm{Li}_{1;Q}(-(1-Q) F\otimes K^{-1}E)\right)\\
+      &=\rho(H_-)+\hbar\sum_{m=1}^\infty \frac{1}{1-Q^{-m}}(Q^{-\te y};Q)_m\\
+      &=\log x+\hbar \theta_y\\
+      &=\mathcal R_*(\log x)
+    \end{align*}
+    このように，target mapは右乗算演算子として解釈できる．
+  
+
+
+
+問題点:
+
+
+
+用いた
+
+
+\section{不変量の構築}
+Mihalache–鈴木–寺嶋により任意の有限次元ホップ代数から1次のベッチ数が消える枠付き閉3次元多様体の新しい不変量が構成された\cite{MihalacheSuzukiTerashima2022}．
+本稿ではこれをMST不変量と呼ぶ．Benedetti,Petronioにより導入された，framingの情報を持ったflow-spineに対応するintegral normal o-graphを考える．
+これは仮想結び目図式のような見た目であり，この各交点と辺の重みに対して，有限次元ホップ代数のハイゼンベルグダブルのある元を対応させ，辺に沿って積を取り，traceを取ることで不変量が構成される．
+対応するハイゼンベルグダブルの元を本稿ではオペレータ表現と呼ぶことにする．
+本節では，無限次元のホップ代数を使った不変量への一般化を試みる．
+% トレースは無限次元の場合は単純に定義することはできないが，トレースクラスと呼ばれる限定された作用素に対してはトレースを定義することが可能である．
+% 形式的な計算は行えており，具体的な計算でトレースの巡回性など要請されるべき性質を満たしていることは確認した．
+% しかし，一般の場合すべてに対してo-graphのオペレータ表現がトレースクラスかどうか，また巡回性が成立するかはまだ証明できていない．
+% 一方で，ハイゼンベルグダブルが定義できる完備フィルター付きホップ代数に対しては$\mathcal S$が存在するので，
+% その性質からMP move,0-2 moveでオペレータ表現が不変である．よって巡回性が成立するトレースがオペレータ表現上に定義できれば不変量が構成される．
+% 積分変換を用いた形式的なトレースの定義を紹介し，具体的に計算を行う．
+% おそらくシュワルツ超函数の理論を用いれば超函数の計算を正当化出来ると思われる．
+
+以下は不変量の構成の流れを示したものである．
+\[\begin{tikzcd}
+	{\begin{array}{c}枠付き閉3次元多様体\\M_f~~with~~b_1= 0\end{array}} &
+  {\begin{array}{c}framed~~normal~~~~\\o-graph\end{array}} &
+  {\begin{array}{c}代数\mathcal{H}(A)\\演算子\mathcal{O}(M_f;A)\end{array}} &
+  {\begin{array}{c}不変量Z(M_f;A)\\\Tr(\mathcal{O}(M_f;A))\end{array}}
+	\arrow["表示",from=1-1, to=1-2]
+  \arrow["オペレータ表現",from=1-2, to=1-3]
+	\arrow["Trace",from=1-3, to=1-4]
+\end{tikzcd}\]
+
+先にワイル代数の計算に関する準備を行い，
+o-graph,o-dataによる組み合わせ的な多様体の表示方法を導入し，
+MST不変量の定義および一般化を行う．
+
+\subsection{ワイル代数の計算}
+
+% \begin{lem}[二項定理]
+%   \begin{equation}\label{eq:binomial_poc}
+%     (1-x)^{-z}=\sum_{n=0}^n \frac{x^n}{n!}(z)_n\qquad (|x|<1)
+%   \end{equation}
+%   が成り立つ．ただし，$(z)_n=z(z+1)\cdots(z+n-1)$はポッホハマー記号(上昇冪)である．
+% \end{lem}
+
+
+
+% \newcommand{\SNone}[2]{S_I(#1,#2)}
+% \newcommand{\SNtwo}[2]{S_{I\hspace{-1.7pt}I}(#1,#2)}
+% \begin{dfn}[Stirling数]
+%     第1種Stirling数$\SNone{n}{k}$ はポッホハマー記号(上昇冪)の展開係数として
+%     \begin{equation*}
+%      (x)_n =\sum_{k=0}^n \SNone{n}{k}x^k
+%     \end{equation*}
+%     と定義される．ただし，$\SNone{n}{k}=0~~(k>n)$である．
+
+
+%     第2種Stirling数$\SNtwo{n}{k}$は下降冪$(-x)_k(-1)^k$による展開係数として
+%     \begin{equation*}
+%       x^n =\sum_{k=0}^n \SNtwo{n}{k}(-1)^k(-x)_k
+%     \end{equation*}
+%     と定義される．ただし，$\SNtwo{n}{k}=0~~(k>n)$である．
+% \end{dfn}
+% 次の公式が成立する．
+% $$(-1)^n(-\te x)_n=x^n\de x^n$$
+% $$\theta_x^n=\sum_{k=0}^n \SNtwo{n}{k}x^k\partial_x^k$$
+% $$\sum_{k=0}^n \SNone{n}{k}\SNtwo{k}{m}(-1)^{m+k}=\delta_{n,m}$$
+
+
+% $$
+% \partial_x^u x^v=\sum_k\binom{u}{k}\binom{v}{k} k! x^{v-k} \partial_x^{u-k}
+% $$
+% \begin{equation*}
+%   \SNtwo{n}{k}=\frac{1}{k!}\sum_{i=1}^k (-1)^{k-i} \binom{k}{i} i^n
+% \end{equation*}
+\subsection{積分変換と演算子のトレース}
+\newcommand{\HD}[0]{\mathcal {H}}
+\newcommand{\WO}[0]{\mathcal {W}}
+\newcommand{\GO}[0]{\mathcal {G}}
+\newcommand{\Wref}[1]{\widehat{\mathbb{W}}^{\textrm{ref}}_{#1}}
+\newcommand{\Wcnv}[1]{\widehat{\mathbb{W}}^{\textrm{cnv}}_{#1}}
+% #rFs(a;b;q;z)
+\newcommand{\pFq}[6]{{}_{{#1}}F_{{#2}}\left(\begin{array}{c}{#3} \\ {#4}\end{array} ; {#5};{#6} \right)}
+
+
+\newcommand{\Tranl}[0]{ \operatorname{Tr}^{\textrm{anl}}}
+\begin{dfn}[積分変換]
+
+  
+  $A$をヒルベルト空間$L^2(\R^N)$上の"良い"線形作用素とする．このとき，シュワルツ核関数定理より，
+  (超)関数$K_A(x,y)$が存在して，任意の$\phi\in L^2(\R^N)$に対して
+  \begin{equation}
+    (A\phi)(x)=\int_{\R^N} K_A(x,\xi)\phi(\xi)d\xi
+  \end{equation}
+  が成り立つ．$K_A(x,y)$を$A$の積分核という．
+  "良い"ことの条件を述べるにはヒルベルト空間上の作用素の定義が必要である．
+\end{dfn}
+\begin{dfn}[トレース]
+  $A$を$K_A$を積分核とする$L^2(\R^N)$上の"良い"線形作用素とする．このとき，
+  $A$の解析的なトレース$\Tranl(A)$は
+  \begin{equation}
+    \Tranl(A)=\int_{\R^N} K_A(x,x)dx
+  \end{equation}
+  で定義される．$x=(x_1,\ldots,x_N)$とする．部分トレース$\operatorname{Tr}_{x_i}$を
+  \begin{equation}
+    \Tranl_{x_i}(A)=\int_{\R} K_A(x,\xi)|_{\xi_i=x_i}dx_i
+  \end{equation}
+  で定義する．
+\end{dfn}
+\begin{rem}
+  $A$がトレースクラス，$B$が"有界"作用素であり，$AB,BA$がトレースクラスであるとき，
+  \begin{equation}
+    \Tranl(AB)=\Tranl(BA)
+  \end{equation}
+  が成り立つ．
+\end{rem}
+しかし，微分作用素は非有界作用素であるため，単純にこの定理を適用することが出来ないことが
+今回の障壁となっている．さらに$\lim_{\epsilon\to 0}\epsilon^{-\theta-1}$のような見かけ上発散する演算子も取り扱う．
+しかし，多様体の不変量に由来する演算子が何らかの条件を満たしていることによりトレースが定義できて巡回性が成立すると思われる．
+未だに確実な定式化はできていない．フィルター構造に着目して収束性を見て，超関数を用いたトレースの計算の補題を準備する．
+\begin{eg}\label{eg:trace_dilation}
+  作用素$a^\theta:f(x)\mapsto f(ax)$は積分核$K_{a^\theta}(x,\xi)=\delta(\xi-ax)$を持つ．
+  ここで，$\delta(x)$はデルタ関数である．このトレースは次のようになる．ただし$a=1$のときは発散する．
+  \begin{equation}\label{eq:trace_euler}
+    \Tranl(a^\theta)=\int_{\R} \delta((1-a)\xi)d\xi=\frac{1}{|1-a|}
+  \end{equation}
+
+  
+  別の計算方法を見る．$|a|<1$のとき，多項式環の基底を$\{x^n\}_{n\in\N}$を取ると，
+  $a^\theta$は基底ベクトル$x^n$が固有値$a^n$の固有関数であることから，
+  \begin{equation}
+    \Tr(a^\theta)=\sum_{n\in\N} a^n=\frac{1}{1-a}
+  \end{equation}
+  となる．これを代数的なトレースと呼ぶ．$a>1$のときもpolylog関数を用いて代数的に固有値の和を計算することができる．
+\end{eg}
+
+\subsection{1変数のワイル代数のトレース}
+ワイル代数の元に対してトレースを定めて，
+それらが積分変換から定義されるトレースやpolylog関数から定義されるトレースと(符号を除いて)一致することをみる．
+
+次の完備化されたワイル代数$\widehat{\mathbb{W}}_1$の形式的な和を考える．
+$$\sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n$$
+これは$|t|\geq1$なら$\widehat{\mathbb{W}}_1$に収まらない．なぜなら，定数項に着目すると，$\de x^n x^n=n!+(\textrm{higher order term})$なので，
+$$\sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n=\sum_{n=0}^\infty (t^n+(\textrm{higher order term}))$$
+となるからである．$|t|<1$のときは，各次数で係数が収束して，
+\begin{equation}\label{eq:dilation_expansion}
+  \sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n=\sum_{n=0}^\infty \frac{t^n}{n!} (\te x+1)_n=(1-t)^{-\te x-1}=\frac{1}{1-t}\sum_{n=0}^\infty \frac{1}{n!}\left(\frac{t}{1-t}\right)^n x^n\de x^n \in \widehat{\mathbb{W}}_1
+\end{equation}
+と書ける．(公式\ref{eq:binomial_poc})そこで，$t\leq -1,~t>1$のときもこの等式が成立していると考える．
+$t=1$のときは特異性により定義できないが，それを回避するために
+$$\sum_{n=0}^\infty \frac{(1-\epsilon)^n}{n!} \de x^n x^n=\epsilon^{-\theta-1}\in \widehat{\mathbb{W}}_1$$
+の$\epsilon\to +0$極限とみなす．
+(実射影射影直線$\mathbb{RP}^1$の元と捉えたほうがよいか？無理か？）
+% さらに，$|a|>1$のときも$\widehat{\mathbb{W}}_1$に入らない元を次のように同一視する．
+% $$\sum_{n=0}^\infty \frac{a^n}{n!} \de x^n x^n=\sum_{n=0}^\infty \frac{a^n}{n!} (\te x+1)_n=
+% \left(\frac{1}{1-a}\right)^{\theta_x+1}=\frac{1}{1-a}\sum_{n=0}^\infty \frac{1}{n!}\left(\frac{a}{1-a}\right)^n
+%  x^n\de x^n $$
+% このような極限の元と$\widehat{\mathbb{W}}_1$から生成される代数を$\Wref{1}$と書く．すなわち
+% \begin{equation}
+%   \Wref{1}=\operatorname{span}_{\kk}\left\{\left.\lim_{\epsilon\to+0}f_\epsilon(x)\de x^n a_\epsilon^{\te x}\right|~n\in\N,~a_\epsilon\in \kk,f_\epsilon\in \kk[[x]]は\epsilon について0で右連続\right\}
+% \end{equation}
+
+$f$を解析関数，$n\in \N, a\in \R\backslash \{1\}$, $A=f(x)\de x^n a^{\te x}$の形の$\widehat{\mathbb{W}}_1$の元全体を$\Wref{1}$とする．
+等式\ref{eq:dilation_expansion}より$A\in  \widehat{\mathbb{W}}_1$である．
+
+$a\neq 0,1$のとき，例\ref{eq:trace_euler}と同様に，$A$の積分核は
+\begin{equation}
+  K_A(x,\xi)=f(x)\de x^n \cdot \delta(\xi-ax)=\frac{1}{|a|}f(x) \delta^{(n)}\left(x-\frac{\xi}{a}\right)
+\end{equation}
+と書けるから，
+\begin{align*}
+  \Tranl(A)
+  &=\int_{\R} K_A(x,x)dx \\
+  &=\frac{1}{|a|}\int_{\R} f(x) \delta^{(n)}\left(x-\frac{x}{a}\right)dx \\
+  &=\frac{1}{|1-a|}\int_{\R} f\left(\frac{ax}{a-1}\right)\delta^{(n)}(x)dx \\
+  &=\frac{1}{|1-a|}\left(\frac{a}{1-a}\right)^n f^{(n)}(0) \\
+\end{align*}
+となる．これを踏まえ，代数的なトレース$\Tr$を符号を補正して次のように定義する．
+\begin{equation}\label{def:trace_1var}
+  \Tr(A)=\frac{1}{1-a}\left(\frac{a}{1-a}\right)^n f^{(n)}(0)  \qquad (a\neq 1)
+\end{equation}
+特異性があり演算子は見かけ上発散している演算子でも，traceは有限の値となることがある．
+\begin{equation}
+  \operatorname{Tr}\left(\sum_{n=0}^\infty \frac{1}{n!} \de x^n x^n\right)=\lim_{\epsilon\to+0}\Tr(\epsilon^{-\theta-1})=\lim_{\epsilon\to+0}\frac{1}{\epsilon}\frac{1}{1-\epsilon^{-1}}=-1
+\end{equation}
+
+% $\Wref1$のうちトレースが収束する部分空間を$\Wcnv{1}$とする．
+% $\mathrm{sgn}\left(1-a\right)=\left\lbrace \begin{array}{ll}
+% -１ & \left(a>1\right)\\
+% 1 & \left(a<1\right)
+% \end{array}\right.$として，
+
+
+% 自然な包含関係$\kk= \widehat{\mathbb{W}}_0\subset \widehat{\mathbb{W}}_1\subset \cdots \subset \widehat{\mathbb{W}}_N$を考える．
+
+不変量の計算にあたり，$\widehat{\mathbb{W}}_N[[\hbar]]$のうち以下の形の元に限定する．
+\begin{equation}\label{eq:refined_form}
+  A=\sum_{k\geq 0}\hbar^k\sum_{n\in \N^N}^{\textrm{finite}} f_{n,k}(x) \de{x}^n a_{n,k}^{\theta}
+\end{equation}
+ただし，$a_{n,k,i}~,f_{n,k}(x)\in \kk[x]~~(i\in 1:N,~k\in\N,~n\in \N^N)$であり，
+$a_{n,k,i}$は$x_i$に依存しないとする．
+$\sum^{\textrm{finite}}$は$n$についての和が有限和であることを表す．
+
+部分トレース$\operatorname{Tr}_{x_i}:\Wref{i}\to \Wref{i-1}\quad(i\in 1: N)$を次で定める．
+\begin{equation}\label{def:trace_act}
+  % \operatorname{Tr}_{x_i}(A):=\sum_{k\geq 0} \hbar^k \sum_{n\in \N^i}^{\textrm{finite}} \left.\frac{\de{}^{n_i}f_{n,k}}{\de{}x_i^{n_i}}(x_1,\cdots,x_{i-1},x_i) \right\vert_{x_i=0} \de{x_1}^{n_1}\cdots \de{x_{i-1}}^{n_{i-1}} a_{n,k,1}^{\te 1}\cdots a_{n,k,i-1}^{\te{i-1}}\left(\frac{a_{n,k,i}}{1-a_{n,k,i}}\right)^{n_i}
+  \operatorname{Tr}_{x_i}(A):=\sum_{k\geq 0} \hbar^k \sum_{n\in \N^i}^{\textrm{finite}} \left.\frac{\de{}^{n_i}f_{n,k}}{\de{}x_i^{n_i}}(x) \right\vert_{x_i=0} \check{\partial}_x^{\check{n}} \check{a}_{n,k}^{\check{\theta}_x}\left(\frac{a_{n,k,i}}{1-a_{n,k,i}}\right)^{n_i}
+\end{equation}
+ただし，$x=(x_1,x_2,\ldots,x_i)$に対して第$i$成分を除いた配列を$\check{x}$とし，ほかも同様に定める．
+各$i\in 1:N$に対して$Tr_{x_{i+1}}\circ\cdots\circ\Tr_{x_N}(A)$が式\ref{eq:refined_form}の形で書けるとき，
+$A$をrefined form\footnote{独自用語である}と呼び，その全体の集合を$\Wref{N}$と書く．
+
+及びトレース$\operatorname{Tr}:\Wref{N}\to\kk[[\hbar]] $を
+\begin{equation}\label{def:trace_iter}
+  \operatorname{Tr}(A):=\Tr_{x_1}\circ\cdots\circ\Tr_{x_N}(A)
+\end{equation}
+と定義する．定義より，$A=\sum_{k\geq 0} \hbar^k A_k\in \Wref{N}\quad(A_k\in \widehat{\mathbb{W}}_N)$の(部分)トレースは
+$\hbar$の次数ごとに分けて計算される．
+\begin{equation}\label{def:trace_hbar}
+  \operatorname{Tr}_z(A)=\sum_{k\geq 0} \hbar^k \operatorname{Tr}_z(A_k)
+\end{equation}
+
+
+次の作用素のtraceの形式的な"公式"を考える:
+
+\begin{align}
+    % \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\mathcal{W}^{a_{ij}}_{i,j}=
+    \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\exp(a_{ij}x\otimes \de x)_{i,j}=\frac{1}{\det A}\label{eq:trace_UR_det}
+\end{align}
+ここで，n.o.はnormal order productを表し，各tensorandにおいて$x,\de x$の順に因子が並ぶように積を取るとする．
+たとえば，$N=2$のときは次のようになる:
+\begin{align*}
+    \Tr \sum_{n\geq 0}\frac{a_{11}^{n_{11}}a_{12}^{n_{12}}a_{21}^{n_{21}}a_{22}^{n_{22}}}{n_{11}!n_{12}!n_{21}!n_{22}!}x^{n_{11}+n_{12}}\de{x}^{n_{11}+n_{21}}\otimes x^{n_{21}+n_{22}}\de{x}^{n_{12}+n_{22}}=\frac{1}{a_{11}a_{22}-a_{12}a_{21}}
+\end{align*}
+形式的な証明を与える．
+(不変量の構成において必要な要件を満たす写像であることが大事で，
+代数or解析的にどのような条件でこの式が成立するかどうかは関心がない)
+式の$x^m$の係数を抜き出す写像を$[x^m]$とする．
+N変数の演算子$A$の代数的なtraceは次のように書ける:
+$$\Tr A=\sum_{m\in \N^N} [x_1^{m_1}]\cdots [x_N^{m_N}]A\cdot x_1^{n_N}\cdots x_N^{m_N}$$
+% 式の$x^m$係数を抜き出す写像$[x^m]$は，$f\in \kk[x]$に対して
+% $$[x^m]f=\frac{1}{m!}f^{(m)}(0)$$
+% と書ける．よって，演算子$A$の代数的なtraceは次のように書ける:
+% $$\Tr A=\sum_{m=0}^\infty [x^m]A\cdot x^m=\left.\sum_{m=0}^\infty \frac{1}{m!}\de x^mA\cdot x^m\right|_{x=0}$$
+これにより
+\begin{align*}
+&\quad  \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\exp(a_{ij}x\otimes \de x)_{i,j}\\
+& =\sum_m [x_1^{m_1}]\cdots [x_N^{m_N}]\sum_n \prod_i \left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) x_i^{\sum_j n_{i j}} \partial_i^{\sum_j n_{j i}} \cdot x_i^{m_i} \\
+& =\sum_m [x_1^{m_1}]\cdots [x_N^{m_N}]\sum_n \prod_i \cdot\left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_{n_i}\right)!} x_i^{m_i-\sum_j n_{j i}+\sum_j n_{i j}} \\
+& =\sum_m \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_j n_{i j}\right)!}\\
+& =\sum_m \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_{j\neq i} \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_{j\neq i} n_{i j}\right)!}(1+a_{ii})^{m_i}\\
+& =\quad \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_{j \neq i} \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right)\left(\sum_{j \neq i}^{n_{i j}}n_{ij}\right)!\left(-a_{i i}\right)^{-1-\sum_{j \neq i} n_{i j}}\\
+% & \prod_i \prod_{j \neq i} t_i^{n_{j i}-n_{i j}}=\prod_i t_i^{\sum_{j \neq i} n_{j i}-n_{i j}} \underline{\underline{3}} \prod_i t_i^{\sum_{j \neq i}^n \xi_j} t_j^{-\sum n_{i j}} \overline{n_1} \\
+% & =\prod_{i \neq j} t_i^{n_{j i}-n_{i j}}=\prod_{i \neq j} t_i^{n_{i j}} t_j^{-n_{i j}} \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_i t_i}\right) \sum_n\prod_i\left(\prod_{j \neq i} \frac{1}{n_{i j}!}\left(-\frac{t_j a_{i j}}{t_i a_{i i}}\right)^{n_{i j}}\right)\left(\sum_{j \neq i} n_{i j}\right)! \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i j} t_i}\right) \sum_n \prod_i\left(\sum_{j \neq i}-\frac{t_j a_{i j}}{t_i a_{i i}}\right)^{n_i} \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i t} t_i}\right) \prod_i\left(1+\sum_{j \neq i} \frac{t_j a_{i j}}{t_i a_{i i}}\right)^{-1}\\
+& \approx [t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i t} t_i}\right) \prod_i\left(1-\frac{\epsilon}{a_{ii}}+\sum_{j \neq i} \frac{t_j a_{i j}}{t_i a_{i i}}\right)^{-1}\\
+&= (-1)^N[t_1^{-1}]\cdots [t_N^{-1}]\prod_{i=1}^N\frac 1{\sum_{j=1}^N(a_{ij}-\epsilon \delta_{i,j})t_j}\\
+&=\epsilon^{-N}[t_1^{0}]\cdots [t_N^{0}]\prod_{i=1}^N\sum_{0\leq k_j}\frac{\left(\sum_{j=1}^Na_{ij}t_j\right)^{k_j}}{\epsilon^{k_j}t_i^{k_j}}\\
+&=\epsilon^{-N}\sum_{0\leq k_j}\left([t_1^{k_1}\cdots t_N^{k_N}]\prod_{i=1}^N\left(\sum_{j=1}^Na_{ij}t_j\right)^{k_j}\right)\frac{1}{\epsilon^{k_j}}\\
+&=\frac 1{\epsilon^N}\frac 1{\mathrm{det}(I-\epsilon^{-1} A)}\tag*{(MacMahon's master theorem)}\\
+&=\frac 1{\mathrm{det}(\epsilon I-A)} \underset{\epsilon\to 0}{\longrightarrow} \frac{(-1)^N}{\mathrm{det}(A)}
+\end{align*}
+
+\subsection{3次元多様体の組み合わせ的表示}
+本稿で扱う 3 次元多様体は常に連結でコンパクトなものとする.
+\newcommand{\mfd}[0]{\mathscr{M}}
+\newcommand{\og}[0]{\mathscr{G}}
+\newcommand{\ED}[0]{\mathscr{E}}
+\newcommand{\OD}[0]{\mathscr{O}}
+
+$\mfd^{cl}$と書いたとき, それは向きの入った閉 3 次元多様体の集合(集合で大丈夫か?)に向きを保つ微分同相の同値関係を入 れた同値類をさすことにする. 
+$\mfd^{cl}_{comb}$ は, combing付きの向き付けられた閉3次元多様体の集合に向きを保つ微分同相の同値関係をいれた集合である(ホモトピー？). 
+また, $\mfd^{cl}_{fram},\mfd^{cl}_{spin}$ も同じように定める.
+spineと呼ばれる多面体が3次元多様体の不変量の組み合わせ的研究において重要な役割を果たす. 
+本稿ではspineの詳細については触れない. 
+その代わり, flow-spineをwordとして表示するE-data(引用)を多様体の表示として用いる. 
+横断的に向き付けられたflow-spineは, 符号とラベルが付されたwordを決定する. 
+virtual E-datumとは，次の条件を満たす$v_i^{\pm l},v_i^{\pm r}(i\in \N)$の形の文字からなるwordである:
+
+同一の数字ラベル$i$をもつ文字が正確に2回現れ, 一方は符号 −（負） 持ち, 他方は符号 ＋（正） を持つ． 
+各文字には l（left：左） または r（right：右） のラベルが付され, 
+各iに対して$i$ラベルのうちいずれか一方（l または r）が2回とも出現する. 
+
+virtual E-datum全体からなる集合を $\ED^{vir}$ と表す.
+flow-spineから得られるvirtual E-dataをE-dataと呼ぶ.
+
+たとえば$v_1^{-l} v_2^{-r} v_3^{+r} v_1^{+l} v_4^{+r} v_5^{-l} v_4^{-r} v_5^{+l} v_3^{-r} v_2^{+r}$はE-dataである．
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{o_graph_example.pdf}
+  \caption{Caption}
+  \label{fig:o_graph_example}
+\end{figure}
+
+E-dataはo-graphと呼ばれる仮想結び目図式として表すことができる．
+l(resp. r)のラベルの頂点はo-graphの正(resp.負)の交点を表している．
+E-dataはその"signed gauss code"を表していると解釈できる．
+o-graph全体を$\og{}$と書く．
+
+先程の例では，図\ref{fig:o_graph_example}のようにo-graphを描くことができる．
+
+逆にo-graphの辺上に基点(base point)を選び，そこから順に辺を辿って頂点を読むことでE-dataを得ることができる．
+基点を変えると得られるE-dataは巡回的に入替わる．
+
+o-graphの辺上に整数のウェイトを付けて，$\mfd^{cl}_{fram}$のspineを表示することを考える．
+integral virtual E-dataとは，virtual E-dataの各文字$v$の後に$g^m(m\in \Z)$形の文字を1つ付け加えたものをいう．
+その集合を$\ED_{fram}$と書く．
+整数はframingの成分のベクトル場の"winding number"を表すが，詳しい意味は\cite{}に譲る．
+
+閉とは限らない多様体の表示を考えるために，E-dataを一般化したo-dataというwordを導入する．
+virtual o-dataとはvirtual E-dataのwordを1個以上のwordに分割したwordの有限列である．
+virtual o-data全体の集合を$\OD$と書く．
+
+
+BenedettiとPetronioは同じ$\mfd^{cl}_{comb},\mfd^{cl}{}$の元を表すo-graph同士が移り合うためのmoveの生成元を特定し，
+村松,鈴木,田口はその生成元をより洗練された形で与えた．
+\begin{thm}[moves in $\mfd^{cl}_{comb}$]
+  同じcombing付き閉3次元多様体を表す2つのo-graphの間のmoveは, primary MP move, PS moveおよびそれらの逆により生成される.
+\end{thm}
+\begin{thm}[moves in $\mfd^{cl}{}$]
+  同じ閉3次元多様体を表す2つのo-graphの間のmoveは, primary MP move, PS move, CP moveおよびそれらの逆により生成される.
+\end{thm}
+(MP,PS,CP moveの図を挿入)
+
+多様体の不変量の不変性を示すためには，これらの生成元となるmoveに対して不変であることを示せばよい．
+
+  \begin{eg}
+    [具体的なo-graphの例] 3-sphere, Lens space, S2×S1,Poincare 3-sphere のo-graph
+  \end{eg}
+
+$s,t$を互いに素な正整数とする．レンズ空間と呼ばれる$L(s,t)\in \mfd^{cl}$のE-dataは次のように表される．
+$$w_{L(s,t)}=v_{st}^{-r} \cdots v_{2t}^{-r} v_{t}^{ -r} v_1^{+r} v_2^{+r}\cdots v_s^{+r}$$
+ただし添字はmodulo $s$で考えるものとする．
+そして$M_O=\mathbb S^2\times \mathbb S^1$のE-data $w_O$，3-fold branched covering space of trefoil knot $M_P$のE-data $w_Q$とPoincare 3-sphere $M_P$のE-data $w_P$を挙げる．
+$$w_O=v_{1}^{-r}v_{2}^{+l}v_{3}^{+r}v_{4}^{+r}v_{4}^{-r}v_{3}^{-r}v_{2}^{-l}v_{1}^{+r}$$
+$$w_Q=v_{3}^{-r}v_{2}^{+r}v_{1}^{-r}v_{3}^{+r}v_{2}^{-r}v_{1}^{+r}$$
+$$w_P=v_{4}^{+r}v_{5}^{-r}v_{3}^{+r}v_{4}^{-r}v_{2}^{+r}v_{3}^{-r}v_{1}^{+r}v_{2}^{-r}v_{5}^{+r}v_{1}^{-r}$$
+
+
+  \subsection{MST不変量の定義}
+
+  $A$を体$\kk$上の有限次元のHopf代数，$\HD=\HD(A)$を$A$のHeisenberg double
+  とする．有限次元involutive Hopf代数$A$に対するMST不変量$Z(-;A):\ED{}\to \kk$は， オペレータ表現$\mathcal{O}
+  (-;A):\ED^{vir}\to \HD(A)$と スカラー値写像$\chi :\HD (A)\to \kk$の合成
+  $Z=\chi\circ \mathcal{O}:\ED^{vir}\to \kk$の制限として定義される．
+  $w$がある多様体$M\in \mfd^{cl}$のE-dataであるとき，$Z(M;A)=Z(w;A)$と定める．
+  
+
+  $\WO=e_{k}\otimes e^{k},~ \overline{\WO}=e_{k}\otimes S(e^{k})\in \HD^{\otimes 2}$
+  を$\HD$のW-operatorとする(定義:).
+  $\WO_{ij}$は$\WO$のコピーの$i$番目の第$j$成分とする．
+  与えられたE-data $w$に対して，$w$の語順を逆にし，各文字に次の$\HD$の元を割り当てる:
+  $$v_{i}^{+r}\mapsto \WO_{i2},~ v_{i}^{+l}\mapsto \overline{\WO}_{i2},~ v_{i}^{-r}\mapsto
+  \WO_{i1},~ v_{i}^{-l}\mapsto \overline{\WO}_{i1}$$
+こうして得られた$\HD$の元を$w$のオペレータ表現$\mathcal{O}(w;A)$とする．
+
+そして，Fock空間表現$\phi:\HD(A)\to \End{A}$(\ref{null})により$\End{A}$のtrace　
+$\Tr:\End{A}\to \kk$を引き戻し，$\chi=\Tr\circ \phi$とする．
+ 
+この不変量の不変性の証明の概略を述べる．
+
+Pachner moveを組み合わせ的に表しているprimary MP moveをo-graphに行ったとき，五角関係式を満たすというW-operatorの性質により
+PS moveによる不変性は$\WO,\overline{\WO}$が$\HD^{\otimes 2}$のテンソル積代数における逆元であることから従う．
+combingの取り替えに対応するCP moveによる不変性は$A$がunimodularかつco-unimodularであるとき(この条件は必要か？)に，計算をすることで確かめられる．(本当に？)
+cyclic moveでの不変性は，$\Tr$の巡回性により保証される．
+
+\begin{eg}[群環の例]
+  $A=\mathbb C[G]$を有限群$G$の群環とする．例\ref{null}で見たように，これはホップ代数である．
+  この場合のMST不変量として次の性質が知られている．閉3次元多様体$M$に対して，$\pi_1M$を$M$の基本群とする．
+  このとき次が成立する．
+  $$Z(w;C[G]) = |\Hom{\pi_1M}{G}|$$
+\end{eg}
+\subsection{$\mathbb F_p[X]$の場合}
+
+  $p$を任意の素数，$A=\mathbb F_p[X]=\mathbb F_p[x]/(x^p)$を有限体$\mathbb F_p$上の多項式環をイデアル$(x^p)$で割ったものとする．
+  $X^p=0$であり，余代数は$X$がprimitive，すなわち$\Delta(X)=X\otimes 1 + 1\otimes X,~\varepsilon(X)=0$と定める．
+  $A$は$p$次元Hopf代数である．
+  \newcommand{\Zp}[0]{\mathbb Z/p\mathbb Z}
+  \begin{thm}
+  $M$を3次元閉多様体とする．このとき次が成立する．
+  
+  $$Z(M;\mathbb F_p[X]) = |\Hom{\pi_1M}{\Zp)}| \mod p =
+\begin{cases}
+0 & (\# H_1(M) = \infty \text{ or } p \mid \# H_1(M)) \\
+1 & (\text{else})
+\end{cases}$$
+  \end{thm}
+\begin{proof}
+  これは予想として川上の修論\cite{}で提起され，それを代数的に解決した．
+  $$g=\exp(X)=(x^p)+\sum_{n=0}^{p-1} \frac{x^n}{n!}\in \mathbb F_p[X]$$
+  は$\exp$の性質により$g$はgroup like，すなわち$\Delta(g)=g\otimes g,~\varepsilon(g)=1$となる．
+  $(m^n)\in \mathbb F_p^{p\times p}$というVandermonde行列の行列式が0でないことから，$g^m(m=0,1,\cdots,p-1)$は$\mathbb F_p[X]$の線形独立な元である．
+  また，$g^p=g^0=1$であるので$g$は群$\Zp$の生成元と見ることができる．
+  従って同型$\mathbb F_p[X]\cong \mathbb F_p[\Zp]$が成立する．
+  また，$\Zp$はAbel群であるため，$\Hom{\pi_1 M}{\Zp}=\Hom{H_1 (M)}{\Zp}$が成り立つ．よって
+  $$Z(M;\mathbb F_p[X]) =Z(M;\mathbb F_p[\Zp])=Z(M;\mathbb C[\Zp])\mod p = |\Hom{\pi_1M}{\Zp}| \mod p$$
+  $$= |\Hom{H_1(M)}{\Zp)}| \mod p =
+\begin{cases}
+0 & (\# H_1(M) = \infty \text{ or } p \mid \# H_1(M)) \\
+1 & (\text{else})
+\end{cases}$$
+  となる．最後の等式は既に\cite{}で示されている．
+\end{proof}
+
+次に, E-dataに対するMST不変量の拡張としてo-dataに対するMST不変量を定義する．
+$\{w_k\}_{k=1}^r$をo-dataのwordの有限列とする．オペレータ表現は
+$$\mathcal O(\{w_k\}_{k=1}^r;A):= \mathcal O(w_1;A)\otimes \cdots \otimes \mathcal O(w_r;A)\in \HD(A)^{\otimes r}$$
+と定める．そしてテンソル積代数$\HD(A)^{\otimes r}$の$A^{\otimes r}$への加群作用
+$\phi:\HD(A)^{\otimes r}\to \End{A^{\otimes r}}$のTrace $\Tr:\End{A^{\otimes r}}\to \kk$により
+スカラー値写像$\chi=\Tr\circ \phi$を定義する．
+$Z=\chi\circ \mathcal O:\OD\to \kk$と定義する．
+
+続いて，non-involutive Hopf代数$A$に対するMST不変量を定義する．
+$A$を有限次元Hopf代数とし，$\GO$を$A$のG-operator(pivotal like elementともいう)とする．
+不変量の構成の流れは変わらない．
+オペレータ表現の構成において，整数ウェイトを表す$\ED_{fram}$の文字$g^m$に対しては$\GO^m$を割り当てるとする．
+閉多様体$M$の第1Betti数は消えている$(b_1=0)$とする．このとき$Z(M;A)$は$M\in \mfd^{cl}_{fram}$の不変量である．
+
+\subsection{$A=U(\mathfrak g),A=U_\hbar(\mathfrak g)$への拡張}
+MST不変量における$A$を無限次元Hopf代数へと拡張することを考える．
+その際に課題となるのは，Heisenberg doubleにおける無限和，traceの定義，(co)integralの存在の3つである．
+
+1つめの問題は前章\ref{}でfiltered Hopf algebraを考えることで解決される．
+W-operatorの五角関係式などに現れる無限和は問題なく成立する．
+しかし，不変量の計算をするにあたって，微分演算子の表示で計算した際に発散してしまう場合がある．
+それを避けるために，$\mathcal O$の定義においてW-operator $\WO, \overline{\WO}$
+ではなく，そのフィルターに沿った$\mathfrak g$に関する次数$d$の項をそれぞれ$(1-\epsilon)^d$倍した$
+\WO^{\epsilon},~ \overline{\WO}^{\epsilon}~(\epsilon\approx 0)$を各文字に割り当てる．
+% ただし，テンソル積代数として
+%  $$\WO^a:=\exp(a\log \WO)\quad (a\in \R),\quad \log \WO:=\sum_{n>0} \frac{(-1)^n}n(1\otimes 1-\WO)^n$$
+ と定める．これにより写像
+ $\mathcal O(-;A;\epsilon):\ED^{vir}\to \HD(A)$が定義される．
+ そしてTraceを取った後に極限$\epsilon\to 0$を取ることで，発散を回避できる(多分).
+なぜこのような定義をおこなったかどうかは具体的に後で説明する．
+
+次にtraceを演算子のtraceとして定義する．
+前章で見たように，Heisenberg doubleは微分演算子の代数とみなせて，
+完備化されたワイル代数への埋め込み$\phi:\HD(A)\to \hat{\mathbb W}_N \subset \End{A}$が存在する．
+そして\ref{}で構成した演算子のtraceにより$\chi=\lim_{\epsilon\to +0}\circ \Tr\circ \phi$または$\chi=\lim_{\epsilon\to +0}\circ\Tr^{\textrm{abs}}\circ \phi$と定義する．
+これによりcyclic moveに対して不変となる．
+これによりcombing付き閉3次元多様体の不変量が構成される．
+
+無限次元Hopf代数に対しては(co)integralは存在するとは限らず，実際$U(\mathfrak g)$や$U_\hbar(\mathfrak g)$には存在しない．
+そして$\mathcal O$はCP moveで変化するので閉3次元多様体の不変量とはならない．
+しかし$U(\R)$に対してはCP moveは$\mathcal O$を$-\mathcal O$に変化させることが分かっているので，最後に絶対値を取ることで
+位相不変量を得ることができる．
+% $\textrm{abs}\circ \Tr^{\textrm{alg}}=\Tr^{\textrm{anl}}　(\textrm{abs}:z\mapsto |z|)$
+
+$\textrm{mod}\epsilon$を取れば次の式よりMP move,PS moveに対して不変であることがわかる．
+\begin{equation*}
+  \WO^{\epsilon}\overline{\WO}^{\epsilon} \equiv 1  \mod \epsilon
+\end{equation*}
+\begin{equation*}
+  \WO_{12}^{\epsilon}\WO_{13}^{\epsilon}\WO_{23}^{\epsilon} \equiv {\WO}_{23}^{\epsilon} \WO_{12}^{\epsilon} \mod \epsilon,\qquad 
+  \overline{\WO}_{23}^{\epsilon} \overline{\WO}_{13}^{\epsilon}\overline{\WO}_{12}^{\epsilon} \equiv \overline{\WO}_{12}^{\epsilon}{\overline{\WO}}_{23}^{\epsilon}  \mod \epsilon
+\end{equation*}
+
+
+
+% \subsection{invariant for involutive Hopf algebra}
+% $A$をinvolutive Hopf algebraとする．o-graphの正負の交点に対して作用素$\WO\in \mathcal H$の元を対応させる．
+% \begin{figure}[htbp]
+%   \centering
+%   \begin{minipage}[b]{0.45\linewidth}
+%     \centering
+%     \includegraphics[width=0.9\linewidth]{vertex_beads_+.pdf}
+%     \caption{Beads configuration for positive vertex}
+%     \label{fig:vertex_beads_plus}
+%   \end{minipage}
+%   \hfill
+%   \begin{minipage}[b]{0.45\linewidth}
+%     \centering
+%     \includegraphics[width=0.9\linewidth]{vertex_beads_-.pdf}
+%     \caption{Beads configuration for negative vertex}
+%     \label{fig:vertex_beads_minus}
+%   \end{minipage}
+% \end{figure}
+% ただし，$T=\WO^{1-\epsilon},~\overline T=\WO^{-1+\epsilon}$,
+%  $$\WO^a:=\exp(a\log \WO)\quad (a\in \R),\quad \log \WO:=\sum_{n>0} \frac{(-1)^n}n(1\otimes 1-\WO)^n$$
+%  とする．
+
+ これにより写像
+ $\mathcal O(-;A;\epsilon):M_{t,p,c}\mapsto 
+ \mathcal O\in \mathcal H$が構成される．また，$\chi:\mathcal H\to \kk$
+\subsection{$\R$リー代数での不変量の計算}
+$A=U(\R)$は一番簡単な無限次元のinvolutiveなホップ代数である．$\epsilon$により変形されたW-operatorは
+$$\WO^\epsilon=\sum \frac {(1-\epsilon)^n}{n!} \de z^n\otimes z^n=\exp\left((1-\epsilon)\de z\otimes z\right),\quad 
+\overline{\WO}^\epsilon=\sum \frac {(\epsilon-1)^n}{n!} \de z^n\otimes z^n=\exp\left(-(1-\epsilon)\de z\otimes z\right)
+$$
+である．
+$\mathbb F_p[X]$の不変量に比べ，情報が増えている(と思われる)．
+
+$w=v_1^{-r}v_1^{+r}$のオペレータ表現は$\mathcal O(w;A;\epsilon)=\WO_1^\epsilon\WO_2^\epsilon$である．
+よって不変量は\ref{eq:binomial_poc}より次のように計算できる．
+\begin{align}\label{eq}
+  \operatorname{Tr}\left(\WO_2^\epsilon \WO_1^\epsilon\right)
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } z^n  \partial_z^n
+  =\Tr\sum_{n} \frac{(\epsilon-1)^n}{n!} (-\te z)_n
+  =\Tr\left((2-\epsilon)^{\te z}\right)
+  =\frac{1}{\epsilon-1}
+\end{align}
+$$Z(\mathbb S^3;A)= \lim_{\epsilon\to 0}\frac{1}{\epsilon-1}=-1$$
+$w'=v_1^{+r}v_1^{-r}$も同じ多様体を表すE-dataであり，不変量は次のように計算される．
+\begin{align}
+  \operatorname{Tr}\left(\WO_1^\epsilon \WO_2^\epsilon\right)
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } \partial_z^n z^n 
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } (\te z+1)_n 
+  =\Tr\left(\epsilon^{-\te z-1}\right)
+  =\frac{1}{\epsilon-1}
+\end{align}
+となり，
+レンズ空間$M=L(2,1)$の不変量も以下のように計算される．
+cyclic moveによる不変性を確認するため，
+$w=v_2^{-r}v_1^{-r}v_1^{+r}v_2^{+r},~v_2^{+r}v_2^{-r}v_1^{-r}v_1^{+r},~v_1^{+r}v_2^{+r}v_2^{-r}v_1^{-r}$
+の3通り計算を行った．
+$\WO_{ij}$は$\WO$のコピーの$i$番目の第$j$成分である．
+\everymath={\displaystyle}
+\begin{align}
+\begin{array}{lll}
+ ~~~\operatorname{Tr} \WO_{22} \WO_{12} \WO_{11} \WO_{21}& =\operatorname{Tr} \WO_{12} \WO_{11}  \WO_{21} \WO_{22}&=\operatorname{Tr} \WO_{11} \WO_{21} \WO_{22} \WO_{12} \\
+=\operatorname{Tr} \sum_{n, m} \frac{1}{n!m! } z^n z^m \partial^m \partial^n&=\operatorname{Tr} \sum_{n, m} \frac{1}{n!m!} z^m \partial^m \partial^n z^n&=\operatorname{Tr} \sum_{n=m} \frac{1}{n!m!} \partial^{n+m} z^{n+m} \\
+ =\operatorname{Tr} \sum_{n, m} \frac{(-1)^m}{ m!n!} z^n(-\theta)^n\partial^n&=\operatorname{Tr} \sum_{n, m} \frac{(-1)^m}{n!m!} (-\theta)_m(\theta+1)_n  &=\operatorname{Tr} \sum_n^n \frac{2^n}{n!} \partial^n z^n \\
+ =\operatorname{Tr} \sum_n \frac{1}{n!} z^n 2^\theta \partial^n&= \lim_{\epsilon\rightarrow 0} 2^\theta \epsilon^{-\theta-1}&=\operatorname{Tr} \sum_n \frac{2^n}{n!}  (\theta+1)_n \\
+ =\operatorname{Tr} \sum_n \frac{(-2)^{-n}}{n!} 2^\theta(-\theta)_n&= \lim_{\epsilon\rightarrow 0}\frac{1}{\epsilon} \times \frac{1}{1-\frac{2}{\epsilon}}&= (-1)^{-\theta-1}\\
+=\operatorname{Tr} 3^\theta&=-\frac{1}{2}& \\
+\end{array}
+\end{align}
+レンズ空間$L(s,t)$については，次のように計算される．
+\begin{align*}
+  Z(L(s,t);A)&=\Tr\mathcal O(L(s,t);A;0)\\
+  =&\Tr \WO_{s2}\cdots \WO_{22}\WO_{12} \WO_{t1}\WO_{2t,1} \cdots \WO_{21} \WO_{st,1}\\
+  =&\Tr \sum_{k\in \N^s}\frac{1}{k_1!k_2!\cdots k_s!} z^{k_1+k_2+\cdots+k_s} \partial^{k_1} \partial^{k_2} \cdots \partial^{k_s} \\
+  =&\Tr \sum_{k\geq 0}\frac{s^k}{k!} z^k \partial^k \\
+  =& \Tr(s+1)^{\te z} \\
+  =&-\frac{1}{s} 
+\end{align*}
+
+% 正整数$m$に対して
+% $$\WO_{1}m^{\te z}\WO_2=\sum_{n=0} \frac{1}{n! }  z^nm^{\te z}  \partial_z^n
+%   =m^{\te z}\sum_{n} \frac{(-1/m)^n}{n!} (-\te z)_n
+%   =m^{\te z}\left(\frac{m+1}{m}\right)^{\te z}
+%   =\left({m+1}\right)^{\te z}
+%   $$
+% なので，帰納的に
+% $$
+% \begin{aligned}
+% Z(L(p, 1))
+%  = \operatorname{Tr}\left(\WO_{11} \WO_{21} \cdots \WO_{p 1} \WO_{p 2}  \cdots \WO_{22} \WO_{12}\right)
+%   =\operatorname{Tr}\left((p+1)^\theta\right) 
+% =-\frac{1}{p} 
+% \end{aligned}
+% $$
+% となる．
+$$
+\begin{aligned}
+\mathcal O(M_3(K_3),U(\R);\epsilon)
+& =\sum_{a, b, c\geq0}\frac{(1-\epsilon)^{a+b+c}}{a!b!c!} x^a \partial^b x^c  \partial^a x^b \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c}}{a!b!c!}\binom{c}{k}\binom{a}{k} k!x^a \partial^{b+a-k}(-1)^k x^{b+c-k} \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c+k}(-1)^k }{a!b!c!}\binom{c}{k} x^{k+a} \partial^{b+a} x^{b+c-k} \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c+2k}(-1)^k }{a!b!c!k!} x^{k+a} \partial^{b+a} x^{b+c} \partial^{c+k}\\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{2k}(-1)^k}{k!} x^{k}\epsilon^{\te x} (2-\epsilon)^{-\te x-1} \epsilon^{\te x} \partial^{k}\\
+& =\frac{1}{2-\epsilon}\sum_{a, b, c, k\geq0} \frac{1}{k!}\left((\epsilon-1)^{2}\frac{\epsilon-2}{\epsilon^2}\right)^k x^{k} \partial^{k}\left(\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& =\frac{1}{2-\epsilon}\left((\epsilon-1)^{2}\frac{\epsilon-2}{\epsilon^2}+1\right)^{\te x}\left(\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& =\frac{1}{2-\epsilon}\left(-(\epsilon-1)^{2}+\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& \underset{\epsilon\to 0}{\longrightarrow}\frac12(-1)^{\te x}
+\end{aligned}
+$$
+$$Z(M_Q;U(\R))=\Tr\frac12(-1)^{\te x}=\frac14$$
+
+% $O\left(H(U(\mathbb{R})) ; q\left(\mathbb{R}^2\right)\right.$ の特微：$x$ 次数
+% $(-1)^{a+b+c} x^a \partial^b x^c \partial^a x^b \partial^c \mapsto(-1)^{a+b+c t}$
+% $$
+% \mapsto(-1)^{a+b+c+k} x^k x^a a^a a^b x^b x^c \partial^{c+a^k} \mapsto\left(-y^c\right.
+% $$
+% $$
+% \mapsto\left(1-\frac{2}{\epsilon^2}\right)^\theta \epsilon^{2 \theta} 2^{-\theta-1}
+% $$
+% $$
+% \rightarrow \quad \frac{1}{2}
+% $$
+% $$
+% \begin{aligned}
+% & (-1)^{a+b+c} \partial^a x^b \partial^c x^a \partial^b x^c \mapsto(-1)^{a+b+c} \partial^a \\
+% & \mapsto(1-1) \partial^k 2^{-\theta-1} \epsilon^\theta 2^{-\theta-1} x^k \mapsto \frac{1}{4}\left(\frac{\epsilon}{4}\right)^k \partial^1 \\
+% & \mapsto\left(1-\frac{\epsilon}{4}\right)^{-\theta-1}\left(\frac{\epsilon}{4}\right)^\theta
+% \end{aligned}
+% $$
+% $$
+% \left[\begin{array}{l}
+% n \\
+% 1
+% \end{array}\right]+\binom{n}{1}+\hbar^2\binom{k+2}{3}\binom{n+1}{k+2}
+% $$
+% \newpage
+CP moveに関する考察
+
+
+subword $w=v_{1}^{-r}v_{2}^{+r}v_{2}^{-r}v_{3}^{+r}v_{3}^{-r}v_{1}^{+r},~w'=v_{1}^{-l}v_{2}^{-l}v_{5}^{+r}v_{3}^{-l}v_{2}^{+l}v_{3}^{+l}v_{4}^{+r}v_{4}^{-r}v_{1}^{+l}v_{5}^{-r}$それぞれのオペレータ表現を計算する．
+ただし，交点ごとに違う$\epsilon$を割り当てている．
+$$\mathcal{O}(w;A;\epsilon)={\WO}_{12}^{\epsilon_1}{\WO}_{31}^{\epsilon_3}{\WO}_{32}^{\epsilon_3}{\WO}_{21}^{\epsilon_2}{\WO}_{22}^{\epsilon_2}{\WO}_{11}^{\epsilon_1}$$
+$$\mathcal{O}(w';A;\epsilon)={\WO}_{51}^{\epsilon_5}\overline{\WO}_{12}^{\epsilon_1}{\WO}_{41}^{\epsilon_4}{\WO}_{42}^{\epsilon_4}\overline{\WO}_{32}^{\epsilon_3}\overline{\WO}_{22}^{\epsilon_2}\overline{\WO}_{31}^{\epsilon_3}{\WO}_{52}^{\epsilon_5}\overline{\WO}_{21}^{\epsilon_2}\overline{\WO}_{11}^{\epsilon_1}$$
+計算を行うと，次の結果が得られた．
+$$\mathcal{O}(w;A;\epsilon)=\tau_1\WO^{1-\tau_2}_{1}\WO^{1-\tau_2}_{2},\qquad \mathcal{O}(w';A;\epsilon)=-\tau_3\WO^{1-\tau_4}_{1}\WO^{1-\tau_4}_{2}$$
+$$\tau=\left(\frac{1}{{\epsilon}_2 \,{\epsilon}_3 +{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1} ,~ 
+\frac{{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1}{{\epsilon}_2 \,{\epsilon}_3 +{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1},~
+\frac{-1}{{\epsilon}_2 +{\epsilon}_3 +{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 -1} 
+,~ \frac{{\epsilon}_2 +2\,{\epsilon}_3 +2\,{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 +{\epsilon}_3 \,{\epsilon}_5 -1}{{\epsilon}_2 +{\epsilon}_3 +{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 -1}\right)$$
+極限$\epsilon\to 0$で$\tau\to (1,1,1,1)$となるので，雑に言えばCP moveで
+$\WO_1\WO_2$が$-\WO_1\WO_2$に変化することが分かる．よって，最後に絶対値を取ることでCP moveに対して不変な不変量を得ることができる．
+
+次に連結和に関する考察を行う．
+
+2つの$M_1,M_2\in \mfd^{cl}_{fram}$の連結和$M_0=M_1\# M_2$を考える．
+$M_0,M_1,M_2$のそれぞれのE-dataを$w_0,w_1,w_2$とすると次のことが知られている．
+\begin{thm}[連結和の不変量]
+  $Z(M_0;A)=Z(M_1;A)Z(M_2;A)$
+\end{thm}
+\begin{thm}[連結和のE-data]
+  $w_0=v_{2}^{-r}v_{1}^{-l}v_{1}^{+l}v_{4}^{+r}w_2v_{4}^{-r}v_{3}^{-l}v_{3}^{+l}v_{2}^{+r}w_1$
+\end{thm}
+$U(\R)$の場合の証明は以下のようになる．subword $w_1,w_2$をbasic form $c_1 (a_1+1)^{\te z}, c_2 (a_2+1)^{\te z}$に置き換える．
+\begin{proof}
+  \begin{align*}
+    \mathcal O(w_0;A)&=c_1 (a_1+1)^{\te z}{\WO}_{22}^{\epsilon_2}\overline{\WO}_{32}^{\epsilon_3}\overline{\WO}_{31}^{\epsilon}{\WO}_{41}^{\epsilon_4}c_2 (a_2+1)^{\te z}{\WO}_{42}^{\epsilon_4}\overline{\WO}_{12}^{\epsilon_1}\overline{\WO}_{11}^{\epsilon_1}{\WO}_{21}^{\epsilon_2}\\
+   &= -\frac{c_1c_2}{a_2+{\epsilon}_4 }\WO_2^{1-\tau}\WO_1^{1-\tau}\qquad\left(\tau={\left(a_1+1\right)}\,{\left({\epsilon}_2 +1\right)}-\frac{{\epsilon}_3 \,{\left(a_1+1\right)}\,{\left({\epsilon}_1 +2\right)}}{a_2+{\epsilon}_4 }-1\right)\\
+    & \underset{\epsilon\to 0}{\longrightarrow} -\frac{c_1c_2}{a_2}(a_1+1)^{\te z}
+  \end{align*}
+  \begin{align*}
+    Z^{\textrm{abs}}(M_0;A)=\abs{\frac{c_1c_2}{a_1a_2}}=Z^{\textrm{abs}}(M_1;A)Z^{\textrm{abs}}(M_2;A)
+  \end{align*}
+  不定形だとどうなるのか分からない．
+\end{proof}
+\subsection{$U(\mathfrak{sl}_2^+)$の場合}
+
+\subsection{$U_\hbar(\mathfrak{sl}_2^+)$の場合}
+$A=U_\hbar(\mathfrak{sl}_2^+)$とする．
+abaloneを表すE-data $w=v_1^{-r}g^{-2}v_1^{+r}g^{1}$に対して計算を行う．特異性による影響は現れないので，
+$\epsilon=0$として計算を行う．
+\begin{align*}
+  \mathcal{O}(w;A;0)
+  &=\GO^{}\WO_2 \GO^{-2}\WO_1 \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!} \GO^{}H_-^m F^n\GO^{-2}H_+^mE^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!} z^m q^{-2 \theta_y+4 n}\left(\frac{y}{x} q^{\theta_x}\right)^n\left(\theta_x-\theta_y\right)^m\left(\frac{x}{y}\left[\theta_y\right]\right)^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{2\binom n2+5n}}{[n]! m!} z^m q^{-2 \theta_y}\left(\theta_x-\theta_y+2n\right)^m q^{n\te x}\frac{\left[\theta_y\right]_q!}{\left[\theta_y-n\right]_q!}\\
+  & =\sum_{n\geq 0}q^{2\binom n2+5n-2 \theta_y} 2^{z\left(\partial_z-\theta_y+2 n\right)}e^{n\hbar\de z}
+    \qbinom{\te y}{n}_q  \\
+  & =\sum_{n\geq 0}  q^{2\binom n2+5n-2 \theta_y} e^{\left(2 n-\theta_y\right) z} e^{\frac{1}{2} \hbar n \partial_z} 2^{\theta_z}
+    \qbinom{\te y}{n}_q  
+  \end{align*}
+  ここで，ある多項式$f_k$が存在して
+\begin{equation*}
+  \left[\begin{array}{l}m \\ n \end{array}\right]_q  =\binom{m}{n}\sum_{k\geq 0}\hbar^k f_k(m,n)
+\end{equation*}
+と書けることから，$ \mathcal{O}(w;A;0)$はrefined formとして書ける．
+すなわち，ある関数$f_{k,a,b}$が存在して，
+\begin{align*}
+  \mathcal{O}(w;A;0)
+  &=\sum_{k\geq 0} \hbar^k f_{k,a,b}(z)\theta_y^a\partial_z^b(e^z+e^{-z})^{\theta_y}2^{\theta_z}
+\end{align*}
+と書ける．
+\begin{align*}
+  \Tr_z\left(\mathcal{O}(w;A;0)\right)
+  &=\Tr_z(\GO^{}\WO_2 \GO^{-2}\WO_1 )\\
+  &=\sum_{n\geq 0} q^{2\binom n2+5n-2 \theta_y} \Tr_z\left(e^{\left(2 n-\theta_y\right) z} e^{\frac{1}{2} \hbar n \partial _z} 2^{\theta _z}\right)
+    % \left[\begin{array}{l}\theta_y \\ n \end{array}\right]_q  \\
+    \qbinom{\te y}{n}_q\\
+  &=-\sum_{n\geq 0} q^{n^2+4n-2 \theta_y}  e^{-2\times\frac{1}{2} \hbar n \left(2 n-\theta_y\right)} \qbinom{\te y}{n}_q\\
+  &=-\sum_{n\geq 0} q^{-n^2+4n+(n-2) \theta_y} \qbinom{\te y}{n}_q\\
+\end{align*}
+最終ステップはまだ予想の段階である．
+\begin{align*}
+  Z(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))=\Tr\left(\mathcal{O}(w;A;0)\right)
+  &=-\Tr_y\left(\sum_{n\geq 0} q^{-n^2+4n+(n-2) \theta_y} 
+  \qbinom{\te y}{n}_q \right)\\
+  &=^?q^{2}
+\end{align*}
+予想が成立する根拠は，$\hbar^5$まで展開を行ったときに一致するからである．
+$$\qbinom{n}{m}_{\exp \hbar}=\binom nm\left(1+\frac{\hbar^2}{6}m(n+1)(n-m)\left(1+\frac{\hbar^2}{60}((5m - 2) n^2 - (m - 1)(5m - 2) n - {7} m^2)\right)\right)+o(\hbar^6)$$
+  $$\sum_{n\ge 0} q^{-n^2 +\left(2+u\right)n+\left(n-u\right)\theta } {\left\lbrack \begin{array}{c}
+    \theta \\
+    n
+    \end{array}\right\rbrack }_q=2^\theta\left(1+\hbar\frac{\theta\left({\theta}-2\,u+3\right)}{4}\right.$$
+    $$+\left.\hbar^2 \frac{\theta\,\left(3\,{\theta}^3-12\,{\theta}^2\,u+22\,{\theta}^2+12\,\theta\,{u}^2-36\,\theta\,u+33\,\theta+12\,{u}^2+48\,u+38\right)}{96}+o(\hbar^3)\right)$$
+  $$-\mathrm{Tr}\left(\sum_{n\ge 0} q^{-n^2 +\left(2+u\right)n+\left(n-u\right)\theta } {\left\lbrack \begin{array}{c}
+\theta \\
+n
+\end{array}\right\rbrack }_q \right)=^? q^u$$
+$\hbar\to0$により，$U(\mathfrak{sl}_2^+)$の不変量が得られる．
+$$\lim_{\hbar\to0}\mathcal{O}(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))=\mathcal{O}(\mathbb S^3;U(\mathfrak{sl}_2^+))=\sum_{n\geq 0}   e^{\left(2 n-\theta_y\right) z} 2^{\theta_z}
+\binom{\theta_y}{n}=\left(e^{-z}+e^z\right)^{\theta_y}2^{\theta_z}$$
+$$Z(\mathbb S^3;U(\mathfrak{sl}_2^+))=\Tr_y\Tr_z\mathcal{O}(\mathbb S^3;U(\mathfrak{sl}_2^+))=-\Tr_y 2^{\te y}=1$$
+
+次に$w'=v_1^{+r}v_1^{-r}$に対しても同様の計算を行う．特異性の影響があるので，$\epsilon$を用いる．
+\begin{align*}
+  \mathcal{O}(w';A;\epsilon)
+  &=\GO^{-2}\WO_1^\epsilon\GO^{}\WO_2^\epsilon  \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!}(1-\epsilon)^{n+m} \GO^{-2}H_+^mE^n\GO^{}H_-^m F^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!}(1-\epsilon)^{n+m} \left(\theta_x-\theta_y\right)^m\left(\frac{x}{y}\left[\theta_y\right]\right)^nz^m\left(\frac{y}{x} q^{\theta_x}\right)^n  q^{-2 \theta_y+2n}\\
+  &=\sum_{n,m\geq 0} \frac{(1-\epsilon)^{n+m}}{[n]_q! m!} \left(z\de z-z\te y+1\right)_m \frac{\left[\theta_y+n\right]_q!}{\left[\theta_y\right]_q!}q^{2n-2 \theta_y+n\de z}\\
+  & =\sum_{n\geq 0}(1-\epsilon)^{n} \epsilon^{-z\left(\partial_z-\theta_y\right)-1}e^{n\hbar\de z}\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\de z} \\
+  & =\sum_{n\geq 0}(1-\epsilon)^{n} e^{(1-\epsilon^{-1}) z\te y} \epsilon^{-\theta_z-1}\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\de z}
+\end{align*}
+\begin{align*}
+  \Tr_z\left(\mathcal{O}(w';A;\epsilon)\right)
+  &=\sum_{n\geq 0} (1-\epsilon)^{n}\Tr_z\left(e^{(1-\epsilon^{-1}) z\te y} e^{n\hbar \epsilon\de z}\epsilon^{-\te z-1}\right)\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y}\\
+ &=\sum_{n\geq 0} (1-\epsilon)^{n} \qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\te y}\times \frac{1}{1-\epsilon^{-1}}\times \epsilon^{-1}
+\end{align*}
+任意の$m\in \N$に対して多項式$f_m(z)\in \kk[\epsilon,\epsilon^{-1}][z]$が存在して
+\begin{equation*}
+  \sum_{n\geq 0}(1-\epsilon)^n \binom{\te y+n}{n} n^m=\epsilon^{-\te y} f_m(\te y)
+\end{equation*}
+と書けることから，$\Tr_z\left(\mathcal{O}(w';A;\epsilon)\right)\in \kk[\epsilon,\epsilon^{-1}][\te y][[\hbar]]$である．
+しかし，$\hbar^5$まで近似的に計算した限りにおいて，やはり$\Tr_y$を取ると$\epsilon^{-1}$の項が相殺され，Traceは有限の値となっている．
+\begin{align*}
+  \Tr\left(\mathcal{O}(w';A;\epsilon)\right)
+  &=\frac{1}{\epsilon-1}\Tr_y\sum_{n\geq 0} (1-\epsilon)^{n} \qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\te y}\\
+  &=\frac{1}{\epsilon-1}\Tr_y \epsilon^{-\te y-1}\left(1-\hbar \left(2\te y+(1-\epsilon^{-1})(\te y+1)(\te y+2) \right)+\cdots\right)\\
+  &=^? \frac{1}{(\epsilon-1)^2}\left(1+2\hbar \frac{1+\epsilon}{1-\epsilon}+2\hbar^2 \frac{1 +10\epsilon+\epsilon^2}{{{\left(1-\mathrm{\epsilon}\right)}}^2 } +\cdots\right)\\
+  & \underset{\epsilon\to 0}{\longrightarrow} \sum \frac {2^n}{n!}\hbar^n=q^2
+\end{align*}
+
+
+より一般に，$\mathcal{Z}(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))$は$q=\exp\hbar$のLaurent多項式で書けると予想する．
+
+% exp(z(\de z+a))の公式
+
+\section{おわりに}
+
+
+\subsection{今後の課題}
+今後の課題としては，定理\ref{thm:dorCmodalg}のB,E,F,G型やアフィンリー代数への一般化の考察，
+module algebraとリー群のポアソン構造によるdeformation quantizationとの関連の考察，
+ハイゼンベルグダブルとその表現を用いた3次元多様体の不変量の構成が挙げられる．
+
+
+A,C,D型の場合はmodule algebraの表現を構築したが，
+関数環のポアソン構造による変形量子化と対応がつくことがわかった．
+逆に，
+ポアソン構造による量子化により関数環を変形するのと同様にして，
+リー代数とリー双代数の構造により，
+リー代数の普遍包絡代数の微分演算子による表現の変形を構成できないかを考えている．
+それにより，
+B,E,F,G型の量子群についても同様に微分演算子を用いた表現が構成できることを期待している．
+それにより，次のようなアドの定理の$q$類似が得られる可能性がある．
+\begin{cnj}
+  A-G型の有限型の量子群は$q$ワイル代数の有限生成の部分代数として忠実に実現される．
+\end{cnj}
+
+{non-simply-laced} なケースでは, Serre 関係式の修正や交換関係の変化など, より複雑な構造が現れることが知られている. これは, 量子群の幾何学的表現やクラスター代数への応用など, さまざまな分野で観察されており, 特に {A, D, E} 型の対象と比較すると, {B, C, F, G} 型では構成が困難になることが多い.  
+
+{C} 型の量子群の表現において生成元に {2階の $q$ 微分演算子} が対応することも, この simply-laced でない構造に起因すると考えられる. 
+生成元に{1階の $q$ 微分演算子} が対応すると仮定して {A, B, C, D} 型の表現を構築しようとしたところ, {B, C} 型では矛盾が生じたのに対し, {A, D} 型では問題なく構成できた. 
+
+また，
+ホップ代数を準ホップ代数にしたり，
+リー代数をアフィンリー代数にするなど，
+様々な代数の一般化が考えられる．
+それらに対しても本研究の手法が適用できるかについても考察していきたい．
+
+3次元多様体の量子不変量の構成に本研究を応用することを目標としている．
+既存の手法では結び目の射影図や3次元多様体を表すnormal o-graphの交点にホップ代数の作用を対応させてtraceを取り，
+不変量が構成される．この手法をに単純に適用するとき，無限次元表現ゆえにtraceが定義できない．
+有限次元ではtraceは巡回性を持つなどの良い性質を持つ．
+しかし，今回の微分演算子による表現は多項式環という無限次元空間に作用しているため，
+適切に制限された微分演算子に対してしかtraceを定義できることが知られている．
+そのため，今回の表現を用いて不変量を構成する際には，
+そのような定義域に収まっているかを確認する必要があると思われる．
+
+
+
+% 一般化の方向性: quasi-bialgebra, bialgebroid, affine, quantum, dynamical
+% 準双代数の微分演算子表現$\rho:U\rightarrow \operatorname{End}(A)$を構成することが挙げられる．
+% AがU-module algebraでかつその積が結合的であると仮定し，$u\in U$を任意の元とする．${\mu}_*\circ \Delta(u)=u\circ {\mu}_*$なので，
+% $$
+% \begin{aligned}
+%     u\circ {\mu}_*\circ ({\mu}_*\otimes 1)&={\mu}_*\circ \Delta(u)\circ  ({\mu}_*\otimes 1)\\
+%     &={\mu}_* \circ({\mu}_*\otimes 1) \circ((\Delta\otimes 1)\Delta(u))\\
+%     &={\mu}_* \circ(1\otimes {\mu}_*) \circ((\Delta\otimes 1)\Delta(u))\\
+%     &= u\circ {\mu}_*\circ (1\otimes {\mu}_*)\\\
+%     &={\mu}_* \circ(1\otimes {\mu}_*) \circ((1\otimes\Delta)\Delta(u))\\
+% \end{aligned}
+% $$
+% となる．作用が全射であるとき，
+% $$(\Delta\otimes 1)\Delta(u)=(1\otimes\Delta)\Delta(u)$$
+
+% でなければならない．したがって，余結合律の仮定を外すためにはmodule algebraの結合律の仮定を外す必要がある．非結合的な関数環を考えなれけばならないが，大森英樹氏の書籍にはそのような例がある．具体的には，微分演算子の代数(ワイル代数)に一部の逆元を付加した代数を考えると，結合律を満たさない要素が作られる．ワイル代数はA型のmodule algebraの積と一致しているので，もしかしたらA型のmodule algebraという関数環に，一部の元の逆元を付加した関数空間を考え，それが非結合的かつmodule algebraになっている可能性がある．準双代数となるにはassociatorを構成することが課題である．
+
+
+
+\section*{謝辞}
+本稿の執筆にあたり，論理構成の確認，文章構成などにおいて，指導教員である鈴木咲衣准教授から大変多くの助言をいただくとともに，
+私が大変な時期でも優しく接していただけました．深く感謝申し上げます．
+また，大矢浩徳准教授や芝浦工業大学の清水健一准教授には様々な助言をいただきました．
+また博士課程の先輩である太田洋平氏とは，普段から議論を重ね，ノートで様々な知識を教えていただきました．
+quantum groupoidやmodule algebraの概念もそこで理解することができました．深く御礼申し上げます．
+研究室のセミナーを通じて有益な議論を交わしてくださった方々にも感謝いたします．
+
+% Include all bibliography entries
+\nocite{*}
+
+% Print the bibliography
+\printbibliography
+
+% \begin{thebibliography}{9}
+
+%   \end{thebibliography}
+  
+
+\end{document}

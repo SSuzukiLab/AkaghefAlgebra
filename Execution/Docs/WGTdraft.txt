@@ -1,0 +1,951 @@
+\documentclass[dvipdfmx, autodetect-engine]{jsarticle}
+\usepackage{amsmath, amssymb}
+\usepackage{type1cm}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{url}
+\usepackage{mathrsfs}
+\usepackage{tikz}
+\usepackage{tikz-cd}
+\usepackage{enumerate}
+\usepackage{multicol}
+\usepackage{amsthm}
+\usepackage{ifthen}
+\usepackage[dvipdfmx]{hyperref}
+% \hyperrefsetup{%
+%  setpagesize=false,%
+%  bookmarks=true,%
+%  bookmarksdepth=tocdepth,%
+%  bookmarksnumbered=true,%
+%  colorlinks=true
+% %  ,hidelinks
+%  }
+\newcommand{\uln}[1]{\underline{#1}}
+
+\theoremstyle{definition}
+\newtheorem{dfn}{定義}[section]
+\newtheorem{prop}[dfn]{命題}
+\newtheorem{lem}[dfn]{補題}
+\newtheorem{thm}[dfn]{定理}
+\newtheorem{cor}[dfn]{系}
+\newtheorem{rem}[dfn]{Remark}
+\newtheorem{fact}[dfn]{Fact}
+\newtheorem{eg}[dfn]{例}
+\newtheorem{cnj}[dfn]{予想}
+% \renewcommand{\chapterautorefname}{第}
+% \renewcommand{\theoremautorefname}{定理}
+% \newcommand{\lemmaautorefname}{補題}
+% Define custom autoref name for `dfn`
+% \providecommand*{\dfnautorefname}{定義}
+% \providecommand*{\propautorefname}{命題}
+% \providecommand*{\lemautorefname}{補題}
+% \providecommand*{\thmautorefname}{定理}
+% \providecommand*{\corautorefname}{系}
+% \providecommand*{\remautorefname}{Remark}
+% \providecommand*{\factautorefname}{Fact}
+% \providecommand*{\egautorefname}{例}
+% \providecommand*{\cnjautorefname}{予想}
+% \providecommand*{\sectionautorefname}{Section}
+% \providecommand*{\subsectionautorefname}{Subsection}
+% \providecommand*{\subsubsectionautorefname}{Subsubsection}
+\newcommand{\theoremrefname}[1]{%
+\ifthenelse{\equal{#1}{dfn}}{定義}{}%
+\ifthenelse{\equal{#1}{prop}}{命題}{}%
+\ifthenelse{\equal{#1}{lem}}{補題}{}%
+\ifthenelse{\equal{#1}{thm}}{定理}{}%
+\ifthenelse{\equal{#1}{cor}}{系}{}%
+\ifthenelse{\equal{#1}{rem}}{Remark}{}%
+\ifthenelse{\equal{#1}{fact}}{Fact}{}%
+\ifthenelse{\equal{#1}{eg}}{例}{}%
+\ifthenelse{\equal{#1}{cnj}}{予想}{}%
+}
+
+% Override the default behavior of \autoref
+\let\oldautoref\autoref{\renewcommand{\autoref}[1]{\theoremrefname{#1}~\oldautoref{#1}}}
+
+\renewcommand{\qedsymbol}{$\blacksquare$}
+
+\numberwithin{equation}{section}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\combination}[2]{{}_{#1}\mathrm{C}_{#2}}
+\newcommand{\permutation}[2]{{}_{#1}\mathrm{\mu}_{#2}}
+\newcommand{\cat}[1]{\mathscr{#1}}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\ob}{\mathrm{ob}}
+\newcommand{\ops}[1]{{#1}^{\mathrm{op}}}
+\newcommand{\kernel}[1]{\mathrm{Ker}\ {#1}}
+\newcommand{\image}[1]{\mathrm{Im}\ {#1}}
+\newcommand{\rnk}[1]{\mathrm{rk}\ {#1}}
+\newcommand{\Hom}[2]{\mathrm{Hom}({#1},{#2})}
+\newcommand{\End}[1]{\mathrm{End}({#1})}
+\newcommand{\qbinom}[2]{\genfrac{[}{]}{0pt}{}{#1}{#2}}
+
+% tikz
+\usetikzlibrary{arrows.meta, positioning, decorations.pathmorphing}
+\usetikzlibrary{graphs}
+
+\newcommand{\kk}[0]{\mathbb{K}}
+\newcommand{\kq}[0]{\mathbb{K_q}}
+\newcommand{\de}[1]{\partial_{#1}}
+\newcommand{\te}[1]{\theta_{#1}}
+% \newtheorem{theorem}{Theorem}[section]
+% \newtheorem{corollary}{Corollary}[theorem]
+% \newtheorem{lemma}[theorem]{Lemma}
+
+% % ページ色設定
+% \usepackage{pagecolor}
+% \definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
+% \color{darkpastelgreen}
+% \pagecolor{black}
+
+% 仮置きのプリアンブル
+% \newcommand{\WO}[0]{\mathcal{W}}
+% \newcommand{\HD}[0]{\mathcal {H}}
+
+% \title{微分演算子によるA,D型量子群のmodule algebraと\\
+% Heisenberg Doubleの実現}
+\title{Derivative Operator Realization of A,C,D Type Quantum Groups\\ and Representation
+of Heisenberg Double}
+
+\author{西森湧也}
+
+\begin{document}
+  \maketitle
+  \begin{thm}[null]\label{null}
+    null
+  \end{thm}
+  \begin{abstract}
+    \tableofcontents
+    
+  \end{abstract}
+
+
+\section{不変量の構築}
+Mihalache–鈴木–寺嶋により任意の有限次元ホップ代数から1次のベッチ数が消える枠付き閉3次元多様体の新しい不変量が構成された\cite{MihalacheSuzukiTerashima2022}．
+本稿ではこれをMST不変量と呼ぶ．Benedetti,Petronioにより導入された，framingの情報を持ったflow-spineに対応するintegral normal o-graphを考える．
+これは仮想結び目図式のような見た目であり，この各交点と辺の重みに対して，有限次元ホップ代数のハイゼンベルグダブルのある元を対応させ，辺に沿って積を取り，traceを取ることで不変量が構成される．
+対応するハイゼンベルグダブルの元を本稿ではオペレータ表現と呼ぶことにする．
+本節では，無限次元のホップ代数を使った不変量への一般化を試みる．
+% トレースは無限次元の場合は単純に定義することはできないが，トレースクラスと呼ばれる限定された作用素に対してはトレースを定義することが可能である．
+% 形式的な計算は行えており，具体的な計算でトレースの巡回性など要請されるべき性質を満たしていることは確認した．
+% しかし，一般の場合すべてに対してo-graphのオペレータ表現がトレースクラスかどうか，また巡回性が成立するかはまだ証明できていない．
+% 一方で，ハイゼンベルグダブルが定義できる完備フィルター付きホップ代数に対しては$\mathcal S$が存在するので，
+% その性質からMP move,0-2 moveでオペレータ表現が不変である．よって巡回性が成立するトレースがオペレータ表現上に定義できれば不変量が構成される．
+% 積分変換を用いた形式的なトレースの定義を紹介し，具体的に計算を行う．
+% おそらくシュワルツ超函数の理論を用いれば超函数の計算を正当化出来ると思われる．
+
+以下は不変量の構成の流れを示したものである．
+\[\begin{tikzcd}
+	{\begin{array}{c}枠付き閉3次元多様体\\M_f~~with~~b_1= 0\end{array}} &
+  {\begin{array}{c}framed~~normal~~~~\\o-graph\end{array}} &
+  {\begin{array}{c}代数\mathcal{H}(A)\\演算子\mathcal{O}(M_f;A)\end{array}} &
+  {\begin{array}{c}不変量Z(M_f;A)\\\Tr(\mathcal{O}(M_f;A))\end{array}}
+	\arrow["表示",from=1-1, to=1-2]
+  \arrow["オペレータ表現",from=1-2, to=1-3]
+	\arrow["Trace",from=1-3, to=1-4]
+\end{tikzcd}\]
+
+先にワイル代数の計算に関する準備を行い，
+o-graph,o-dataによる組み合わせ的な多様体の表示方法を導入し，
+MST不変量の定義および一般化を行う．
+
+\subsection{ワイル代数の計算}
+
+% \begin{lem}[二項定理]
+%   \begin{equation}\label{eq:binomial_poc}
+%     (1-x)^{-z}=\sum_{n=0}^n \frac{x^n}{n!}(z)_n\qquad (|x|<1)
+%   \end{equation}
+%   が成り立つ．ただし，$(z)_n=z(z+1)\cdots(z+n-1)$はポッホハマー記号(上昇冪)である．
+% \end{lem}
+
+
+
+% \newcommand{\SNone}[2]{S_I(#1,#2)}
+% \newcommand{\SNtwo}[2]{S_{I\hspace{-1.7pt}I}(#1,#2)}
+% \begin{dfn}[Stirling数]
+%     第1種Stirling数$\SNone{n}{k}$ はポッホハマー記号(上昇冪)の展開係数として
+%     \begin{equation*}
+%      (x)_n =\sum_{k=0}^n \SNone{n}{k}x^k
+%     \end{equation*}
+%     と定義される．ただし，$\SNone{n}{k}=0~~(k>n)$である．
+
+
+%     第2種Stirling数$\SNtwo{n}{k}$は下降冪$(-x)_k(-1)^k$による展開係数として
+%     \begin{equation*}
+%       x^n =\sum_{k=0}^n \SNtwo{n}{k}(-1)^k(-x)_k
+%     \end{equation*}
+%     と定義される．ただし，$\SNtwo{n}{k}=0~~(k>n)$である．
+% \end{dfn}
+% 次の公式が成立する．
+% $$(-1)^n(-\te x)_n=x^n\de x^n$$
+% $$\theta_x^n=\sum_{k=0}^n \SNtwo{n}{k}x^k\partial_x^k$$
+% $$\sum_{k=0}^n \SNone{n}{k}\SNtwo{k}{m}(-1)^{m+k}=\delta_{n,m}$$
+
+
+% $$
+% \partial_x^u x^v=\sum_k\binom{u}{k}\binom{v}{k} k! x^{v-k} \partial_x^{u-k}
+% $$
+% \begin{equation*}
+%   \SNtwo{n}{k}=\frac{1}{k!}\sum_{i=1}^k (-1)^{k-i} \binom{k}{i} i^n
+% \end{equation*}
+\subsection{積分変換と演算子のトレース}
+\newcommand{\HD}[0]{\mathcal {H}}
+\newcommand{\WO}[0]{\mathcal {W}}
+\newcommand{\GO}[0]{\mathcal {G}}
+\newcommand{\Wref}[1]{\widehat{\mathbb{W}}^{\textrm{ref}}_{#1}}
+\newcommand{\Wcnv}[1]{\widehat{\mathbb{W}}^{\textrm{cnv}}_{#1}}
+% #rFs(a;b;q;z)
+\newcommand{\pFq}[6]{{}_{{#1}}F_{{#2}}\left(\begin{array}{c}{#3} \\ {#4}\end{array} ; {#5};{#6} \right)}
+
+
+\newcommand{\Tranl}[0]{ \operatorname{Tr}^{\textrm{anl}}}
+\begin{dfn}[積分変換]
+
+  
+  $A$をヒルベルト空間$L^2(\R^N)$上の"良い"線形作用素とする．このとき，シュワルツ核関数定理より，
+  (超)関数$K_A(x,y)$が存在して，任意の$\phi\in L^2(\R^N)$に対して
+  \begin{equation}
+    (A\phi)(x)=\int_{\R^N} K_A(x,\xi)\phi(\xi)d\xi
+  \end{equation}
+  が成り立つ．$K_A(x,y)$を$A$の積分核という．
+  "良い"ことの条件を述べるにはヒルベルト空間上の作用素の定義が必要である．
+\end{dfn}
+\begin{dfn}[トレース]
+  $A$を$K_A$を積分核とする$L^2(\R^N)$上の"良い"線形作用素とする．このとき，
+  $A$の解析的なトレース$\Tranl(A)$は
+  \begin{equation}
+    \Tranl(A)=\int_{\R^N} K_A(x,x)dx
+  \end{equation}
+  で定義される．$x=(x_1,\ldots,x_N)$とする．部分トレース$\operatorname{Tr}_{x_i}$を
+  \begin{equation}
+    \Tranl_{x_i}(A)=\int_{\R} K_A(x,\xi)|_{\xi_i=x_i}dx_i
+  \end{equation}
+  で定義する．
+\end{dfn}
+\begin{rem}
+  $A$がトレースクラス，$B$が"有界"作用素であり，$AB,BA$がトレースクラスであるとき，
+  \begin{equation}
+    \Tranl(AB)=\Tranl(BA)
+  \end{equation}
+  が成り立つ．
+\end{rem}
+しかし，微分作用素は非有界作用素であるため，単純にこの定理を適用することが出来ないことが
+今回の障壁となっている．さらに$\lim_{\epsilon\to 0}\epsilon^{-\theta-1}$のような見かけ上発散する演算子も取り扱う．
+しかし，多様体の不変量に由来する演算子が何らかの条件を満たしていることによりトレースが定義できて巡回性が成立すると思われる．
+未だに確実な定式化はできていない．フィルター構造に着目して収束性を見て，超関数を用いたトレースの計算の補題を準備する．
+\begin{eg}\label{eg:trace_dilation}
+  作用素$a^\theta:f(x)\mapsto f(ax)$は積分核$K_{a^\theta}(x,\xi)=\delta(\xi-ax)$を持つ．
+  ここで，$\delta(x)$はデルタ関数である．このトレースは次のようになる．ただし$a=1$のときは発散する．
+  \begin{equation}\label{eq:trace_euler}
+    \Tranl(a^\theta)=\int_{\R} \delta((1-a)\xi)d\xi=\frac{1}{|1-a|}
+  \end{equation}
+
+  
+  別の計算方法を見る．$|a|<1$のとき，多項式環の基底を$\{x^n\}_{n\in\N}$を取ると，
+  $a^\theta$は基底ベクトル$x^n$が固有値$a^n$の固有関数であることから，
+  \begin{equation}
+    \Tr(a^\theta)=\sum_{n\in\N} a^n=\frac{1}{1-a}
+  \end{equation}
+  となる．これを代数的なトレースと呼ぶ．$a>1$のときもpolylog関数を用いて代数的に固有値の和を計算することができる．
+\end{eg}
+
+\subsection{1変数のワイル代数のトレース}
+ワイル代数の元に対してトレースを定めて，
+それらが積分変換から定義されるトレースやpolylog関数から定義されるトレースと(符号を除いて)一致することをみる．
+
+次の完備化されたワイル代数$\widehat{\mathbb{W}}_1$の形式的な和を考える．
+$$\sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n$$
+これは$|t|\geq1$なら$\widehat{\mathbb{W}}_1$に収まらない．なぜなら，定数項に着目すると，$\de x^n x^n=n!+(\textrm{higher order term})$なので，
+$$\sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n=\sum_{n=0}^\infty (t^n+(\textrm{higher order term}))$$
+となるからである．$|t|<1$のときは，各次数で係数が収束して，
+\begin{equation}\label{eq:dilation_expansion}
+  \sum_{n=0}^\infty \frac{t^n}{n!} \de x^n x^n=\sum_{n=0}^\infty \frac{t^n}{n!} (\te x+1)_n=(1-t)^{-\te x-1}=\frac{1}{1-t}\sum_{n=0}^\infty \frac{1}{n!}\left(\frac{t}{1-t}\right)^n x^n\de x^n \in \widehat{\mathbb{W}}_1
+\end{equation}
+と書ける．(公式\ref{eq:binomial_poc})そこで，$t\leq -1,~t>1$のときもこの等式が成立していると考える．
+$t=1$のときは特異性により定義できないが，それを回避するために
+$$\sum_{n=0}^\infty \frac{(1-\epsilon)^n}{n!} \de x^n x^n=\epsilon^{-\theta-1}\in \widehat{\mathbb{W}}_1$$
+の$\epsilon\to +0$極限とみなす．
+(実射影射影直線$\mathbb{RP}^1$の元と捉えたほうがよいか？無理か？）
+% さらに，$|a|>1$のときも$\widehat{\mathbb{W}}_1$に入らない元を次のように同一視する．
+% $$\sum_{n=0}^\infty \frac{a^n}{n!} \de x^n x^n=\sum_{n=0}^\infty \frac{a^n}{n!} (\te x+1)_n=
+% \left(\frac{1}{1-a}\right)^{\theta_x+1}=\frac{1}{1-a}\sum_{n=0}^\infty \frac{1}{n!}\left(\frac{a}{1-a}\right)^n
+%  x^n\de x^n $$
+% このような極限の元と$\widehat{\mathbb{W}}_1$から生成される代数を$\Wref{1}$と書く．すなわち
+% \begin{equation}
+%   \Wref{1}=\operatorname{span}_{\kk}\left\{\left.\lim_{\epsilon\to+0}f_\epsilon(x)\de x^n a_\epsilon^{\te x}\right|~n\in\N,~a_\epsilon\in \kk,f_\epsilon\in \kk[[x]]は\epsilon について0で右連続\right\}
+% \end{equation}
+
+$f$を解析関数，$n\in \N, a\in \R\backslash \{1\}$, $A=f(x)\de x^n a^{\te x}$の形の$\widehat{\mathbb{W}}_1$の元全体を$\Wref{1}$とする．
+等式\ref{eq:dilation_expansion}より$A\in  \widehat{\mathbb{W}}_1$である．
+
+$a\neq 0,1$のとき，例\ref{eq:trace_euler}と同様に，$A$の積分核は
+\begin{equation}
+  K_A(x,\xi)=f(x)\de x^n \cdot \delta(\xi-ax)=\frac{1}{|a|}f(x) \delta^{(n)}\left(x-\frac{\xi}{a}\right)
+\end{equation}
+と書けるから，
+\begin{align*}
+  \Tranl(A)
+  &=\int_{\R} K_A(x,x)dx \\
+  &=\frac{1}{|a|}\int_{\R} f(x) \delta^{(n)}\left(x-\frac{x}{a}\right)dx \\
+  &=\frac{1}{|1-a|}\int_{\R} f\left(\frac{ax}{a-1}\right)\delta^{(n)}(x)dx \\
+  &=\frac{1}{|1-a|}\left(\frac{a}{1-a}\right)^n f^{(n)}(0) \\
+\end{align*}
+となる．これを踏まえ，代数的なトレース$\Tr$を符号を補正して次のように定義する．
+\begin{equation}\label{def:trace_1var}
+  \Tr(A)=\frac{1}{1-a}\left(\frac{a}{1-a}\right)^n f^{(n)}(0)  \qquad (a\neq 1)
+\end{equation}
+特異性があり演算子は見かけ上発散している演算子でも，traceは有限の値となることがある．
+\begin{equation}
+  \operatorname{Tr}\left(\sum_{n=0}^\infty \frac{1}{n!} \de x^n x^n\right)=\lim_{\epsilon\to+0}\Tr(\epsilon^{-\theta-1})=\lim_{\epsilon\to+0}\frac{1}{\epsilon}\frac{1}{1-\epsilon^{-1}}=-1
+\end{equation}
+
+% $\Wref1$のうちトレースが収束する部分空間を$\Wcnv{1}$とする．
+% $\mathrm{sgn}\left(1-a\right)=\left\lbrace \begin{array}{ll}
+% -１ & \left(a>1\right)\\
+% 1 & \left(a<1\right)
+% \end{array}\right.$として，
+
+
+% 自然な包含関係$\kk= \widehat{\mathbb{W}}_0\subset \widehat{\mathbb{W}}_1\subset \cdots \subset \widehat{\mathbb{W}}_N$を考える．
+
+不変量の計算にあたり，$\widehat{\mathbb{W}}_N[[\hbar]]$のうち以下の形の元に限定する．
+\begin{equation}\label{eq:refined_form}
+  A=\sum_{k\geq 0}\hbar^k\sum_{n\in \N^N}^{\textrm{finite}} f_{n,k}(x) \de{x}^n a_{n,k}^{\theta}
+\end{equation}
+ただし，$a_{n,k,i}~,f_{n,k}(x)\in \kk[x]~~(i\in 1:N,~k\in\N,~n\in \N^N)$であり，
+$a_{n,k,i}$は$x_i$に依存しないとする．
+$\sum^{\textrm{finite}}$は$n$についての和が有限和であることを表す．
+
+部分トレース$\operatorname{Tr}_{x_i}:\Wref{i}\to \Wref{i-1}\quad(i\in 1: N)$を次で定める．
+\begin{equation}\label{def:trace_act}
+  % \operatorname{Tr}_{x_i}(A):=\sum_{k\geq 0} \hbar^k \sum_{n\in \N^i}^{\textrm{finite}} \left.\frac{\de{}^{n_i}f_{n,k}}{\de{}x_i^{n_i}}(x_1,\cdots,x_{i-1},x_i) \right\vert_{x_i=0} \de{x_1}^{n_1}\cdots \de{x_{i-1}}^{n_{i-1}} a_{n,k,1}^{\te 1}\cdots a_{n,k,i-1}^{\te{i-1}}\left(\frac{a_{n,k,i}}{1-a_{n,k,i}}\right)^{n_i}
+  \operatorname{Tr}_{x_i}(A):=\sum_{k\geq 0} \hbar^k \sum_{n\in \N^i}^{\textrm{finite}} \left.\frac{\de{}^{n_i}f_{n,k}}{\de{}x_i^{n_i}}(x) \right\vert_{x_i=0} \check{\partial}_x^{\check{n}} \check{a}_{n,k}^{\check{\theta}_x}\left(\frac{a_{n,k,i}}{1-a_{n,k,i}}\right)^{n_i}
+\end{equation}
+ただし，$x=(x_1,x_2,\ldots,x_i)$に対して第$i$成分を除いた配列を$\check{x}$とし，ほかも同様に定める．
+各$i\in 1:N$に対して$Tr_{x_{i+1}}\circ\cdots\circ\Tr_{x_N}(A)$が式\ref{eq:refined_form}の形で書けるとき，
+$A$をrefined form\footnote{独自用語である}と呼び，その全体の集合を$\Wref{N}$と書く．
+
+及びトレース$\operatorname{Tr}:\Wref{N}\to\kk[[\hbar]] $を
+\begin{equation}\label{def:trace_iter}
+  \operatorname{Tr}(A):=\Tr_{x_1}\circ\cdots\circ\Tr_{x_N}(A)
+\end{equation}
+と定義する．定義より，$A=\sum_{k\geq 0} \hbar^k A_k\in \Wref{N}\quad(A_k\in \widehat{\mathbb{W}}_N)$の(部分)トレースは
+$\hbar$の次数ごとに分けて計算される．
+\begin{equation}\label{def:trace_hbar}
+  \operatorname{Tr}_z(A)=\sum_{k\geq 0} \hbar^k \operatorname{Tr}_z(A_k)
+\end{equation}
+
+
+次の作用素のtraceの形式的な"公式"を考える:
+
+\begin{align}
+    % \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\mathcal{W}^{a_{ij}}_{i,j}=
+    \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\exp(a_{ij}x\otimes \de x)_{i,j}=\frac{1}{\det A}\label{eq:trace_UR_det}
+\end{align}
+ここで，n.o.はnormal order productを表し，各tensorandにおいて$x,\de x$の順に因子が並ぶように積を取るとする．
+たとえば，$N=2$のときは次のようになる:
+\begin{align*}
+    \Tr \sum_{n\geq 0}\frac{a_{11}^{n_{11}}a_{12}^{n_{12}}a_{21}^{n_{21}}a_{22}^{n_{22}}}{n_{11}!n_{12}!n_{21}!n_{22}!}x^{n_{11}+n_{12}}\de{x}^{n_{11}+n_{21}}\otimes x^{n_{21}+n_{22}}\de{x}^{n_{12}+n_{22}}=\frac{1}{a_{11}a_{22}-a_{12}a_{21}}
+\end{align*}
+形式的な証明を与える．
+(不変量の構成において必要な要件を満たす写像であることが大事で，
+代数or解析的にどのような条件でこの式が成立するかどうかは関心がない)
+式の$x^m$の係数を抜き出す写像を$[x^m]$とする．
+N変数の演算子$A$の代数的なtraceは次のように書ける:
+$$\Tr A=\sum_{m\in \N^N} [x_1^{m_1}]\cdots [x_N^{m_N}]A\cdot x_1^{n_N}\cdots x_N^{m_N}$$
+% 式の$x^m$係数を抜き出す写像$[x^m]$は，$f\in \kk[x]$に対して
+% $$[x^m]f=\frac{1}{m!}f^{(m)}(0)$$
+% と書ける．よって，演算子$A$の代数的なtraceは次のように書ける:
+% $$\Tr A=\sum_{m=0}^\infty [x^m]A\cdot x^m=\left.\sum_{m=0}^\infty \frac{1}{m!}\de x^mA\cdot x^m\right|_{x=0}$$
+これにより
+\begin{align*}
+&\quad  \Tr\prod_{i,j=1}^N{}^{\mathrm{n.o.}}\exp(a_{ij}x\otimes \de x)_{i,j}\\
+& =\sum_m [x_1^{m_1}]\cdots [x_N^{m_N}]\sum_n \prod_i \left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) x_i^{\sum_j n_{i j}} \partial_i^{\sum_j n_{j i}} \cdot x_i^{m_i} \\
+& =\sum_m [x_1^{m_1}]\cdots [x_N^{m_N}]\sum_n \prod_i \cdot\left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_{n_i}\right)!} x_i^{m_i-\sum_j n_{j i}+\sum_j n_{i j}} \\
+& =\sum_m \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_j \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_j n_{i j}\right)!}\\
+& =\sum_m \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_{j\neq i} \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right) \frac{m_{i}!}{\left(m_i-\sum_{j\neq i} n_{i j}\right)!}(1+a_{ii})^{m_i}\\
+& =\quad \sum_{n,\forall i,-\sum_j n_{j i}+\sum_j n_{i j}=0} \prod_i\left(\prod_{j \neq i} \frac{a_{i j}^{n_{i j}}}{n_{i j}!}\right)\left(\sum_{j \neq i}^{n_{i j}}n_{ij}\right)!\left(-a_{i i}\right)^{-1-\sum_{j \neq i} n_{i j}}\\
+% & \prod_i \prod_{j \neq i} t_i^{n_{j i}-n_{i j}}=\prod_i t_i^{\sum_{j \neq i} n_{j i}-n_{i j}} \underline{\underline{3}} \prod_i t_i^{\sum_{j \neq i}^n \xi_j} t_j^{-\sum n_{i j}} \overline{n_1} \\
+% & =\prod_{i \neq j} t_i^{n_{j i}-n_{i j}}=\prod_{i \neq j} t_i^{n_{i j}} t_j^{-n_{i j}} \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_i t_i}\right) \sum_n\prod_i\left(\prod_{j \neq i} \frac{1}{n_{i j}!}\left(-\frac{t_j a_{i j}}{t_i a_{i i}}\right)^{n_{i j}}\right)\left(\sum_{j \neq i} n_{i j}\right)! \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i j} t_i}\right) \sum_n \prod_i\left(\sum_{j \neq i}-\frac{t_j a_{i j}}{t_i a_{i i}}\right)^{n_i} \\
+& =[t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i t} t_i}\right) \prod_i\left(1+\sum_{j \neq i} \frac{t_j a_{i j}}{t_i a_{i i}}\right)^{-1}\\
+& \approx [t_1^{-1}]\cdots [t_N^{-1}]\left(\prod_i \frac{1}{-a_{i t} t_i}\right) \prod_i\left(1-\frac{\epsilon}{a_{ii}}+\sum_{j \neq i} \frac{t_j a_{i j}}{t_i a_{i i}}\right)^{-1}\\
+&= (-1)^N[t_1^{-1}]\cdots [t_N^{-1}]\prod_{i=1}^N\frac 1{\sum_{j=1}^N(a_{ij}-\epsilon \delta_{i,j})t_j}\\
+&=\epsilon^{-N}[t_1^{0}]\cdots [t_N^{0}]\prod_{i=1}^N\sum_{0\leq k_j}\frac{\left(\sum_{j=1}^Na_{ij}t_j\right)^{k_j}}{\epsilon^{k_j}t_i^{k_j}}\\
+&=\epsilon^{-N}\sum_{0\leq k_j}\left([t_1^{k_1}\cdots t_N^{k_N}]\prod_{i=1}^N\left(\sum_{j=1}^Na_{ij}t_j\right)^{k_j}\right)\frac{1}{\epsilon^{k_j}}\\
+&=\frac 1{\epsilon^N}\frac 1{\mathrm{det}(I-\epsilon^{-1} A)}\tag*{(MacMahon's master theorem)}\\
+&=\frac 1{\mathrm{det}(\epsilon I-A)} \underset{\epsilon\to 0}{\longrightarrow} \frac{(-1)^N}{\mathrm{det}(A)}
+\end{align*}
+
+\subsection{3次元多様体の組み合わせ的表示}
+本稿で扱う 3 次元多様体は常に連結でコンパクトなものとする.
+\newcommand{\mfd}[0]{\mathscr{M}}
+\newcommand{\og}[0]{\mathscr{G}}
+\newcommand{\ED}[0]{\mathscr{E}}
+\newcommand{\OD}[0]{\mathscr{O}}
+
+$\mfd^{cl}$と書いたとき, それは向きの入った閉 3 次元多様体の集合(集合で大丈夫か?)に向きを保つ微分同相の同値関係を入 れた同値類をさすことにする. 
+$\mfd^{cl}_{comb}$ は, combing付きの向き付けられた閉3次元多様体の集合に向きを保つ微分同相の同値関係をいれた集合である(ホモトピー？). 
+また, $\mfd^{cl}_{fram},\mfd^{cl}_{spin}$ も同じように定める.
+spineと呼ばれる多面体が3次元多様体の不変量の組み合わせ的研究において重要な役割を果たす. 
+本稿ではspineの詳細については触れない. 
+その代わり, flow-spineをwordとして表示するE-data(引用)を多様体の表示として用いる. 
+横断的に向き付けられたflow-spineは, 符号とラベルが付されたwordを決定する. 
+virtual E-datumとは，次の条件を満たす$v_i^{\pm l},v_i^{\pm r}(i\in \N)$の形の文字からなるwordである:
+
+同一の数字ラベル$i$をもつ文字が正確に2回現れ, 一方は符号 −（負） 持ち, 他方は符号 ＋（正） を持つ． 
+各文字には l（left：左） または r（right：右） のラベルが付され, 
+各iに対して$i$ラベルのうちいずれか一方（l または r）が2回とも出現する. 
+
+virtual E-datum全体からなる集合を $\ED^{vir}$ と表す.
+flow-spineから得られるvirtual E-dataをE-dataと呼ぶ.
+
+たとえば$v_1^{-l} v_2^{-r} v_3^{+r} v_1^{+l} v_4^{+r} v_5^{-l} v_4^{-r} v_5^{+l} v_3^{-r} v_2^{+r}$はE-dataである．
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\textwidth]{o_graph_example.pdf}
+  \caption{Caption}
+  \label{fig:o_graph_example}
+\end{figure}
+
+E-dataはo-graphと呼ばれる仮想結び目図式として表すことができる．
+l(resp. r)のラベルの頂点はo-graphの正(resp.負)の交点を表している．
+E-dataはその"signed gauss code"を表していると解釈できる．
+o-graph全体を$\og{}$と書く．
+
+先程の例では，図\ref{fig:o_graph_example}のようにo-graphを描くことができる．
+
+逆にo-graphの辺上に基点(base point)を選び，そこから順に辺を辿って頂点を読むことでE-dataを得ることができる．
+基点を変えると得られるE-dataは巡回的に入替わる．
+
+o-graphの辺上に整数のウェイトを付けて，$\mfd^{cl}_{fram}$のspineを表示することを考える．
+integral virtual E-dataとは，virtual E-dataの各文字$v$の後に$g^m(m\in \Z)$形の文字を1つ付け加えたものをいう．
+その集合を$\ED_{fram}$と書く．
+整数はframingの成分のベクトル場の"winding number"を表すが，詳しい意味は\cite{}に譲る．
+
+閉とは限らない多様体の表示を考えるために，E-dataを一般化したo-dataというwordを導入する．
+virtual o-dataとはvirtual E-dataのwordを1個以上のwordに分割したwordの有限列である．
+virtual o-data全体の集合を$\OD$と書く．
+
+
+BenedettiとPetronioは同じ$\mfd^{cl}_{comb},\mfd^{cl}{}$の元を表すo-graph同士が移り合うためのmoveの生成元を特定し，
+村松,鈴木,田口はその生成元をより洗練された形で与えた．
+\begin{thm}[moves in $\mfd^{cl}_{comb}$]
+  同じcombing付き閉3次元多様体を表す2つのo-graphの間のmoveは, primary MP move, PS moveおよびそれらの逆により生成される.
+\end{thm}
+\begin{thm}[moves in $\mfd^{cl}{}$]
+  同じ閉3次元多様体を表す2つのo-graphの間のmoveは, primary MP move, PS move, CP moveおよびそれらの逆により生成される.
+\end{thm}
+(MP,PS,CP moveの図を挿入)
+
+多様体の不変量の不変性を示すためには，これらの生成元となるmoveに対して不変であることを示せばよい．
+
+  \begin{eg}
+    [具体的なo-graphの例] 
+  \end{eg}
+
+$s,t$を互いに素な正整数とする．レンズ空間と呼ばれる$L(s,t)\in \mfd^{cl}$のE-dataは次のように表される．
+$$w_{L(s,t)}=v_{st}^{-r} \cdots v_{2t}^{-r} v_{t}^{ -r} v_1^{+r} v_2^{+r}\cdots v_s^{+r}$$
+ただし添字はmodulo $s$で考えるものとする．
+そして$M_O=\mathbb S^2\times \mathbb S^1$のE-data $w_O$，3-fold branched covering space of trefoil knot $M_P$のE-data $w_Q$とPoincare 3-sphere $M_P$のE-data $w_P$を挙げる．
+$$w_O=v_{1}^{-r}v_{2}^{+l}v_{3}^{+r}v_{4}^{+r}v_{4}^{-r}v_{3}^{-r}v_{2}^{-l}v_{1}^{+r}$$
+$$w_Q=v_{3}^{-r}v_{2}^{+r}v_{1}^{-r}v_{3}^{+r}v_{2}^{-r}v_{1}^{+r}$$
+$$w_P=v_{4}^{+r}v_{5}^{-r}v_{3}^{+r}v_{4}^{-r}v_{2}^{+r}v_{3}^{-r}v_{1}^{+r}v_{2}^{-r}v_{5}^{+r}v_{1}^{-r}$$
+それぞれのホモロジー群は
+$$H_1(L(s,t))=\Z/s\Z,~H_1(M_O;\Z)=\Z,~H_1(M_P;\Z)=0,~H_1(M_Q;\Z)=\Z/2\Z\oplus \Z/2\Z$$
+である．
+  \subsection{MST不変量の定義}
+
+  $A$を体$\kk$上の有限次元のHopf代数，$\HD=\HD(A)$を$A$のHeisenberg double
+  とする．有限次元involutive Hopf代数$A$に対するMST不変量$Z(-;A):\ED{}\to \kk$は， オペレータ表現$\mathcal{O}
+  (-;A):\ED^{vir}\to \HD(A)$と スカラー値写像$\chi :\HD (A)\to \kk$の合成
+  $Z=\chi\circ \mathcal{O}:\ED^{vir}\to \kk$の制限として定義される．
+  $w$がある多様体$M\in \mfd^{cl}$のE-dataであるとき，$Z(M;A)=Z(w;A)$と定める．
+  
+
+  $\WO=e_{k}\otimes e^{k},~ \overline{\WO}=e_{k}\otimes S(e^{k})\in \HD^{\otimes 2}$
+  を$\HD$のW-operatorとする(定義:).
+  $\WO_{ij}$は$\WO$のコピーの$i$番目の第$j$成分とする．
+  与えられたE-data $w$に対して，$w$の語順を逆にし，各文字に次の$\HD$の元を割り当てる:
+  $$v_{i}^{+r}\mapsto \WO_{i2},~ v_{i}^{+l}\mapsto \overline{\WO}_{i2},~ v_{i}^{-r}\mapsto
+  \WO_{i1},~ v_{i}^{-l}\mapsto \overline{\WO}_{i1}$$
+こうして得られた$\HD$の元を$w$のオペレータ表現$\mathcal{O}(w;A)$とする．
+
+そして，Fock空間表現$\phi:\HD(A)\to \End{A}$(\ref{null})により$\End{A}$のtrace　
+$\Tr:\End{A}\to \kk$を引き戻し，$\chi=\Tr\circ \phi$とする．
+ 
+この不変量の不変性の証明の概略を述べる．
+
+Pachner moveを組み合わせ的に表しているprimary MP moveをo-graphに行ったとき，五角関係式を満たすというW-operatorの性質により
+PS moveによる不変性は$\WO,\overline{\WO}$が$\HD^{\otimes 2}$のテンソル積代数における逆元であることから従う．
+combingの取り替えに対応するCP moveによる不変性は$A$がunimodularかつco-unimodularであるとき(この条件は必要か？)に，計算をすることで確かめられる．(本当に？)
+cyclic moveでの不変性は，$\Tr$の巡回性により保証される．
+
+\begin{eg}[群環の例]
+  $A=\mathbb C[G]$を有限群$G$の群環とする．例\ref{null}で見たように，これはホップ代数である．
+  この場合のMST不変量として次の性質が知られている．閉3次元多様体$M$に対して，$\pi_1M$を$M$の基本群とする．
+  このとき次が成立する．
+  $$Z(w;C[G]) = |\Hom{\pi_1M}{G}|$$
+\end{eg}
+\newpage
+\subsection{$\mathbb F_p[X]$の場合}
+
+  $p$を任意の素数，$A=\mathbb F_p[X]=\mathbb F_p[x]/(x^p)$(双対空間にするべき)を有限体$\mathbb F_p$上の多項式環をイデアル$(x^p)$で割ったものとする．
+  $X^p=0$であり，余代数は$X$がprimitive，すなわち$\Delta(X)=X\otimes 1 + 1\otimes X,~\varepsilon(X)=0,~S(X)=-X$と定める．
+  $A$は$p$次元Hopf代数である．
+  \newcommand{\Zp}[0]{\mathbb Z/p\mathbb Z}
+  
+  $M$を閉3次元閉多様体とする．
+  川上の修論\cite{}で提起された2つの予想を代数的に解決した．
+  \begin{thm}
+  $$Z(M;\mathbb F_p[X]) = |\Hom{\pi_1M}{\Zp)}| \mod p  =
+\begin{cases}
+0 & (\# H_1(M) = \infty \text{ or } p \mid \# H_1(M)) \\
+1 & (\text{else})
+\end{cases}$$
+  \end{thm}
+\begin{proof}
+
+  $g$を群$\Zp$の生成元とする．線形写像$\phi$を以下で定める．
+  $$\phi:\mathbb F_p[\Zp]\to \mathbb F_p[X]:g\mapsto\exp(X)=\sum_{n=0}^{p-1} \frac{X^n}{n!}\in \mathbb F_p[X]$$
+  $\phi$がホップ代数の同型写像であることを示す．$\phi(g)^m=\exp(mX)(m=0,1,\cdots,p-1)$は$\mathbb F_p[X]$の基底である．なぜなら基底${X^n}/{n!}(n=0,1,\ldots, p-1)$の変換行列は
+  % $(m^n)\in \mathbb F_p^{p\times p}$という
+  Vandermonde行列をなし，その行列式が0でないからである．
+  % $\mathbb F_p[X]$の線形独立な元である．
+  また，$\phi(g)^p=\exp(pX)=\phi(g^0)=1$であるので$\phi$は代数の同型である．さらに
+  $X$がprimitiveなので$\exp$の性質により$\exp(X)$はgroup likeとなる．すなわち次が成立する．
+  $$(\phi\otimes \phi)\Delta(g)=\phi(g)\otimes \phi(g)=\exp(1\otimes X)\exp(X\otimes 1)=\exp(\Delta(X))=\Delta(\phi(g))$$
+  $$\varepsilon(\phi(g))=\varepsilon(\exp(X))=\exp(\varepsilon(X))=1=\epsilon(g)$$
+  $$S(\phi(g))=S(\exp(X))=\exp(-X)=\phi(g^{-1})=\phi(S(g))$$
+  以上より同型$\mathbb F_p[X]\cong \mathbb F_p[\Zp]$が成立する．
+  また，$\Zp$はAbel群であるため，$\Hom{\pi_1 M}{\Zp}=\Hom{H_1 (M)}{\Zp}$が成り立つ．
+  よって
+  $$Z(M;\mathbb F_p[X]) =Z(M;\mathbb F_p[\Zp])=Z(M;\mathbb C[\Zp])\mod p= |\Hom{\pi_1M}{\Zp}| \mod p $$
+  $$= |\Hom{H_1(M)}{\Zp}| \mod p
+  =\begin{cases}
+0 & (\# H_1(M) = \infty \text{ or } p \mid \# H_1(M)) \\
+1 & (\text{else})
+\end{cases} $$
+  となる．最後は$\Hom{H_1 (M)}{\Zp}$をアーベル群の基本定理により分解することで導かれる．
+  \end{proof}
+%   \begin{proof}
+%     フェルマーの小定理
+%     $$a^{p-1} \mod p=\begin{cases}
+% 0 & (a=0) \\
+% 1 & (a\neq 0)
+% \end{cases}.\qquad (a\in \Zp)$$
+% およびウィルソンの定理$(p-1)!\mod p= -1$を用いる．以前の節のように，$X$の双対元を$\de{}$と定める．
+% 後の$U(\R)$の場合と同様にbasic formに帰着させることができる．つまりオペレータ表現は次のいずれかに等しい．
+% ただし$\mu_\HD:\HD\otimes \HD\to \HD$は$\HD$の積である．
+% $$\mathcal O(w;A)=\begin{cases}
+% \mu_\HD\exp(aX\otimes \de{}) & (a\in \Zp) \\
+% \mu_\HD\exp( \de{}\otimes X)=-X^{p-1}\de{}^{p-1} 
+% \end{cases}$$
+% それぞれの場合に不変量の値は
+% $$Z(w;A)=\begin{cases}
+% \Tr\mu_\HD\exp(aX\otimes \de{}) & (a\in \Zp) \\
+% -\Tr(X^{p-1}\de{}^{p-1})
+% \end{cases}=\begin{cases}
+% a^{p-1} \\
+% 1
+% \end{cases}\in \{0,1\}$$
+% となる．定理より$Z(M;A)=|\Hom{H_1(M)}{\Zp)}| \mod p$であり，
+% アーベル群の基本定理によって$H_1(M)$の位数を分解して考えることにより次が導かれる．
+%   $$
+% Z(M;A)=\begin{cases}
+% 0 & (\# H_1(M) = \infty \text{ or } p \mid \# H_1(M)) \\
+% 1 & (\text{else})
+% \end{cases}$$
+% \end{proof}
+
+次に, E-dataに対するMST不変量の拡張としてo-dataに対するMST不変量を定義する．
+$\{w_k\}_{k=1}^r$をo-dataのwordの有限列とする．オペレータ表現は
+$$\mathcal O(\{w_k\}_{k=1}^r;A):= \mathcal O(w_1;A)\otimes \cdots \otimes \mathcal O(w_r;A)\in \HD(A)^{\otimes r}$$
+と定める．そしてテンソル積代数$\HD(A)^{\otimes r}$の$A^{\otimes r}$への加群作用
+$\phi:\HD(A)^{\otimes r}\to \End{A^{\otimes r}}$のTrace $\Tr:\End{A^{\otimes r}}\to \kk$により
+スカラー値写像$\chi=\Tr\circ \phi$を定義する．
+$Z=\chi\circ \mathcal O:\OD\to \kk$と定義する．
+
+続いて，non-involutive Hopf代数$A$に対するMST不変量を定義する．
+$A$を有限次元Hopf代数とし，$\GO$を$A$のG-operator(pivotal like elementともいう)とする．
+不変量の構成の流れは変わらない．
+オペレータ表現の構成において，整数ウェイトを表す$\ED_{fram}$の文字$g^m$に対しては$\GO^m$を割り当てるとする．
+閉多様体$M$の第1Betti数は消えている$(b_1=0)$とする．このとき$Z(M;A)$は$M\in \mfd^{cl}_{fram}$の不変量である．
+
+\subsection{$A=U(\mathfrak g),A=U_\hbar(\mathfrak g)$への拡張}
+MST不変量における$A$を無限次元Hopf代数へと拡張することを考える．
+その際に課題となるのは，Heisenberg doubleにおける無限和，traceの定義，(co)integralの存在の3つである．
+
+1つめの問題は前章\ref{}でfiltered Hopf algebraを考えることで解決される．
+W-operatorの五角関係式などに現れる無限和は問題なく成立する．
+しかし，不変量の計算をするにあたって，微分演算子の表示で計算した際に発散してしまう場合がある．
+それを避けるために，$\mathcal O$の定義においてW-operator $\WO, \overline{\WO}$
+ではなく，そのフィルターに沿った$\mathfrak g$に関する次数$d$の項をそれぞれ$(1-\epsilon)^d$倍した$
+\WO^{\epsilon},~ \overline{\WO}^{\epsilon}~(\epsilon\approx 0)$を各文字に割り当てる．
+% ただし，テンソル積代数として
+%  $$\WO^a:=\exp(a\log \WO)\quad (a\in \R),\quad \log \WO:=\sum_{n>0} \frac{(-1)^n}n(1\otimes 1-\WO)^n$$
+ と定める．これにより写像
+ $\mathcal O(-;A;\epsilon):\ED^{vir}\to \HD(A)$が定義される．
+ そしてTraceを取った後に極限$\epsilon\to 0$を取ることで，発散を回避できる(多分).
+なぜこのような定義をおこなったかどうかは具体的に後で説明する．
+
+次にtraceを演算子のtraceとして定義する．
+前章で見たように，Heisenberg doubleは微分演算子の代数とみなせて，
+完備化されたワイル代数への埋め込み$\phi:\HD(A)\to \hat{\mathbb W}_N \subset \End{A}$が存在する．
+そして\ref{}で構成した演算子のtraceにより$\chi=\lim_{\epsilon\to +0}\circ \Tr\circ \phi$または$\chi=\lim_{\epsilon\to +0}\circ\Tr^{\textrm{abs}}\circ \phi$と定義する．
+これによりcyclic moveに対して不変となる．
+これによりcombing付き閉3次元多様体の不変量が構成される．
+
+無限次元Hopf代数に対しては(co)integralは存在するとは限らず，実際$U(\mathfrak g)$や$U_\hbar(\mathfrak g)$には存在しない．
+そして$\mathcal O$はCP moveで変化するので閉3次元多様体の不変量とはならない．
+しかし$U(\R)$に対してはCP moveは$\mathcal O$を$-\mathcal O$に変化させることが分かっているので，最後に絶対値を取ることで
+位相不変量を得ることができる．
+% $\textrm{abs}\circ \Tr^{\textrm{alg}}=\Tr^{\textrm{anl}}　(\textrm{abs}:z\mapsto |z|)$
+
+$\textrm{mod}\epsilon$を取れば次の式よりMP move,PS moveに対して不変であることがわかる．
+\begin{equation*}
+  \WO^{\epsilon}\overline{\WO}^{\epsilon} \equiv 1  \mod \epsilon
+\end{equation*}
+\begin{equation*}
+  \WO_{12}^{\epsilon}\WO_{13}^{\epsilon}\WO_{23}^{\epsilon} \equiv {\WO}_{23}^{\epsilon} \WO_{12}^{\epsilon} \mod \epsilon,\qquad 
+  \overline{\WO}_{23}^{\epsilon} \overline{\WO}_{13}^{\epsilon}\overline{\WO}_{12}^{\epsilon} \equiv \overline{\WO}_{12}^{\epsilon}{\overline{\WO}}_{23}^{\epsilon}  \mod \epsilon
+\end{equation*}
+
+
+
+% \subsection{invariant for involutive Hopf algebra}
+% $A$をinvolutive Hopf algebraとする．o-graphの正負の交点に対して作用素$\WO\in \mathcal H$の元を対応させる．
+% \begin{figure}[htbp]
+%   \centering
+%   \begin{minipage}[b]{0.45\linewidth}
+%     \centering
+%     \includegraphics[width=0.9\linewidth]{vertex_beads_+.pdf}
+%     \caption{Beads configuration for positive vertex}
+%     \label{fig:vertex_beads_plus}
+%   \end{minipage}
+%   \hfill
+%   \begin{minipage}[b]{0.45\linewidth}
+%     \centering
+%     \includegraphics[width=0.9\linewidth]{vertex_beads_-.pdf}
+%     \caption{Beads configuration for negative vertex}
+%     \label{fig:vertex_beads_minus}
+%   \end{minipage}
+% \end{figure}
+% ただし，$T=\WO^{1-\epsilon},~\overline T=\WO^{-1+\epsilon}$,
+%  $$\WO^a:=\exp(a\log \WO)\quad (a\in \R),\quad \log \WO:=\sum_{n>0} \frac{(-1)^n}n(1\otimes 1-\WO)^n$$
+%  とする．
+
+ これにより写像
+ $\mathcal O(-;A;\epsilon):M_{t,p,c}\mapsto 
+ \mathcal O\in \mathcal H$が構成される．また，$\chi:\mathcal H\to \kk$
+\subsection{$\R$リー代数での不変量の計算}
+$A=U(\R)$は一番簡単な無限次元のinvolutiveなホップ代数である．$\epsilon$により変形されたW-operatorは
+$$\WO^\epsilon=\sum \frac {(1-\epsilon)^n}{n!} \de z^n\otimes z^n=\exp\left((1-\epsilon)\de z\otimes z\right),\quad 
+\overline{\WO}^\epsilon=\sum \frac {(\epsilon-1)^n}{n!} \de z^n\otimes z^n=\exp\left(-(1-\epsilon)\de z\otimes z\right)
+$$
+である．
+$\mathbb F_p[X]$の不変量に比べ，情報が増えている(と思われる)．
+
+$w=v_1^{-r}v_1^{+r}$のオペレータ表現は$\mathcal O(w;A;\epsilon)=\WO_1^\epsilon\WO_2^\epsilon$である．
+よって不変量は\ref{eq:binomial_poc}より次のように計算できる．
+\begin{align}\label{eq}
+  \operatorname{Tr}\left(\WO_2^\epsilon \WO_1^\epsilon\right)
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } z^n  \partial_z^n
+  =\Tr\sum_{n} \frac{(\epsilon-1)^n}{n!} (-\te z)_n
+  =\Tr\left((2-\epsilon)^{\te z}\right)
+  =\frac{1}{\epsilon-1}
+\end{align}
+$$Z(\mathbb S^3;A)= \lim_{\epsilon\to 0}\frac{1}{\epsilon-1}=-1$$
+$w'=v_1^{+r}v_1^{-r}$も同じ多様体を表すE-dataであり，不変量は次のように計算される．
+\begin{align}
+  \operatorname{Tr}\left(\WO_1^\epsilon \WO_2^\epsilon\right)
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } \partial_z^n z^n 
+  =\Tr\sum_{n} \frac{(1-\epsilon)^n}{n! } (\te z+1)_n 
+  =\Tr\left(\epsilon^{-\te z-1}\right)
+  =\frac{1}{\epsilon-1}
+\end{align}
+となり，
+レンズ空間$M=L(2,1)$の不変量も以下のように計算される．
+cyclic moveによる不変性を確認するため，
+$w=v_2^{-r}v_1^{-r}v_1^{+r}v_2^{+r},~v_2^{+r}v_2^{-r}v_1^{-r}v_1^{+r},~v_1^{+r}v_2^{+r}v_2^{-r}v_1^{-r}$
+の3通り計算を行った．
+$\WO_{ij}$は$\WO$のコピーの$i$番目の第$j$成分である．
+\everymath={\displaystyle}
+\begin{align}
+\begin{array}{lll}
+ ~~~\operatorname{Tr} \WO_{22} \WO_{12} \WO_{11} \WO_{21}& =\operatorname{Tr} \WO_{12} \WO_{11}  \WO_{21} \WO_{22}&=\operatorname{Tr} \WO_{11} \WO_{21} \WO_{22} \WO_{12} \\
+=\operatorname{Tr} \sum_{n, m} \frac{1}{n!m! } z^n z^m \partial^m \partial^n&=\operatorname{Tr} \sum_{n, m} \frac{1}{n!m!} z^m \partial^m \partial^n z^n&=\operatorname{Tr} \sum_{n=m} \frac{1}{n!m!} \partial^{n+m} z^{n+m} \\
+ =\operatorname{Tr} \sum_{n, m} \frac{(-1)^m}{ m!n!} z^n(-\theta)^n\partial^n&=\operatorname{Tr} \sum_{n, m} \frac{(-1)^m}{n!m!} (-\theta)_m(\theta+1)_n  &=\operatorname{Tr} \sum_n^n \frac{2^n}{n!} \partial^n z^n \\
+ =\operatorname{Tr} \sum_n \frac{1}{n!} z^n 2^\theta \partial^n&= \lim_{\epsilon\rightarrow 0} 2^\theta \epsilon^{-\theta-1}&=\operatorname{Tr} \sum_n \frac{2^n}{n!}  (\theta+1)_n \\
+ =\operatorname{Tr} \sum_n \frac{(-2)^{-n}}{n!} 2^\theta(-\theta)_n&= \lim_{\epsilon\rightarrow 0}\frac{1}{\epsilon} \times \frac{1}{1-\frac{2}{\epsilon}}&= (-1)^{-\theta-1}\\
+=\operatorname{Tr} 3^\theta&=-\frac{1}{2}& \\
+\end{array}
+\end{align}
+レンズ空間$L(s,t)$については，次のように計算される．
+\begin{align*}
+  Z(L(s,t);A)&=\Tr\mathcal O(L(s,t);A;0)\\
+  =&\Tr \WO_{s2}\cdots \WO_{22}\WO_{12} \WO_{t1}\WO_{2t,1} \cdots \WO_{21} \WO_{st,1}\\
+  =&\Tr \sum_{k\in \N^s}\frac{1}{k_1!k_2!\cdots k_s!} z^{k_1+k_2+\cdots+k_s} \partial^{k_1} \partial^{k_2} \cdots \partial^{k_s} \\
+  =&\Tr \sum_{k\geq 0}\frac{s^k}{k!} z^k \partial^k \\
+  =& \Tr(s+1)^{\te z} \\
+  =&-\frac{1}{s} 
+\end{align*}
+
+% 正整数$m$に対して
+% $$\WO_{1}m^{\te z}\WO_2=\sum_{n=0} \frac{1}{n! }  z^nm^{\te z}  \partial_z^n
+%   =m^{\te z}\sum_{n} \frac{(-1/m)^n}{n!} (-\te z)_n
+%   =m^{\te z}\left(\frac{m+1}{m}\right)^{\te z}
+%   =\left({m+1}\right)^{\te z}
+%   $$
+% なので，帰納的に
+% $$
+% \begin{aligned}
+% Z(L(p, 1))
+%  = \operatorname{Tr}\left(\WO_{11} \WO_{21} \cdots \WO_{p 1} \WO_{p 2}  \cdots \WO_{22} \WO_{12}\right)
+%   =\operatorname{Tr}\left((p+1)^\theta\right) 
+% =-\frac{1}{p} 
+% \end{aligned}
+% $$
+% となる．
+$$
+\begin{aligned}
+\mathcal O(M_3(K_3),U(\R);\epsilon)
+& =\sum_{a, b, c\geq0}\frac{(1-\epsilon)^{a+b+c}}{a!b!c!} x^a \partial^b x^c  \partial^a x^b \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c}}{a!b!c!}\binom{c}{k}\binom{a}{k} k!x^a \partial^{b+a-k}(-1)^k x^{b+c-k} \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c+k}(-1)^k }{a!b!c!}\binom{c}{k} x^{k+a} \partial^{b+a} x^{b+c-k} \partial^c \\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{a+b+c+2k}(-1)^k }{a!b!c!k!} x^{k+a} \partial^{b+a} x^{b+c} \partial^{c+k}\\
+& =\sum_{a, b, c, k\geq0} \frac{(\epsilon-1)^{2k}(-1)^k}{k!} x^{k}\epsilon^{\te x} (2-\epsilon)^{-\te x-1} \epsilon^{\te x} \partial^{k}\\
+& =\frac{1}{2-\epsilon}\sum_{a, b, c, k\geq0} \frac{1}{k!}\left((\epsilon-1)^{2}\frac{\epsilon-2}{\epsilon^2}\right)^k x^{k} \partial^{k}\left(\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& =\frac{1}{2-\epsilon}\left((\epsilon-1)^{2}\frac{\epsilon-2}{\epsilon^2}+1\right)^{\te x}\left(\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& =\frac{1}{2-\epsilon}\left(-(\epsilon-1)^{2}+\frac{\epsilon^2}{2-\epsilon}\right)^{\te x}\\
+& \underset{\epsilon\to 0}{\longrightarrow}\frac12(-1)^{\te x}
+\end{aligned}
+$$
+$$Z(M_Q;U(\R))=\Tr\frac12(-1)^{\te x}=\frac14$$
+
+% $O\left(H(U(\mathbb{R})) ; q\left(\mathbb{R}^2\right)\right.$ の特微：$x$ 次数
+% $(-1)^{a+b+c} x^a \partial^b x^c \partial^a x^b \partial^c \mapsto(-1)^{a+b+c t}$
+% $$
+% \mapsto(-1)^{a+b+c+k} x^k x^a a^a a^b x^b x^c \partial^{c+a^k} \mapsto\left(-y^c\right.
+% $$
+% $$
+% \mapsto\left(1-\frac{2}{\epsilon^2}\right)^\theta \epsilon^{2 \theta} 2^{-\theta-1}
+% $$
+% $$
+% \rightarrow \quad \frac{1}{2}
+% $$
+% $$
+% \begin{aligned}
+% & (-1)^{a+b+c} \partial^a x^b \partial^c x^a \partial^b x^c \mapsto(-1)^{a+b+c} \partial^a \\
+% & \mapsto(1-1) \partial^k 2^{-\theta-1} \epsilon^\theta 2^{-\theta-1} x^k \mapsto \frac{1}{4}\left(\frac{\epsilon}{4}\right)^k \partial^1 \\
+% & \mapsto\left(1-\frac{\epsilon}{4}\right)^{-\theta-1}\left(\frac{\epsilon}{4}\right)^\theta
+% \end{aligned}
+% $$
+% $$
+% \left[\begin{array}{l}
+% n \\
+% 1
+% \end{array}\right]+\binom{n}{1}+\hbar^2\binom{k+2}{3}\binom{n+1}{k+2}
+% $$
+% \newpage
+CP moveに関する考察
+
+
+subword $w=v_{1}^{-r}v_{2}^{+r}v_{2}^{-r}v_{3}^{+r}v_{3}^{-r}v_{1}^{+r},~w'=v_{1}^{-l}v_{2}^{-l}v_{5}^{+r}v_{3}^{-l}v_{2}^{+l}v_{3}^{+l}v_{4}^{+r}v_{4}^{-r}v_{1}^{+l}v_{5}^{-r}$それぞれのオペレータ表現を計算する．
+ただし，交点ごとに違う$\epsilon$を割り当てている．
+$$\mathcal{O}(w;A;\epsilon)={\WO}_{12}^{\epsilon_1}{\WO}_{31}^{\epsilon_3}{\WO}_{32}^{\epsilon_3}{\WO}_{21}^{\epsilon_2}{\WO}_{22}^{\epsilon_2}{\WO}_{11}^{\epsilon_1}$$
+$$\mathcal{O}(w';A;\epsilon)={\WO}_{51}^{\epsilon_5}\overline{\WO}_{12}^{\epsilon_1}{\WO}_{41}^{\epsilon_4}{\WO}_{42}^{\epsilon_4}\overline{\WO}_{32}^{\epsilon_3}\overline{\WO}_{22}^{\epsilon_2}\overline{\WO}_{31}^{\epsilon_3}{\WO}_{52}^{\epsilon_5}\overline{\WO}_{21}^{\epsilon_2}\overline{\WO}_{11}^{\epsilon_1}$$
+計算を行うと，次の結果が得られた．
+$$\mathcal{O}(w;A;\epsilon)=\tau_1\WO^{1-\tau_2}_{1}\WO^{1-\tau_2}_{2},\qquad \mathcal{O}(w';A;\epsilon)=-\tau_3\WO^{1-\tau_4}_{1}\WO^{1-\tau_4}_{2}$$
+$$\tau=\left(\frac{1}{{\epsilon}_2 \,{\epsilon}_3 +{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1} ,~ 
+\frac{{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1}{{\epsilon}_2 \,{\epsilon}_3 +{\epsilon}_1 \,{\epsilon}_2 \,{\epsilon}_3 +1},~
+\frac{-1}{{\epsilon}_2 +{\epsilon}_3 +{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 -1} 
+,~ \frac{{\epsilon}_2 +2\,{\epsilon}_3 +2\,{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 +{\epsilon}_3 \,{\epsilon}_5 -1}{{\epsilon}_2 +{\epsilon}_3 +{\epsilon}_4 -{\epsilon}_1 \,{\epsilon}_4 -1}\right)$$
+極限$\epsilon\to 0$で$\tau\to (1,1,1,1)$となるので，雑に言えばCP moveで
+$\WO_1\WO_2$が$-\WO_1\WO_2$に変化することが分かる．よって，最後に絶対値を取ることでCP moveに対して不変な不変量を得ることができる．
+
+次に連結和に関する考察を行う．
+
+2つの$M_1,M_2\in \mfd^{cl}$の連結和$M_0=M_1\# M_2$を考える．
+$M_0,M_1,M_2$のそれぞれのE-dataを$w_0,w_1,w_2$とすると次のことが知られている．
+\begin{thm}[連結和の不変量]
+  $Z(M_0;A)=Z(M_1;A)Z(M_2;A)$
+\end{thm}
+\begin{thm}[連結和のE-data]
+  $w_0=v_{2}^{-r}v_{1}^{-l}v_{1}^{+l}v_{4}^{+r}w_2v_{4}^{-r}v_{3}^{-l}v_{3}^{+l}v_{2}^{+r}w_1$
+\end{thm}
+$U(\R)$の場合の証明は以下のようになる．subword $w_1,w_2$をbasic form $c_1 (a_1+1)^{\te z}, c_2 (a_2+1)^{\te z}$に置き換える．
+\begin{proof}
+  \begin{align*}
+    \mathcal O(w_0;A)&=c_1 (a_1+1)^{\te z}{\WO}_{22}^{\epsilon_2}\overline{\WO}_{32}^{\epsilon_3}\overline{\WO}_{31}^{\epsilon}{\WO}_{41}^{\epsilon_4}c_2 (a_2+1)^{\te z}{\WO}_{42}^{\epsilon_4}\overline{\WO}_{12}^{\epsilon_1}\overline{\WO}_{11}^{\epsilon_1}{\WO}_{21}^{\epsilon_2}\\
+   &= -\frac{c_1c_2}{a_2+{\epsilon}_4 }\WO_2^{1-\tau}\WO_1^{1-\tau}\qquad\left(\tau={\left(a_1+1\right)}\,{\left({\epsilon}_2 +1\right)}-\frac{{\epsilon}_3 \,{\left(a_1+1\right)}\,{\left({\epsilon}_1 +2\right)}}{a_2+{\epsilon}_4 }-1\right)\\
+    & \underset{\epsilon\to 0}{\longrightarrow} -\frac{c_1c_2}{a_2}(a_1+1)^{\te z}
+  \end{align*}
+  \begin{align*}
+    Z^{\textrm{abs}}(M_0;A)=\abs{\frac{c_1c_2}{a_1a_2}}=Z^{\textrm{abs}}(M_1;A)Z^{\textrm{abs}}(M_2;A)
+  \end{align*}
+  不定形だとどうなるのか分からない．
+\end{proof}
+\subsection{$U(\mathfrak{sl}_2^+)$の場合}
+一般の$\R$上の有限次元リー代数$\mathfrak g$に対して$A=U(\mathfrak g)$の場合のMST不変量は
+$$Z(M;U(\mathfrak g))=^?Z(w;U(\R))^{\dim \mathfrak g}$$
+であると予想する．
+\subsection{$U_\hbar(\mathfrak{sl}_2^+)$の場合}
+$A=U_\hbar(\mathfrak{sl}_2^+)$とする．
+abaloneを表すE-data $w=v_1^{-r}g^{-2}v_1^{+r}g^{1}$に対して計算を行う．特異性による影響は現れないので，
+$\epsilon=0$として計算を行う．
+\begin{align*}
+  \mathcal{O}(w;A;0)
+  &=\GO^{}\WO_2 \GO^{-2}\WO_1 \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!} \GO^{}H_-^m F^n\GO^{-2}H_+^mE^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!} z^m q^{-2 \theta_y+4 n}\left(\frac{y}{x} q^{\theta_x}\right)^n\left(\theta_x-\theta_y\right)^m\left(\frac{x}{y}\left[\theta_y\right]\right)^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{2\binom n2+5n}}{[n]! m!} z^m q^{-2 \theta_y}\left(\theta_x-\theta_y+2n\right)^m q^{n\te x}\frac{\left[\theta_y\right]_q!}{\left[\theta_y-n\right]_q!}\\
+  & =\sum_{n\geq 0}q^{2\binom n2+5n-2 \theta_y} 2^{z\left(\partial_z-\theta_y+2 n\right)}e^{n\hbar\de z}
+    \qbinom{\te y}{n}_q  \\
+  & =\sum_{n\geq 0}  q^{2\binom n2+5n-2 \theta_y} e^{\left(2 n-\theta_y\right) z} e^{\frac{1}{2} \hbar n \partial_z} 2^{\theta_z}
+    \qbinom{\te y}{n}_q  
+  \end{align*}
+  ここで，ある多項式$f_k$が存在して
+\begin{equation*}
+  \left[\begin{array}{l}m \\ n \end{array}\right]_q  =\binom{m}{n}\sum_{k\geq 0}\hbar^k f_k(m,n)
+\end{equation*}
+と書けることから，$ \mathcal{O}(w;A;0)$はrefined formとして書ける．
+すなわち，ある関数$f_{k,a,b}$が存在して，
+\begin{align*}
+  \mathcal{O}(w;A;0)
+  &=\sum_{k\geq 0} \hbar^k f_{k,a,b}(z)\theta_y^a\partial_z^b(e^z+e^{-z})^{\theta_y}2^{\theta_z}
+\end{align*}
+と書ける．
+\begin{align*}
+  \Tr_z\left(\mathcal{O}(w;A;0)\right)
+  &=\Tr_z(\GO^{}\WO_2 \GO^{-2}\WO_1 )\\
+  &=\sum_{n\geq 0} q^{2\binom n2+5n-2 \theta_y} \Tr_z\left(e^{\left(2 n-\theta_y\right) z} e^{\frac{1}{2} \hbar n \partial _z} 2^{\theta _z}\right)
+    % \left[\begin{array}{l}\theta_y \\ n \end{array}\right]_q  \\
+    \qbinom{\te y}{n}_q\\
+  &=-\sum_{n\geq 0} q^{n^2+4n-2 \theta_y}  e^{-2\times\frac{1}{2} \hbar n \left(2 n-\theta_y\right)} \qbinom{\te y}{n}_q\\
+  &=-\sum_{n\geq 0} q^{-n^2+4n+(n-2) \theta_y} \qbinom{\te y}{n}_q\\
+\end{align*}
+最終ステップはまだ予想の段階である．
+\begin{align*}
+  Z(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))=\Tr\left(\mathcal{O}(w;A;0)\right)
+  &=-\Tr_y\left(\sum_{n\geq 0} q^{-n^2+4n+(n-2) \theta_y} 
+  \qbinom{\te y}{n}_q \right)\\
+  &=^?q^{2}
+\end{align*}
+予想が成立する根拠は，$\hbar^5$まで展開を行ったときに一致するからである．
+$$\qbinom{n}{m}_{\exp \hbar}=\binom nm\left(1+\frac{\hbar^2}{6}m(n+1)(n-m)\left(1+\frac{\hbar^2}{60}((5m - 2) n^2 - (m - 1)(5m - 2) n - {7} m^2)\right)\right)+o(\hbar^6)$$
+  $$\sum_{n\ge 0} q^{-n^2 +\left(2+u\right)n+\left(n-u\right)\theta } {\left\lbrack \begin{array}{c}
+    \theta \\
+    n
+    \end{array}\right\rbrack }_q=2^\theta\left(1+\hbar\frac{\theta\left({\theta}-2\,u+3\right)}{4}\right.$$
+    $$+\left.\hbar^2 \frac{\theta\,\left(3\,{\theta}^3-12\,{\theta}^2\,u+22\,{\theta}^2+12\,\theta\,{u}^2-36\,\theta\,u+33\,\theta+12\,{u}^2+48\,u+38\right)}{96}+o(\hbar^3)\right)$$
+  $$-\mathrm{Tr}\left(\sum_{n\ge 0} q^{-n^2 +\left(2+u\right)n+\left(n-u\right)\theta } {\left\lbrack \begin{array}{c}
+\theta \\
+n
+\end{array}\right\rbrack }_q \right)=^? q^u$$
+$\hbar\to0$により，$U(\mathfrak{sl}_2^+)$の不変量が得られる．
+$$\lim_{\hbar\to0}\mathcal{O}(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))=\mathcal{O}(\mathbb S^3;U(\mathfrak{sl}_2^+))=\sum_{n\geq 0}   e^{\left(2 n-\theta_y\right) z} 2^{\theta_z}
+\binom{\theta_y}{n}=\left(e^{-z}+e^z\right)^{\theta_y}2^{\theta_z}$$
+$$Z(\mathbb S^3;U(\mathfrak{sl}_2^+))=\Tr_y\Tr_z\mathcal{O}(\mathbb S^3;U(\mathfrak{sl}_2^+))=-\Tr_y 2^{\te y}=1$$
+
+次に$w'=v_1^{+r}v_1^{-r}$に対しても同様の計算を行う．特異性の影響があるので，$\epsilon$を用いる．
+\begin{align*}
+  \mathcal{O}(w';A;\epsilon)
+  &=\GO^{-2}\WO_1^\epsilon\GO^{}\WO_2^\epsilon  \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!}(1-\epsilon)^{n+m} \GO^{-2}H_+^mE^n\GO^{}H_-^m F^n \\
+  &=\sum_{n,m\geq 0} \frac{q^{\binom n2}}{[n]_q! m!}(1-\epsilon)^{n+m} \left(\theta_x-\theta_y\right)^m\left(\frac{x}{y}\left[\theta_y\right]\right)^nz^m\left(\frac{y}{x} q^{\theta_x}\right)^n  q^{-2 \theta_y+2n}\\
+  &=\sum_{n,m\geq 0} \frac{(1-\epsilon)^{n+m}}{[n]_q! m!} \left(z\de z-z\te y+1\right)_m \frac{\left[\theta_y+n\right]_q!}{\left[\theta_y\right]_q!}q^{2n-2 \theta_y+n\de z}\\
+  & =\sum_{n\geq 0}(1-\epsilon)^{n} \epsilon^{-z\left(\partial_z-\theta_y\right)-1}e^{n\hbar\de z}\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\de z} \\
+  & =\sum_{n\geq 0}(1-\epsilon)^{n} e^{(1-\epsilon^{-1}) z\te y} \epsilon^{-\theta_z-1}\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\de z}
+\end{align*}
+\begin{align*}
+  \Tr_z\left(\mathcal{O}(w';A;\epsilon)\right)
+  &=\sum_{n\geq 0} (1-\epsilon)^{n}\Tr_z\left(e^{(1-\epsilon^{-1}) z\te y} e^{n\hbar \epsilon\de z}\epsilon^{-\te z-1}\right)\qbinom{\te y+n}{n}_q q^{2n-2 \theta_y}\\
+ &=\sum_{n\geq 0} (1-\epsilon)^{n} \qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\te y}\times \frac{1}{1-\epsilon^{-1}}\times \epsilon^{-1}
+\end{align*}
+任意の$m\in \N$に対して多項式$f_m(z)\in \kk[\epsilon,\epsilon^{-1}][z]$が存在して
+\begin{equation*}
+  \sum_{n\geq 0}(1-\epsilon)^n \binom{\te y+n}{n} n^m=\epsilon^{-\te y} f_m(\te y)
+\end{equation*}
+と書けることから，$\Tr_z\left(\mathcal{O}(w';A;\epsilon)\right)\in \kk[\epsilon,\epsilon^{-1}][\te y][[\hbar]]$である．
+しかし，$\hbar^5$まで近似的に計算した限りにおいて，やはり$\Tr_y$を取ると$\epsilon^{-1}$の項が相殺され，Traceは有限の値となっている．
+\begin{align*}
+  \Tr\left(\mathcal{O}(w';A;\epsilon)\right)
+  &=\frac{1}{\epsilon-1}\Tr_y\sum_{n\geq 0} (1-\epsilon)^{n} \qbinom{\te y+n}{n}_q q^{2n-2 \theta_y+n\te y}\\
+  &=\frac{1}{\epsilon-1}\Tr_y \epsilon^{-\te y-1}\left(1-\hbar \left(2\te y+(1-\epsilon^{-1})(\te y+1)(\te y+2) \right)+\cdots\right)\\
+  &=^? \frac{1}{(\epsilon-1)^2}\left(1+2\hbar \frac{1+\epsilon}{1-\epsilon}+2\hbar^2 \frac{1 +10\epsilon+\epsilon^2}{{{\left(1-\mathrm{\epsilon}\right)}}^2 } +\cdots\right)\\
+  & \underset{\epsilon\to 0}{\longrightarrow} \sum \frac {2^n}{n!}\hbar^n=q^2
+\end{align*}
+
+
+より一般に，$\mathcal{Z}(\mathbb S^3;U_\hbar(\mathfrak{sl}_2^+))$は$q=\exp\hbar$のLaurent多項式で書けると予想する．
+
+% exp(z(\de z+a))の公式
+
+  \section*{Motivation}
+
+  The motivation for this work stems from the recent construction of quantum
+  invariants of 3-manifolds using Heisenberg doubles and ideal triangulations. These
+  invariants, defined for finite-dimensional Hopf algebras, capture subtle topological
+  information via tensor network evaluations. However, many algebraic structures
+  that naturally appear in representation theory and quantum topology are infinite-dimensional.
+  A natural question arises: can the construction of these invariants be extended
+  to infinite-dimensional Hopf algebras?
+
+  To address this, we aim to formulate the invariants using algebraic techniques
+  that accommodate infinite-dimensionality, such as regularized traces and distributional
+  dualities. This extension not only broadens the class of applicable Hopf
+  algebras but also uncovers connections to known invariants derived from
+  infinite-dimensional quantum groups and algebras.
+
+  \section*{Main Construction}
+
+  Let $H$ be an infinite-dimensional Hopf algebra satisfying certain regularity conditions.
+  Let $\mathscr{H}$ denote the associated Heisenberg double, and let $\phi \in \mathscr{H}
+  \otimes \mathscr{H}$ be the canonical element satisfying the pentagon equation.
+  Given an ideal triangulation of a closed 3-manifold $M$, represented by an o-graph
+  $M_{T}$, we assign tensors to each tetrahedron using $\phi$, and contract them
+  according to the gluing pattern of the triangulation.
+
+  To define the trace over the entire network, we introduce a trace-like
+  functional $\mathrm{Tr}\colon \mathrm{End}(V) \to \mathbb{C}$, where $V$ is an
+  appropriate topological vector space. The trace must satisfy:
+  \[
+    \mathrm{Tr}(AB) = \mathrm{Tr}(BA), \quad \mathrm{Tr}(a x) = \chi(a) \mathrm{Tr}
+    (x)
+  \]
+  for all $a \in H$, where $\chi$ is a character of $H$. We verify that under these
+  assumptions, the resulting invariant is independent of the base point $P$ and
+  invariant under 0-2 and 2-3 Pachner moves.
+
+  % More sections can follow...
+
+  \begin{thebibliography}{9}
+    \bibitem{Kassel} Christian Kassel, \textit{Quantum Groups}, Graduate Texts
+      in Mathematics, Vol. 155, Springer-Verlag, New York, 1995.
+
+    \bibitem{Tanizaki} 谷崎 俊之, \textit{リー代数と量子群}, 共立出版
+      現代数学の潮流, 2018.
+
+    \bibitem{KlimykSchmudgen} A. U. Klimyk, K. Schmüdgen, \textit{Quantum Groups
+      and Their Representations}, Texts and Monographs in Physics, Springer-Verlag,
+      1997.
+
+    \bibitem{Zhang} J. Zhang and N. Hu, "Realization of $U_{q}(\mathfrak{sp}_{2n}
+      )$ within the Differential Algebra on Quantum Symplectic Space," Symmetry,
+      Integrability and Geometry: Methods and Applications (SIGMA), vol. 13, p. 084,
+      2017. DOI: 10.3842/SIGMA.2017.084.
+
+    \bibitem{Zhang2} J. Zhang and N. Hu, "Realization of $U_{q}(\mathfrak{so}_{2n+1}
+      )$ within the Differential Algebra on Quantum Orthogonal Space," Symmetry,
+      Integrability and Geometry: Methods and Applications (SIGMA), vol. 14, p. 013,
+      2018. DOI: 10.3842/SIGMA.2018.013.
+  \end{thebibliography}
+\end{document}
